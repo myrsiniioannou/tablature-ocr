@@ -1,0 +1,70 @@
+      <VBox>
+        <height>12</height>
+        <topGap>0</topGap>
+        <boxAutoSize>0</boxAutoSize>
+        <Text>
+          <style>Frame</style>
+          <family>Georgia</family>
+          <size>25</size>
+          <bold>1</bold>
+          <italic>1</italic>
+          <align>left,center</align>
+          <offset x="9" y="0"/>
+          <text>I A</text>
+          </Text>
+        <Text>
+          <style>Frame</style>
+          <size>38</size>
+          <bold>1</bold>
+          <color r="147" g="13" b="23" a="255"/>
+          <align>left,center</align>
+          <text>&#167;</text>
+          </Text>
+        <Image>
+          <offset x="45.9" y="0"/>
+          <path>a621a367685546af85bc2b772493daf6.svg</path>
+          <linkPath>C:/Users/merse/Desktop/Tablature OCR/logo/SVG/svg2.svg</linkPath>
+          <size w="5.1103" h="5.1103"/>
+          </Image>
+        </VBox>
+      <HBox>
+        <width>48.5</width>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>27</size>
+          <textLineSpacing>0</textLineSpacing>
+          <align>center,center</align>
+          <offset x="-7" y="0"/>
+          <text>F</text>
+          </Text>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>20</size>
+          <align>center,center</align>
+          <offset x="-0.5" y="1"/>
+          <text>1A</text>
+          </Text>
+        </HBox>
+      <HBox>
+        <width>48.5</width>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>27</size>
+          <textLineSpacing>0</textLineSpacing>
+          <align>center,center</align>
+          <offset x="0.5" y="0"/>
+          <text>F</text>
+          </Text>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>20</size>
+          <align>center,center</align>
+          <offset x="7" y="1"/>
+          <text>2A</text>
+          </Text>
+        </HBox>
+        
