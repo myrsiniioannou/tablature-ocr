@@ -2,3 +2,4 @@
 .vscode
 __pycache__
 books_to_analyze
+extracted_measures

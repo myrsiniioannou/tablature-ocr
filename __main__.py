@@ -1,28 +1,27 @@
 import sys
 sys.path.append('modules')
-from find_subparts import *
+from measure_detection_and_extraction import *
 from domain_model import *
+from measure_analysis import *
+
+from detecto import core, utils, visualize
+from detecto.visualize import show_labeled_image, plot_prediction_grid
+from torchvision import transforms
+import torch
+import os
 
 
-def main ():
-    directory = r"C:\Users\merse\Desktop\Tablature OCR\code\books_to_analyze\book1"
-    for root, dirs, files in os.walk(directory):
-        folderName = os.path.basename(os.path.normpath(root))
-        if folderName.startswith('chapter'):
-            #print("Chapter")
-            pass
-        elif folderName.startswith('unit'):
-            #print("Unit")
-            pass
-        # Iterate through your pages
-        for filename in files:
-            print("Are you satisfied with the detected contours? (y/n):")
-            imagePath = os.path.join(root, filename)
-            # Find subparts' coordinates
-            tabCoords = find_tablature_coordinates(imagePath)
-            # Verify the findings and add potential margin if needed
-            tabsWithPotentialMargin = plot_the_tablature_coordinates_found_for_verification(tabCoords, imagePath)
-
-            
 if __name__ == '__main__':
-    main()
+    bookDirectory = r"../books_to_analyze/book1"
+    measureDetectionAndExtraction(bookDirectory)
+    
+    #model_path = r"../model/model2.pth"
+    #trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
+    #extractedBookDirectory = r"../../extracted_measures/book1"
+    #measureAnalysis(extractedBookDirectory, trainedModel)
+           
+    # Analyse each measure/ PARSE
+    # RENDER TO TEMPLATES
+
+    
+    print("Book Done!")
