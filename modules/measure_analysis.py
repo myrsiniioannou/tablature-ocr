@@ -29,13 +29,21 @@ def userInput(data):
             print("That's not a correct response, try again")
             
     if usePreviousData == "n":
+
         while True:
             try:
                 data["stringNumber"], data["noteNumber"], data["fingeringNumber"], data["chordNumber"], data["headerNumber"] = map (int, input("Enter: String Number, Note Number, Fingering Number, Chord Number, Header Number: \n").split())
                 break
             except ValueError:
                 print("That's not a correct response, try again")
-        
+                
+        while True:
+            try:
+                data["headerExistence"] =  bool(input("Header Existence (y or ENTER): "))
+                break
+            except ValueError:
+                print("That's not a correct response, try again")
+                
         while True:
             try:
                 data["noteStringExistence"] =  bool(input("Note String Existence (y or ENTER): "))
@@ -258,30 +266,18 @@ def chordPositionDetection(mdf, chordNumber):
     return measureDF
 
 
-def correction(df, img):
-    print(df)
-    show_labeled_image(img)
-    while True:
-        try:
-            isDFcorredt = str(input("Is the measure's dataframe correct?: Y/N "))
-            if isDFcorredt == 'y' or isDFcorredt == 'n':
-                break
-            else:
-                raise ValueError()
-        except ValueError:
-            print("That's not a correct response, try again")
-    
-    return correctedDF
-
 
 def measureAnalysis(directory, model, stringNum):
+    headerMeasureCounter = 1
     firstFile = True
-    for root, dirs, files in os.walk(directory):
-        for filename in files:
+    
+    for root, dirs, measures in os.walk(directory):
+
+        for measure in measures:
             chapterDir = os.path.basename(Path(root).parents[1])
             unitDir = os.path.basename(Path(root).parents[0])
             pageFolder = (os.path.basename(root))
-            path_to_img =os.path.join(directory,chapterDir, unitDir, pageFolder, filename)
+            path_to_img =os.path.join(directory,chapterDir, unitDir, pageFolder, measure)
             image = cv2.imread(path_to_img)
             print("Analyzing image:", path_to_img)
             horizContours = horizontalLineDetection(image)
@@ -291,7 +287,7 @@ def measureAnalysis(directory, model, stringNum):
             
             # Print the input data before showing the detected notation in order to compare
             if firstFile:
-                measureData = {"stringNumber":stringNum, "noteNumber":8,"fingeringNumber" : 20, "chordNumber" : 20, "headerNumber" : 8, "headerExistence" : True, "noteStringExistence" : True, "noteStrings" : [1]}
+                measureData = {"stringNumber":stringNum, "noteNumber":8,"fingeringNumber" : 20, "chordNumber" : 20, "headerNumber" : 20, "headerExistence" : True, "noteStringExistence" : True, "noteStrings" : [1]}
                 firstFile = False
             print(measureData)
             
@@ -300,20 +296,34 @@ def measureAnalysis(directory, model, stringNum):
             measureInfoDF = dataframeCreation(boxes, labels, scores)
             DFwithStringsDetected = detectStringsOrHeader(measureInfoDF, centroidClasses)
             DFwithVeryCloseElementsEliminated = eliminateVeryCloseElements(DFwithStringsDetected)
-            # NOTES = 1,2,3,4,5,6.. = labels with integers
-            # FINGERING = p,i,m,a   = labels with strings
-
             measureData = userInput(measureData)
-            
             DFwithProperNumberOfElements = eliminateUnessescaryElementsAccordingToInput(DFwithVeryCloseElementsEliminated, **measureData)
+            measureDFcleared = chordPositionDetection(DFwithProperNumberOfElements, measureData["chordNumber"])
+                       
+            # Saving and using header
+            if measureData["headerExistence"] and headerMeasureCounter==1:
+                headerStoringArray = []
+            if measureData["headerExistence"]:
+                headerStoringArray.append(measureDFcleared[measureDFcleared["String"] == 0])
+                print(headerStoringArray)
+            else:
+                # try because header might not even exist in some 3-string books
+                try:
+                    measureDFcleared = pd.concat([measureDFcleared, headerStoringArray[headerMeasureCounter]])
+                    measureDFcleared = measureDFcleared.sort_values('Position',ignore_index=True)
+                except:
+                    pass
+            if headerMeasureCounter==len(measures):
+                headerMeasureCounter = 0
+            headerMeasureCounter+=1                      
+
+            print(measureDFcleared)
+            
+        
+            
 
             
-            measureDFcleared = chordPositionDetection(DFwithProperNumberOfElements, measureData["chordNumber"])            
-            correctedDF = correction(measureDFcleared, image)
-    
-
             
-
 if __name__ == '__main__':
     
     dirname = os.path.dirname(__file__)
