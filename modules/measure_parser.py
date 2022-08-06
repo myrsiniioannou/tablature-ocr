@@ -182,7 +182,6 @@ def parseMeasure(mdf, UserInputData, amountOfChords):
     measure = []
     for chordIndex in range(amountOfChords):
 
-
         # For each chordIndex/Position (in df), it must create a chord object
         chord = Chord(duration = durationDecoding(UserInputData["chordDurationInteger"][chordIndex]),
                        hasBox = hasBoxOrAccentDecoding(UserInputData["hasBox"][chordIndex]),
