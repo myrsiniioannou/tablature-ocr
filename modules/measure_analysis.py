@@ -6,15 +6,18 @@ import cv2
 from IPython.display import Image
 from sklearn.cluster import KMeans
 import pandas as pd
-import tqdm
+import tqdm as notebook_tqdm
 from detecto import core, utils, visualize
 from detecto.visualize import show_labeled_image, plot_prediction_grid
 from torchvision import transforms
 import torch
 from pathlib import Path
 
+def incorectResponse():
+    print("That's not a correct response, try again")
 
-def userInput(data):
+
+def measureUserInput(data):
     # NOTES = 1,2,3,4,5,6.. = labels with integers
     # FINGERING = p,i,m,a   = labels with strings
 
@@ -26,7 +29,7 @@ def userInput(data):
             else:
                 raise ValueError()
         except ValueError:
-            print("That's not a correct response, try again")
+            incorectResponse()
             
     if usePreviousData == "n":
 
@@ -35,25 +38,30 @@ def userInput(data):
                 data["stringNumber"], data["noteNumber"], data["fingeringNumber"], data["chordNumber"], data["headerNumber"] = map (int, input("Enter: String Number, Note Number, Fingering Number, Chord Number, Header Number: \n").split())
                 break
             except ValueError:
-                print("That's not a correct response, try again")
+                incorectResponse()
                 
         while True:
             try:
                 data["headerExistence"] =  bool(input("Header Existence (y or ENTER): "))
                 break
             except ValueError:
-                print("That's not a correct response, try again")
+                incorectResponse()
                 
         while True:
             try:
                 data["noteStringExistence"] =  bool(input("Note String Existence (y or ENTER): "))
                 if data["noteStringExistence"]:
-                    data["noteStrings"] = list(map(int,input("Note Strings: ").strip().split()))
+                    while True:
+                        try:
+                            data["noteStrings"] = list(map(int,input("Note Strings: ").strip().split()))
+                            break
+                        except ValueError:
+                            incorectResponse()
                 else:
                     data["noteStrings"] = 0
                 break
             except ValueError:
-                print("That's not a correct response, try again")  
+                incorectResponse()  
     return data
 
 def horizontalLineDetection(imgInit):
@@ -72,7 +80,7 @@ def horizontalLineDetection(imgInit):
     """
     cv2.imshow('', img)
     cv2.waitKey(0) & 0xFF"""
-    plt.figure(figsize=(20, 20))
+    plt.figure(figsize=(10, 10))
     plt.imshow(img)
     plt.show()
     return horizontalContours
@@ -93,7 +101,7 @@ def removeExtraLines(df):
             else:
                 raise ValueError()
         except ValueError:
-            print("That's not a correct response, try again")
+            incorectResponse()
     
     if key == "u":
         #REMOVE UPPER LINE
@@ -268,8 +276,9 @@ def chordPositionDetection(mdf, chordNumber):
 
 
 def measureAnalysis(directory, model, stringNum):
-    headerMeasureCounter = 1
+    headerMeasureCounter = 0
     firstFile = True
+    
     
     for root, dirs, measures in os.walk(directory):
 
@@ -289,23 +298,23 @@ def measureAnalysis(directory, model, stringNum):
             if firstFile:
                 measureData = {"stringNumber":stringNum, "noteNumber":8,"fingeringNumber" : 20, "chordNumber" : 20, "headerNumber" : 20, "headerExistence" : True, "noteStringExistence" : True, "noteStrings" : [1]}
                 firstFile = False
-            print(measureData)
+            print(measureData) # Keep this print
             
             
             boxes, labels, scores = detectNotation(model, image)
             measureInfoDF = dataframeCreation(boxes, labels, scores)
             DFwithStringsDetected = detectStringsOrHeader(measureInfoDF, centroidClasses)
             DFwithVeryCloseElementsEliminated = eliminateVeryCloseElements(DFwithStringsDetected)
-            measureData = userInput(measureData)
+            measureData = measureUserInput(measureData)
             DFwithProperNumberOfElements = eliminateUnessescaryElementsAccordingToInput(DFwithVeryCloseElementsEliminated, **measureData)
             measureDFcleared = chordPositionDetection(DFwithProperNumberOfElements, measureData["chordNumber"])
                        
             # Saving and using header
-            if measureData["headerExistence"] and headerMeasureCounter==1:
+            if measureData["headerExistence"] and headerMeasureCounter==0:
                 headerStoringArray = []
             if measureData["headerExistence"]:
                 headerStoringArray.append(measureDFcleared[measureDFcleared["String"] == 0])
-                print(headerStoringArray)
+                #print(headerStoringArray)
             else:
                 # try because header might not even exist in some 3-string books
                 try:
@@ -313,11 +322,16 @@ def measureAnalysis(directory, model, stringNum):
                     measureDFcleared = measureDFcleared.sort_values('Position',ignore_index=True)
                 except:
                     pass
-            if headerMeasureCounter==len(measures):
-                headerMeasureCounter = 0
+            if headerMeasureCounter==(len(measures)-1):
+                headerMeasureCounter = -1
             headerMeasureCounter+=1                      
 
-            print(measureDFcleared)
+
+            #print(measureDFcleared) 
+
+            measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
+
+
             
         
             
@@ -326,6 +340,8 @@ def measureAnalysis(directory, model, stringNum):
             
 if __name__ == '__main__':
     
+    import torchvision.models.detection as detection  
+
     dirname = os.path.dirname(__file__)
     model_path = os.path.join(dirname, '../../model/model2.pth')
     trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])

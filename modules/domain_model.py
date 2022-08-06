@@ -10,22 +10,28 @@ class ChordDuration(str, Enum):
     QUARTER = "quarter"
     HALF = "half"
     DOUBLE = "double"
+      
 
 @dataclass
 class Slur(Enum):
+    NO_SLUR = 0
     START = 1
     END = 2
 
+
 @dataclass
 class Triplet(Enum):
+    NO_TRIPLET = 0
     FIRST_POSITION = 1
     SECOND_POSITION = 2
     THIRD_POSITION = 3
+
 
 @dataclass
 class Articulation(str, Enum):
     UP = "Up"
     DOWN = "Down"
+
 
 @dataclass
 class FingeringType(str, Enum):
@@ -34,11 +40,20 @@ class FingeringType(str, Enum):
     M = "m"
     A = "a"
     DOT = "dot"
+    NO_FINGERING = None
     
+
 @dataclass
 class StringFingering:
     string: int
-    typeFingering: FingeringType
+    typeFingering: Optional[FingeringType] = None
+
+
+@dataclass
+class Note:
+    noteOnString: Optional[int] = None
+    string: Optional[int] = None
+
 
 @dataclass
 class Chord:
@@ -46,34 +61,40 @@ class Chord:
     duration: ChordDuration
     hasBox: bool = False
     hasAccent: bool = False
-    note: Optional[int] = None
-    headerFingering: Optional[FingeringType] = None
     articulation: Optional[Articulation] = None
-    stringFingering: Optional[StringFingering] = None
     slur: Optional[Slur] = None
-    triplet: Optional[Triplet] = None      
+    triplet: Optional[Triplet] = None
+    note: Optional[Note] = None # Detected
+    headerFingering: Optional[FingeringType] = None # Detected
+    stringFingering: Optional[StringFingering] = None # Detected
 
+     
 @dataclass
 class Measure:
     chords: Chord = field(default_factory=list)
     
+
 @dataclass
 class NotationPage:
     measures: Measure = field(default_factory=list)
+
 
 @dataclass
 class SectionPageTitle(str, Enum):
     CHAPTER = "Chapter"
     UNIT = "Unit"
 
+
 @dataclass
 class SectionPage:
     sectionpagetitle: SectionPageTitle
+
 
 @dataclass
 class Page:
     sectionpage: Optional[SectionPage] = None
     notationpage: Optional[NotationPage] = None
+
 
 @dataclass
 class Book:
@@ -82,9 +103,13 @@ class Book:
 
 
 if __name__ == '__main__':
-    chord1 = Chord(duration='16th', note=1, articulation= "Up", stringFingering='i',)
-    chord2 = Chord(duration='16th', note=2, headerFingering=FingeringType.I, articulation= "Down", hasBox=True, hasAccent=True)
-    chord3 = Chord(duration='eighth', note=3, headerFingering='m', stringFingering='p', slur=1, hasBox=False, hasAccent=False, triplet=1)
+    
+    # Testing
+    chord1 = Chord(duration=ChordDuration.SIXTEENTH, note=1, articulation= "Up", stringFingering= StringFingering(string=1, typeFingering=FingeringType("p")))
+
+
+    chord2 = Chord(duration=ChordDuration.QUARTER, note=2, headerFingering=FingeringType.I, articulation= Articulation.DOWN, hasBox=True, hasAccent=True, stringFingering=StringFingering(string=1, typeFingering=FingeringType("m")))
+    chord3 = Chord(duration=ChordDuration.EIGHTH, note=3, headerFingering='m', slur=1, hasBox=False, hasAccent=False, triplet=1, stringFingering= StringFingering(string=2, typeFingering=FingeringType("i")))
     measure1 = Measure([chord1, chord2, chord3])
     measure2 = Measure([chord2, chord3 ,chord1, chord3])
     measure3 = Measure([chord2, chord3 ,chord1, chord3, chord2, chord1])
@@ -102,5 +127,5 @@ if __name__ == '__main__':
 
     book1 = Book(numberOfStrings=6, pages = [page1, page2, page3, page4])
 
+    #print(book1)
     print(json.dumps(book1, indent=3, default=vars))
-

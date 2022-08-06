@@ -251,3 +251,4 @@ if __name__ == '__main__':
     dirname = os.path.dirname(__file__)
     bookDirectory = os.path.join(dirname, '../../books_to_analyze/book1')
     measureDetectionAndExtraction(bookDirectory)
+
