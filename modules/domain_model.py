@@ -51,7 +51,7 @@ class StringFingering:
 
 @dataclass
 class Note:
-    noteOnString: Optional[int] = None
+    noteonstring: Optional[int] = None
     string: Optional[int] = None
 
 
@@ -79,15 +79,15 @@ class NotationPage:
     measures: Measure = field(default_factory=list)
 
 
-@dataclass
-class SectionPageTitle(str, Enum):
-    CHAPTER = "Chapter"
-    UNIT = "Unit"
+#@dataclass
+#class SectionPageTitle(str, Enum):
+    #CHAPTER = "Chapter"
+    #UNIT = "Unit"
 
 
 @dataclass
 class SectionPage:
-    sectionpagetitle: SectionPageTitle
+    sectionpagetitle: str
 
 
 @dataclass
@@ -98,7 +98,7 @@ class Page:
 
 @dataclass
 class Book:
-    numberOfStrings: int
+    numberofstrings: int
     pages: Page = field(default_factory=list)
 
 
@@ -117,8 +117,8 @@ if __name__ == '__main__':
     notationpage1 = NotationPage([measure1, measure2, measure3, measure4])
     notationpage2 = NotationPage([measure3, measure2, measure3, measure1, measure4])
 
-    sectionpage1 = SectionPage("Chapter")
-    sectionpage2 = SectionPage("Unit")
+    sectionpage1 = SectionPage("Chapter 1")
+    sectionpage2 = SectionPage("Unit 2")
 
     page1 = Page(notationpage=notationpage1)
     page2 = Page(notationpage=notationpage2)

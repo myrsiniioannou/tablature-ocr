@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from pathlib import Path
+import json
 from domain_model import *
 
 def pathToFile(mainDirectory, rootOfDirectory, measureCSV):
@@ -189,7 +190,7 @@ def parseMeasure(mdf, UserInputData, amountOfChords):
                        articulation = articulationDecoding(UserInputData["articulation"][chordIndex]),
                        slur = UserInputData["slur"][chordIndex],
                        triplet = UserInputData["triplet"][chordIndex],
-                       note = Note(noteOnString=noteDecoding(mdf,chordIndex), string=noteStringDecoding(mdf,chordIndex)),
+                       note = Note(noteonstring=noteDecoding(mdf,chordIndex), string=noteStringDecoding(mdf,chordIndex)),
                        headerFingering = FingeringType(fingeringDecoding(mdf, chordIndex, headerOrNot=True)),
                        stringFingering = StringFingering(string=stringFingeringDecoding(mdf, chordIndex),
                                                         typeFingering=FingeringType(fingeringDecoding(mdf, chordIndex, headerOrNot=False))))
@@ -198,39 +199,81 @@ def parseMeasure(mdf, UserInputData, amountOfChords):
     return measure
         
 
+def parseSectionPage(rootFolder):
+    def splitFolderName(directoryName):
+        head = directoryName.rstrip('0123456789')
+        tail = directoryName[len(head):]
+        return head, tail
 
-def parseBook(directory):
+    # Check if root has chapter or unit as folder name and instantiate section page if so.
+    baseName = os.path.basename(Path(rootFolder))
+    if baseName.startswith("chapter") or baseName.startswith("unit"):
+        folderName, folderNumber = splitFolderName(baseName)
+        folderName = folderName[0].upper() + folderName[1:]
+        if folderNumber[0]=="0":
+            folderNumber = folderNumber[1:]
+        sectionPageTitle = ' '.join([folderName, folderNumber])
+    else:
+        sectionPageTitle = None
+    return sectionPageTitle
+
+
+def parseNotationPage(directory, root, measures, dataInput, fileNumber):
+    notationPageContent = []
+
+    for measure in measures:
+        if measure.endswith('.csv'):
+            filePath = pathToFile(directory, root, measure)                
+            print(f"Parsing file: {filePath}")
+            df = readMeasureDF(filePath)
+            chordNumber = findChordNumber(df).astype(int)
+            dataInput = askUserForInput(fileNumber, chordNumber, dataInput)
+            print(dataInput)
+            measureOutput = Measure(parseMeasure(df, dataInput, chordNumber))
+            notationPageContent.append(measureOutput)
+            fileNumber+=1
+    return notationPageContent, fileNumber, dataInput
+
+
+def parseBook(directory, stringNumber):
     dataInput = {}
+    bookPages = []
     fileNumber = 0
     # Iterate over the csv DFs
     for root, dirs, measures in os.walk(directory):
-        for measure in measures:
-            if measure.endswith('.csv'):
-                filePath = pathToFile(directory, root, measure)                
-                print(f"Parsing file: {filePath}")
-                df = readMeasureDF(filePath)
-                chordNumber = findChordNumber(df).astype(int)
-                dataInput = askUserForInput(fileNumber, chordNumber, dataInput)
-                print(dataInput)
-                
-                
-                book = parseMeasure(df, dataInput, chordNumber)
-                
-                print(json.dumps(book, indent=3, default=vars))
-                # OUTPUT SHOULD BE A JSON
+        # Section Page
+        sectionPageTitle = parseSectionPage(root)
+        if sectionPageTitle:
+            sectionPage = SectionPage(sectionpagetitle = sectionPageTitle)
+            page = Page(sectionpage = sectionPage)
+            bookPages.append(page)
 
-                
-                
-                fileNumber+=1
+        # Notation Page
+        notationPageContent, fileNumber, dataInput = parseNotationPage(directory, root, measures, dataInput, fileNumber)
+        if notationPageContent:
+            notationPage = NotationPage(measures = notationPageContent)
+            page = Page(notationpage = notationPage)
+            bookPages.append(page)
+
+    book = Book(numberofstrings = stringNumber, pages = bookPages)
 
 
+    #print(json.dumps(book, indent=3, default=vars))
+    bookJSON = json.dumps(book, indent=3, default=vars)
+    jsonFileName = os.path.basename(Path(directory)) +'.json'
+    outputDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\book_outputs", jsonFileName)
 
+    
+    with open(outputDirectory, 'w', encoding='utf-8') as f:
+        json.dump(bookJSON, f, ensure_ascii=False)
 
+    
     print("Parsing Done!")
-            
-            
+
+              
 
 if __name__ == '__main__':
 
     bookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book1"
-    parseBook(bookDirectory)
+    numberOfStrings = 6
+    parseBook(bookDirectory, numberOfStrings)
