@@ -1,4 +1,5 @@
 import sys
+from header_repeater import headerRepeater
 sys.path.append('modules')
 
 from measure_detection_and_extraction import *
@@ -20,6 +21,7 @@ if __name__ == '__main__':
     measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings)
 
     # 3rd Step - Header Repeater
+    headerRepeater()
 
     # 4th Step - Parse Book
     parseBook(bookDirectory, numberOfStrings)
