@@ -1,17 +1,18 @@
-from PIL import Image
+#from PIL import Image
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-from IPython.display import Image
+#from IPython.display import Image
 from sklearn.cluster import KMeans
 import pandas as pd
-import tqdm as notebook_tqdm
-from detecto import core, utils, visualize
-from detecto.visualize import show_labeled_image, plot_prediction_grid
-from torchvision import transforms
-import torch
+#import tqdm as notebook_tqdm
+from detecto import core #, utils, visualize
+from detecto.visualize import show_labeled_image #, plot_prediction_grid
+#from torchvision import transforms
+#import torch
 from pathlib import Path
+
 
 def incorectResponse():
     print("That's not a correct response, try again")
@@ -116,7 +117,6 @@ def removeExtraLines(df):
     return df
 
 
-
 def findStringCentroids(stringNumber, df):
     cluster_number = stringNumber + 2
     X = df[["y"]]
@@ -130,6 +130,7 @@ def findStringCentroids(stringNumber, df):
     if len(classes) == cluster_number:
         classes.pop(1)
     return classes
+
 
 def detectNotation(model, img):
     thresh = 0
@@ -332,11 +333,8 @@ def measureAnalysis(directory, model, stringNum):
             measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
 
 
-            
-        
-            
 
-            
+
             
 if __name__ == '__main__':
     

@@ -1,20 +1,15 @@
 import sys
 sys.path.append('modules')
-from measure_detection_and_extraction import *
-from domain_model import *
-from measure_analysis import *
 
-from detecto import core, utils, visualize
-from detecto.visualize import show_labeled_image, plot_prediction_grid
-from torchvision import transforms
-import torch
-import os
+from measure_detection_and_extraction import *
+from measure_analysis import *
+from book_parser import *
 
 
 if __name__ == '__main__':
     # 1st Step - Exctract Measures
     bookDirectory = r"../books_to_analyze/book1"
-    #measureDetectionAndExtraction(bookDirectory)
+    measureDetectionAndExtraction(bookDirectory)
     
     
     # 2nd Step - Analyze measures and create dfs for each one
@@ -24,21 +19,13 @@ if __name__ == '__main__':
     numberOfStrings = 6
     measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings)
 
+    # 3rd Step - Header Repeater
 
+    # 4th Step - Parse Book
+    parseBook(bookDirectory, numberOfStrings)
 
-
-
-
-    # 1ST TASK - 3rd Step - Parse the extracted dfs in csv format
-    # 2ND TASK -  4th Step Add Section Pages
-    parseBook(bookDirectory)
-    
-    # 3RD TASK - 5th Step - Render in xml
-    # 4TH TASK - 6th Step - Retrain
-    
+    # 5th Step - Render Book
 
     
-
-
     
     print("Book Done!")

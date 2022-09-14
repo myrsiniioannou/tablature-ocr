@@ -261,7 +261,7 @@ def parseBook(directory, stringNumber):
     #print(json.dumps(book, indent=3, default=vars))
     bookJSON = json.dumps(book, indent=3, default=vars)
     jsonFileName = os.path.basename(Path(directory)) +'.json'
-    outputDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\book_outputs", jsonFileName)
+    outputDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs", jsonFileName)
 
     
     with open(outputDirectory, 'w', encoding='utf-8') as f:
