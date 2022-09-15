@@ -20,6 +20,9 @@ if __name__ == '__main__':
     numberOfStrings = 6
     measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings)
 
+
+
+    ############HEREE--------------------------------------------------------------
     # 3rd Step - Header Repeater
     headerRepeater()
 

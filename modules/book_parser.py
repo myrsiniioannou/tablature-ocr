@@ -197,14 +197,15 @@ def parseMeasure(mdf, UserInputData, amountOfChords):
         
         measure.append(chord)
     return measure
-        
+
+
+def splitFolderName(directoryName):
+    head = directoryName.rstrip('0123456789')
+    tail = directoryName[len(head):]
+    return head, tail 
+
 
 def parseSectionPage(rootFolder):
-    def splitFolderName(directoryName):
-        head = directoryName.rstrip('0123456789')
-        tail = directoryName[len(head):]
-        return head, tail
-
     # Check if root has chapter or unit as folder name and instantiate section page if so.
     baseName = os.path.basename(Path(rootFolder))
     if baseName.startswith("chapter") or baseName.startswith("unit"):
