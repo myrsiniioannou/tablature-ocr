@@ -1,62 +1,88 @@
 from pathlib import Path
 import os
-from book_parser import splitFolderName
+import pandas as pd
+
+
+def addZeroToNumberIfOneDigit(number):
+    if len(str(number))==1:
+        finalNumber = "0" + str(number)
+    else:
+        finalNumber = str(number)
+    return finalNumber
+
+
+def generateHeaderDirectory(dir, headerPage):
+    for section in headerPage:
+        if section != "page":
+            dir = os.path.join(dir,section+addZeroToNumberIfOneDigit(headerPage[section]))
+        else:
+            dir = os.path.join(dir,addZeroToNumberIfOneDigit(headerPage[section]))
+    return dir
+
+def copyDFs(root, measures):
+    listOfMeasureHeaderDfs = []
+    for measure in measures:
+        if measure.endswith('.csv'):
+            measureDirectory = os.path.join(root, measure)
+            measureDF = pd.read_csv(measureDirectory)
+            #print(measureDF[measureDF["String"] == 0].reset_index(drop=True))
+            listOfMeasureHeaderDfs.append(measureDF[measureDF["String"] == 0].reset_index(drop=True))
+            #print(root)
+    return listOfMeasureHeaderDfs
+
+
+def concatenateDFs(root, measures, listOfMeasureHeaderDfs):
+    index = 0
+    for measure in measures:
+        if measure.endswith('.csv'):
+            measureDirectory = os.path.join(root, measure)
+            measureDF = pd.read_csv(measureDirectory)
+
+            # JUST IN CASE, ERASE HEADERS
+            try:
+                measureDFwithNoHeader = measureDF[measureDF["String"] != 0]
+            except:
+                pass
+            try:
+                newMeasureDf = pd.concat([listOfMeasureHeaderDfs[index], measureDFwithNoHeader], ignore_index=True)
+                newMeasureDf = newMeasureDf.sort_values(by=['Position'], ascending=True, ignore_index=True)
+                newMeasureDf.to_csv(measureDirectory,index = False, encoding='utf-8')
+            except:
+                pass
+            #print(newMeasureDf)
+            index+=1
+            
+   
 
 
 def headerRepeater(directory, headerPages: dict):
 
-    # Iterate through files and folders
-    for root, dirs, measures in os.walk(directory):
-        pagesWithHeaderCounter = 0
-        
-        for measure in measures:
-            if measure.endswith('.csv'):
-
-                
-                print("measure: ", measure)
-                measureNumber = measure[:2]
-                print("root: ", root)
-                chapter = os.path.basename(Path(root).parents[1])
-                unit = os.path.basename(Path(root).parents[0])
-                page = os.path.basename(root)
-
-                sectionList = [chapter, unit, page]
-                sectionListWithoutText = []
-                for section in sectionList:
-                    sectionTitle, sectionNumber = splitFolderName(section)
-                    
-                    if sectionNumber[0] == "0":
-                        sectionNumber = sectionNumber[1:]
-                    sectionNumber = int(sectionNumber)
-                    sectionListWithoutText.append(sectionNumber)
-
-
-                print("chapter: ", chapter)
-                print("chapter number:", sectionListWithoutText[0]) # chapter
-                print("unit: ", sectionListWithoutText[1]) # unit 
-                print("page: ", sectionListWithoutText[2]) # page
-                
-
-
-                if ((headerPages[pagesWithHeaderCounter]["chapter"] == sectionListWithoutText[0]) and
-                    (headerPages[pagesWithHeaderCounter]["unit"] == sectionListWithoutText[1]) and
-                    (headerPages[pagesWithHeaderCounter]["page"] == sectionListWithoutText[2])):
-                    print("--->PAGE WITH HEADER<---")
-                                    
-                    pagesWithHeaderCounter+=1
-
-                print('headerPages[pagesWithHeaderCounter]["chapter"]: ', headerPages[pagesWithHeaderCounter]["chapter"])
-                print('headerPages[pagesWithHeaderCounter]["unit"]: ', headerPages[pagesWithHeaderCounter]["unit"])
-                print('headerPages[pagesWithHeaderCounter]["page"]: ', headerPages[pagesWithHeaderCounter]["page"])
-                print("sectionListWithoutText: ", sectionListWithoutText)
-                print("-------------------")
-                #TO MEASURE DEN TO THELOUME STO DICTIONARY ALLA TO THELOUME ENTOS GIA THN APOTHIKEYSH
-
-
-
+    listOfHeaderPages = []
+    listOfMeasureHeaderDfs = []
+    # Iterates through the pages that their header should be copied. They are added by the user.
+    # It generates the directories of the pages that have header in order to iterate on them.
+    for headerPage in headerPages:
+        listOfHeaderPages.append(generateHeaderDirectory(directory, headerPage))
     
-            # ta measures pou ginontai copies prepei na exoun to idio noumero (giati mporei na exoume error)
-            # opote na to tsekarei auto h malakia
+    
+    # Iterating through every folder and page
+    for root, dirs, measures in os.walk(directory):
+        # If this is a page with a header, then call copyDFs, copy the measures and store them in a list
+        if root in listOfHeaderPages:
+            listOfMeasureHeaderDfs = copyDFs(root, measures)
+
+        # else call concatenateDFs to concatenate the previous list to the headerless measures
+        else:
+            if listOfMeasureHeaderDfs:
+                concatenateDFs(root, measures, listOfMeasureHeaderDfs)
+
+
+    print("Header Repeating Process Done!")
+
+
+
+
+
 
 if __name__ == '__main__':
 
@@ -64,9 +90,11 @@ if __name__ == '__main__':
     
     pagesWithHeader = [
         {"chapter": 1, "unit": 1, "page": 1},
-        {"chapter": 1, "unit": 1, "page": 2}
+        {"chapter": 1, "unit": 2, "page": 3}
     ]
 
 
 
     headerRepeater(extractedBookDirectory, pagesWithHeader)
+
+

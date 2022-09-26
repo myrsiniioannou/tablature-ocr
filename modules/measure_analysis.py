@@ -331,6 +331,7 @@ def measureAnalysis(directory, model, stringNum):
             #print(measureDFcleared) 
 
             measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
+    print("Measure Analysis done!")
 
 
 
