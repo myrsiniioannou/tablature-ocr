@@ -1,3 +1,6 @@
+{% from 'content.mscx' import content %}
+{% from 'header.mscx' import header %}
+
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="3.02">
   <programVersion>3.6.2</programVersion>
@@ -10,6 +13,8 @@
       <pagePrintableWidth>6.69291</pagePrintableWidth>
       <pageEvenLeftMargin>0.787402</pageEvenLeftMargin>
       <pageOddLeftMargin>0.787402</pageOddLeftMargin>
+      <pageOddTopMargin>1.02362</pageOddTopMargin>
+      <pageTwosided>0</pageTwosided>
       <staffUpperBorder>0</staffUpperBorder>
       <staffLowerBorder>0</staffLowerBorder>
       <enableVerticalSpread>1</enableVerticalSpread>
@@ -21,6 +26,7 @@
       <beamWidth>0.3</beamWidth>
       <beamDistance>1</beamDistance>
       <propertyDistance>1.38778e-16</propertyDistance>
+      <showMeasureNumber>0</showMeasureNumber>
       <useStandardNoteNames>0</useStandardNoteNames>
       <createMultiMeasureRests>1</createMultiMeasureRests>
       <enableIndentationOnFirstSystem>0</enableIndentationOnFirstSystem>
@@ -57,7 +63,7 @@
       <Staff id="1">
         <StaffType group="tablature">
           <name>tab6StrCommon</name>
-          <lines>6</lines>
+          <lines>{{NumberOfStrings}}</lines>
           <lineDistance>1.5</lineDistance>
           <clef>0</clef>
           <timesig>0</timesig>
@@ -65,8 +71,8 @@
           <durationFontName>MuseScore Tab Modern</durationFontName>
           <durationFontSize>15</durationFontSize>
           <durationFontY>0</durationFontY>
-          <fretFontName>MuseScore Tab Renaiss</fretFontName>
-          <fretFontSize>11</fretFontSize>
+          <fretFontName>MuseScore Tab Sans</fretFontName>
+          <fretFontSize>12</fretFontSize>
           <fretFontY>0</fretFontY>
           <linesThrough>1</linesThrough>
           <minimStyle>1</minimStyle>
@@ -152,8 +158,8 @@
           </Channel>
         </Instrument>
       </Part>
-      <Staff id="1">
-    {{ content }}
-      </Staff>
+    
+    {{content(variab)}}
+    {{header(dataaa)}}
     </Score>
   </museScore>

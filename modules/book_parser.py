@@ -257,16 +257,17 @@ def parseBook(directory, stringNumber):
             bookPages.append(page)
 
     book = Book(numberofstrings = stringNumber, pages = bookPages)
-
+    bookDict = vars(book)
 
     #print(json.dumps(book, indent=3, default=vars))
-    bookJSON = json.dumps(book, indent=3, default=vars)
+    #bookJSON = json.dump(bookDict, indent=3, default=vars)
     jsonFileName = os.path.basename(Path(directory)) +'.json'
     outputDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs", jsonFileName)
 
     
     with open(outputDirectory, 'w', encoding='utf-8') as f:
-        json.dump(bookJSON, f, ensure_ascii=False)
+        #json.dumps(bookDict, f, ensure_ascii=False)
+        json.dump(bookDict, f, indent=3, default=vars, ensure_ascii=False)
 
     
     print("Parsing Done!")
@@ -278,3 +279,30 @@ if __name__ == '__main__':
     bookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book1"
     numberOfStrings = 6
     parseBook(bookDirectory, numberOfStrings)
+
+
+
+
+    """
+    chord1 = Chord(positionInMeasure=0, duration='16th', note=60, articulation= "Up", stringFingering='i',)
+    chord2 = Chord(positionInMeasure=1, duration='16th', note=62, headerFingering='i', articulation= "Down", hasBox=True, hasAccent=True)
+    chord3 = Chord(positionInMeasure=2, duration='eighth', note=66, headerFingering='m', stringFingering='p', slur=1, hasBox=False, hasAccent=False, triplet=1)
+    measure1 = Measure(3, [chord1, chord2, chord3])
+    measure2 = Measure(4, [chord2, chord3 ,chord1, chord3])
+    measure3 = Measure(6, [chord2, chord3 ,chord1, chord3, chord2, chord1])
+    measure4 = Measure(2, [chord2, chord1])
+    notationpage1 = NotationPage(4, [measure1, measure2, measure3, measure4])
+    notationpage2 = NotationPage(5, [measure3, measure2, measure3, measure1, measure4])
+
+    sectionpage1 = SectionPage("Chapter")
+    sectionpage2 = SectionPage("Unit")
+
+    page1 = Page(notationpage=notationpage1)
+    page2 = Page(notationpage=notationpage2)
+    page3 = Page(sectionpage=sectionpage1)
+    page4 = Page(sectionpage=sectionpage2)
+
+    book1 = Book(numberOfStrings=6, page = [page1, page2, page3, page4])
+
+    print(json.dumps(book1, indent=3, default=vars))
+    """
