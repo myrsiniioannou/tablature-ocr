@@ -1,8 +1,8 @@
-{% from 'content.mscx' import content %}
-{% from 'header.mscx' import header %}
-
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="3.02">
+
+{% from 'header.mscx' import header %}
+{% from 'measure.mscx' import measure %}
   <programVersion>3.6.2</programVersion>
   <programRevision>3224f34</programRevision>
   <Score>
@@ -10,10 +10,15 @@
     <currentLayer>0</currentLayer>
     <Division>480</Division>
     <Style>
-      <pagePrintableWidth>6.69291</pagePrintableWidth>
-      <pageEvenLeftMargin>0.787402</pageEvenLeftMargin>
-      <pageOddLeftMargin>0.787402</pageOddLeftMargin>
-      <pageOddTopMargin>1.02362</pageOddTopMargin>
+      <pageWidth>8.5</pageWidth>
+      <pageHeight>11.6902</pageHeight>
+      <pagePrintableWidth>7.2189</pagePrintableWidth>
+      <pageEvenLeftMargin>0.640551</pageEvenLeftMargin>
+      <pageOddLeftMargin>0.640551</pageOddLeftMargin>
+      <pageEvenTopMargin>0.590157</pageEvenTopMargin>
+      <pageEvenBottomMargin>0.590157</pageEvenBottomMargin>
+      <pageOddTopMargin>1.10236</pageOddTopMargin>
+      <pageOddBottomMargin>0.590157</pageOddBottomMargin>
       <pageTwosided>0</pageTwosided>
       <staffUpperBorder>0</staffUpperBorder>
       <staffLowerBorder>0</staffLowerBorder>
@@ -40,7 +45,7 @@
       <tupletBracketHookHeight>3</tupletBracketHookHeight>
       <measureNumberPosBelow x="0" y="1"/>
       <footerAlign>center,center</footerAlign>
-      <Spatium>1.75</Spatium>
+      <Spatium>1.753</Spatium>
       </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
@@ -158,8 +163,19 @@
           </Channel>
         </Instrument>
       </Part>
-    
-    {{content(variab)}}
-    {{header(dataaa)}}
+    <Staff id="1">
+    {{header(singleHeading, doubleHeading, paragraph, paragraphSymbol, paragraphText1, paragraphText2)}}
+    {{measure(sideFrames, sideFrameTextOnTheLeft, measureEvenNumber, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage)}}
+    {{measure(sideFrames, sideFrameTextOnTheLeft, measureEvenNumber, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage)}}
+
+    {{measure(sideFrames, sideFrameTextOnTheLeft, measureEvenNumber, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage)}}
+    {{measure(sideFrames, sideFrameTextOnTheLeft, measureEvenNumber, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage)}}
+
+
+    {{measure(sideFrames, sideFrameTextOnTheLeft, measureEvenNumber, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage)}}
+    {{measure(sideFrames, sideFrameTextOnTheLeft, measureEvenNumber, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage)}}
+
+
+      </Staff>
     </Score>
   </museScore>

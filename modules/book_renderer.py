@@ -3,16 +3,21 @@ from domain_model import *
 import json
 from jinja2 import Environment, FileSystemLoader
 
-def setParagraphPagesAndHeadings():
+def setValues():
     paragraphs = {
-        "IA":[1,4],
-        "IB": [3,5]
+        "I A":[1,4],
+        "I B": [3,5]
     }
     headings = {
         "doubleHeading": [*range(1,8), *range(18,30)],
         "singleHeading": [*range(8,18), *range(30,40)]
     }
-    return paragraphs, headings
+    measures = {
+        "Horizontal": 2,
+        "Vertical" : 6
+    }
+    sideFrameTextExistence = True
+    return paragraphs, headings, measures, sideFrameTextExistence
 
 
 def render(JSON):
@@ -22,28 +27,33 @@ def render(JSON):
     file_loader = FileSystemLoader("templates")
     env = Environment(loader = file_loader)
 
-    paragraphs, headings = setParagraphPagesAndHeadings()
-
-
-    # ask for I Paragraph
+    paragraphs, headings, measures, sideFrameTextExistence = setValues()
 
 
 
+    render = env.get_template("book.mscx").render(
+       NumberOfStrings = bookInJsonFormat["numberofstrings"],
+       singleHeading = False,
+       doubleHeading = True,
+       paragraph = "I A",
+       paragraphSymbol = "F",
+       paragraphText1 = "1A",
+       paragraphText2 = "1B",
+       
+       # Sideframe
+       sideFrames = sideFrameTextExistence,
+       sideFrameTextOnTheLeft = "F2",
+       isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS MOTHERFUCKER
+       
+       isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK 
+       isMeasureLastInPage = False # YOU NEED TO CALCULATE THIS - PAGE BREAK 
+       )
 
-    # FTIAKSE TO DICT TOU DATA SCTRUCTURE STH MORFH POY PREPEI GIA NA RENTAREIS META
+    print(render)
 
-
-
-    #render = env.get_template("base.mscx").render(
-    #    NumberOfStrings = bookInJsonFormat["numberofstrings"],
-    #    dataaa = 'CONTENT',
-    #    variab = "Hello to you too")
-
-    #print(render)
-
-    #musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\book.mscx"
-    ##with open(f"{musescoreOutputFile}", "w") as f:
-    #    f.write(render)
+    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\book1.mscx"
+    with open(f"{musescoreOutputFile}", "w") as f:
+        f.write(render)
 
 
 
@@ -52,6 +62,9 @@ def render(JSON):
 
 
 if __name__ == '__main__':
-
+    #
+    # YOU NEED TO GIVE SOME INPUT AT THE TOP OF THE CODE
+    #
+    #
     JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\book1.json"
     render(JSON_book_directory)

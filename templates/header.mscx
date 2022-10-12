@@ -1,55 +1,102 @@
-{% macro header(data) %}
-<p>{{data}}</p>
-    <VBox>
-      <height>10</height>
-      <topGap>0</topGap>
-      <boxAutoSize>0</boxAutoSize>
-      <Text>
-        <style>Frame</style>
-        <family>Georgia</family>
-        <size>25</size>
-        <bold>1</bold>
-        <italic>1</italic>
-        <align>left,center</align>
-        <offset x="9" y="0"/>
-        <text>I A</text>
-        </Text>
-        
-      <Text>
-        <style>Frame</style>
-        <size>38</size>
-        <bold>1</bold>
-        <color r="147" g="13" b="23" a="255"/>
-        <align>left,center</align>
-        <text>&#167;</text>
-        </Text>
-      <Image>
-        <offset x="46" y="0"/>
-        <path>a621a367685546af85bc2b772493daf6.svg</path>
-        <linkPath>C:/Users/merse/Desktop/Tablature OCR/files/logo/SVG/THIS ONE WORKS.svg</linkPath>
-        <size w="5.11" h="5.11"/>
-        </Image>
-      </VBox>
-    <VBox>
-      <height>7</height>
-      <topGap>0</topGap>
-      <boxAutoSize>0</boxAutoSize>
-      <Text>
-        <style>Frame</style>
-        <family>Arial</family>
-        <size>24</size>
-        <align>center,center</align>
-        <text>F1</text>
-        </Text>
-      </VBox>
-    <HBox>
-      <width>5</width>
-      <Text>
-        <style>Frame</style>
-        <family>Arial</family>
-        <size>9</size>
-        <align>left,center</align>
-        <text><font size="16"></font>F1</text>
-        </Text>
-      </HBox>
+{% macro header(singleHeading, doubleHeading, paragraph, paragraphSymbol, paragraphText1, paragraphText2) %}
+      <VBox>
+        <height>10</height>
+        <topGap>0</topGap>
+        <boxAutoSize>0</boxAutoSize>
+        {% if paragraph %}
+        <Text>
+          <style>Frame</style>
+          <family>Georgia</family>
+          <size>25</size>
+          <bold>1</bold>
+          <italic>1</italic>
+          <align>left,center</align>
+          <offset x="9" y="0"/>
+          <text>{{paragraph}}</text>
+          </Text>
+        <Text>
+          <style>Frame</style>
+          <size>38</size>
+          <bold>1</bold>
+          <color r="147" g="13" b="23" a="255"/>
+          <align>left,center</align>
+          <text>&#167;</text>
+          </Text>
+          {% endif %}
+        <Image>
+          <offset x="49.3" y="0"/>
+          <path>a621a367685546af85bc2b772493daf6.svg</path>
+          <linkPath>C:/Users/merse/Desktop/Tablature OCR/files/logo/SVG/THIS ONE WORKS.svg</linkPath>
+          <size w="6" h="6"/>
+          </Image>
+        </VBox>
+      {% if doubleHeading %}
+      <VBox>
+        <height>7</height>
+        <topGap>0</topGap>
+        <boxAutoSize>0</boxAutoSize>
+        <HBox>
+          <width>52.3</width>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>23</size>
+            <align>center,center</align>
+            <offset x="-3" y="0"/>
+            <text>{{paragraphSymbol}}</text>
+            </Text>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>17</size>
+            <align>center,center</align>
+            <offset x="3" y="0.74"/>
+            <text>{{paragraphText1}}</text>
+            </Text>
+          </HBox>
+        <HBox>
+          <width>52.3</width>
+          <offset x="52.2978" y="0"/>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>17</size>
+            <align>center,center</align>
+            <offset x="3" y="0.74"/>
+            <text>{{paragraphText2}}</text>
+            </Text>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>23</size>
+            <align>center,center</align>
+            <offset x="-3" y="0"/>
+            <text>{{paragraphSymbol}}</text>
+            </Text>
+          </HBox>
+        </VBox>
+      {% endif %}
+      {% if singleHeading%}
+      <VBox>
+        <height>7</height>
+        <topGap>0</topGap>
+        <boxAutoSize>0</boxAutoSize>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>23</size>
+          <align>center,center</align>
+          <offset x="-3" y="0"/>
+          <text>{{paragraphSymbol}}</text>
+          </Text>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>17</size>
+          <align>center,center</align>
+          <offset x="3" y="0.74"/>
+          <text>{{paragraphText1}}</text>
+          </Text>
+        </VBox>
+      {% endif %}
 {% endmacro %}
