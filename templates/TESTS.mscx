@@ -530,6 +530,7 @@
               </Note>
             </Chord>
           <endTuplet/>
+
           <Chord>
             <BeamMode>begin32</BeamMode>
             <durationType>eighth</durationType>

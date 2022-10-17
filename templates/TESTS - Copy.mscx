@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="3.02">
-
-{% from 'header.mscx' import header %}
-{% from 'horizontalBox.mscx' import horizontalBox %}
-{% from 'measure.mscx' import measure %}
-{% from 'verticalBox.mscx' import verticalBox %}
-
   <programVersion>3.6.2</programVersion>
   <programRevision>3224f34</programRevision>
   <Score>
@@ -71,7 +65,7 @@
       <Staff id="1">
         <StaffType group="tablature">
           <name>tab6StrCommon</name>
-          <lines>{{NumberOfStrings}}</lines>
+          <lines>6</lines>
           <lineDistance>1.5</lineDistance>
           <clef>0</clef>
           <timesig>0</timesig>
@@ -167,38 +161,97 @@
         </Instrument>
       </Part>
     <Staff id="1">
-    {{header(singleHeading, doubleHeading, paragraph, paragraphSymbol, paragraphText1, paragraphText2)}}
-    {{horizontalBox(sideFrames, sideFrameTextOnTheLeft, isMeasureFirstInRow)}}
-    {{measure(sideFrames,
-              sideFrameTextOnTheLeft,
-              measureEvenNumber,
-              isMeasureFirstInRow,
-              isMeasureLastInRow,
-              isMeasureLastInPage,
-              duration,
-              slur,
-              isBeamContinued,
-              triplet)
-      }}
-    {{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}
-    
-
-    {{horizontalBox(sideFrames, sideFrameTextOnTheLeft, isMeasureFirstInRow)}}
-    {{measure(sideFrames,
-              sideFrameTextOnTheLeft,
-              measureEvenNumber,
-              isMeasureFirstInRow,
-              isMeasureLastInRow,
-              isMeasureLastInPage,
-              duration,
-              slur,
-              isBeamContinued,
-              triplet)
-      }}
-    {{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}
-    
-
-
+      <HBox>
+        <width>5</width>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>9</size>
+          <align>left,center</align>
+          <text><font size="16"></font>F1</text>
+          </Text>
+        </HBox>
+      <Measure>
+        <voice>
+          <BarLine>
+            <subtype>double</subtype>
+            <span>1</span>
+            </BarLine>
+          <TimeSig>
+            <sigN>2</sigN>
+            <sigD>4</sigD>
+            </TimeSig>
+          <Tuplet>
+            <normalNotes>2</normalNotes>
+            <actualNotes>3</actualNotes>
+            <baseNote>eighth</baseNote>
+            <Number>
+              <style>Tuplet</style>
+              <text>3</text>
+              </Number>
+            </Tuplet>
+          <Chord>
+            <durationType>eighth</durationType>
+            <Spanner type="Slur">
+              <Slur>
+                <up>up</up>
+                </Slur>
+              <next>
+                <location>
+                  <fractions>1/6</fractions>
+                  </location>
+                </next>
+              </Spanner>
+            <Note>
+              <pitch>64</pitch>
+              <tpc>18</tpc>
+              <fret>0</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>eighth</durationType>
+            <Note>
+              <pitch>64</pitch>
+              <tpc>18</tpc>
+              <fret>0</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>eighth</durationType>
+            <Spanner type="Slur">
+              <prev>
+                <location>
+                  <fractions>-1/6</fractions>
+                  </location>
+                </prev>
+              </Spanner>
+            <Note>
+              <pitch>64</pitch>
+              <tpc>18</tpc>
+              <fret>0</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <endTuplet/>
+          <Rest>
+            <durationType>16th</durationType>
+            </Rest>
+          <Rest>
+            <durationType>16th</durationType>
+            </Rest>
+          <Rest>
+            <durationType>16th</durationType>
+            </Rest>
+          <Rest>
+            <durationType>16th</durationType>
+            </Rest>
+          <BarLine>
+            <subtype>double</subtype>
+            </BarLine>
+          </voice>
+        </Measure>
       </Staff>
     </Score>
   </museScore>

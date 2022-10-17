@@ -1,26 +1,16 @@
-{% macro measure(sideFrames, sideFrameTextOnTheLeft, measureEvenNumber, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage) %}
-{% if ((isMeasureFirstInRow and sideFrames) or (not isMeasureFirstInRow)) %}  
-  <HBox>
-    {% if isMeasureFirstInRow %}
-      <width>5</width>
-    {% else %}
-      <width>8</width>
-    {% endif %} 
-    <Text>
-      <style>Frame</style>
-      <family>Arial</family>
-      <size>5</size>
-      {% if isMeasureFirstInRow %}
-        <align>left,center</align>
-      {% else %}
-        <align>center,center</align>
-      {% endif %}
-      {% if sideFrames %}
-        <text><font size="16"></font>{{sideFrameTextOnTheLeft}}</text>
-      {% endif %}
-      </Text>
-    </HBox>
-  {% endif %}
+{% from 'chord.mscx' import chord %}
+{% macro measure(
+                sideFrames,
+                sideFrameTextOnTheLeft,
+                measureEvenNumber,
+                isMeasureFirstInRow,
+                isMeasureLastInRow,
+                isMeasureLastInPage,
+                duration,
+                slur,
+                isBeamContinued,
+                triplet
+) %}
 <Measure>
         <voice>
           <BarLine>
@@ -31,86 +21,37 @@
             <sigN>2</sigN>
             <sigD>4</sigD>
             </TimeSig>
+
+
+
+
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
             <p1 x="0" y="-0.1"/>
-            <baseNote>16th</baseNote>
+            <baseNote>{{duration[2]}}</baseNote>
             <Number>
               <style>Tuplet</style>
               <text>3</text>
-              </Number>
+            </Number>
             </Tuplet>
+
+
+          {{chord(duration[2], isBeamContinued, slur[1])}}
+          
+
+
           <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <Slur>
-                <up>up</up>
-                </Slur>
-              <next>
-                <location>
-                  <fractions>1/24</fractions>
-                  </location>
-                </next>
-              </Spanner>
-            <Spanner type="Slur">
-              <Slur>
-                <SlurSegment no="0">
-                  <autoplace>0</autoplace>
-                  <offset x="0" y="-5.5"/>
-                  </SlurSegment>
-                <up>up</up>
-                </Slur>
-              <next>
-                <location>
-                  <fractions>1/12</fractions>
-                  </location>
-                </next>
-              </Spanner>
-            <Articulation>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-5"/>
-              </Articulation>
-            <Articulation>
-              <subtype>articAccentBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-9"/>
-              </Articulation>
-            <Stem>
-              <offset x="0" y="7.6"/>
-              <userLen>7.5</userLen>
-              </Stem>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="7.6"/>
-                <text>p</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <pitch>65</pitch>
-              <tpc>13</tpc>
-              <fret>1</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>16th</durationType>
+            <durationType>{{duration[2]}}</durationType>
+            
             <Spanner type="Slur">
               <prev>
                 <location>
-                  <fractions>-1/24</fractions>
-                  </location>
-                </prev>
+                  <fractions>-1/8</fractions>
+                </location>
+              </prev>
               </Spanner>
+
             <Articulation>
               <direction>down</direction>
               <subtype>articMarcatoBelow</subtype>
@@ -123,7 +64,7 @@
                 <family>Georgia</family>
                 <size>12</size>
                 <text>m</text>
-                </Fingering>
+              </Fingering>
               <pitch>67</pitch>
               <tpc>15</tpc>
               <fret>3</fret>
@@ -131,7 +72,7 @@
               </Note>
             </Chord>
           <Chord>
-            <durationType>16th</durationType>
+            <durationType>{{duration[2]}}</durationType>
             <Spanner type="Slur">
               <prev>
                 <location>
@@ -159,6 +100,9 @@
               </Note>
             </Chord>
           <endTuplet/>
+
+
+
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -340,25 +284,11 @@
               <string>0</string>
               </Note>
             </Chord>
+
+            
           <BarLine>
             <subtype>double</subtype>
             </BarLine>
           </voice>
-        </Measure>
-
-      {% if isMeasureLastInRow or isMeasureLastInPage%}
-          <VBox>
-            <topGap>0</topGap>
-            <boxAutoSize>0</boxAutoSize>
-          {% if isMeasureLastInRow %}
-            <height>4</height>
-          {% elif isMeasureLastInPage %}
-            <height>0</height>
-            <LayoutBreak>
-                <subtype>page</subtype>
-            </LayoutBreak>
-          {% endif %}
-          </VBox>
-        {% endif %}
-        
+        </Measure>        
 {% endmacro %}

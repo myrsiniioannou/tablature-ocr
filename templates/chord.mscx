@@ -1,0 +1,121 @@
+        {% macro chord(
+          duration,
+          isBeamContinued,
+          slur,
+          triplet
+          ) %}
+
+
+
+          <!--# 
+          
+          ΑΥΤΟΟΟΟΟΟΟΟΟΟΟ ΤΗΕΛΕΙ ΦΤΙΑΞΙΜΟ
+
+
+
+          TO TUPLET EINAI MEROS TOU CHORD ARA PREPEI NA EINAI S AUTH THN KLASH
+          <Tuplet>
+            <normalNotes>2</normalNotes>
+            <actualNotes>3</actualNotes>
+            <p1 x="0" y="-0.1"/>
+            <baseNote>{{duration[2]}}</baseNote>
+            <Number>
+              <style>Tuplet</style>
+              <text>3</text>
+              </Number>
+            </Tuplet>-->
+
+
+
+
+
+        <Chord>
+
+          <!--BEAM CONTINUATION-->
+          {% if isBeamContinued %}
+            <BeamMode>begin32</BeamMode>
+          {% endif %}
+            <durationType>{{duration}}</durationType>
+
+          <!--SLUR-->
+          {% if  slur != 0 %}
+            <Spanner type="Slur">
+              <Slur>
+                <up>up</up>
+              </Slur>
+              <next>
+                <location>
+                  {% if  slur == 1 %}
+                    <fractions>1/8</fractions>
+                  {% elif  slur == 2 %}
+                    <fractions>-1/8</fractions>
+                  {% endif %}
+                </location>
+              </next>
+            </Spanner>
+          {% endif %}
+
+
+          
+          <!--Triplet Slur Part-->
+            {% if  (triplet != 0) and (triplet != 2) %}
+            <Spanner type="Slur">
+              <Slur>
+                <SlurSegment no="0">
+                  <autoplace>0</autoplace>
+                  <offset x="0" y="-5.5"/>
+                </SlurSegment>
+                <up>up</up>
+              </Slur>
+                <next>
+                  <location>
+                    {% if  slur == 1 %}
+                      <fractions>1/12</fractions>
+                    {% elif  slur == 3 %}
+                      <fractions>-1/12</fractions>
+                    {% endif %}
+                  </location>
+                </next>
+            </Spanner>
+          {% endif %}
+
+
+
+            <Articulation>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-5"/>
+              </Articulation>
+            <Articulation>
+              <subtype>articAccentBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-9"/>
+              </Articulation>
+            <Stem>
+              <offset x="0" y="7.6"/>
+              <userLen>7.5</userLen>
+              </Stem>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="7.6"/>
+                <text>p</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <pitch>65</pitch>
+              <tpc>13</tpc>
+              <fret>1</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <!--<endTuplet/>-->
+
+{% endmacro %}

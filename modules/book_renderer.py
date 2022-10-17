@@ -33,7 +33,7 @@ def render(JSON):
 
     render = env.get_template("book.mscx").render(
        NumberOfStrings = bookInJsonFormat["numberofstrings"],
-       singleHeading = False,
+       singleHeading = False, # YOU NEED TO CALCULATE THIS ACCORDING TO PAGES. EASY
        doubleHeading = True,
        paragraph = "I A",
        paragraphSymbol = "F",
@@ -44,14 +44,19 @@ def render(JSON):
        sideFrames = sideFrameTextExistence,
        sideFrameTextOnTheLeft = "F2",
        isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS MOTHERFUCKER
-       
        isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK 
-       isMeasureLastInPage = False # YOU NEED TO CALCULATE THIS - PAGE BREAK 
+       isMeasureLastInPage = False, # YOU NEED TO CALCULATE THIS - PAGE BREAK 
+       
+       # Chords
+       duration = ["16th", "eighth", "16th", "eighth"],
+       slur = [0, 1, 2],
+       isBeamContinued = True,
+       triplet = 1
        )
 
     print(render)
 
-    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\book1.mscx"
+    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\bookRENDER.mscx"
     with open(f"{musescoreOutputFile}", "w") as f:
         f.write(render)
 
