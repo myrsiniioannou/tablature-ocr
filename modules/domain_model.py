@@ -29,8 +29,8 @@ class Triplet(Enum):
 
 @dataclass
 class Articulation(str, Enum):
-    UP = "Up"
-    DOWN = "Down"
+    UP = "up"
+    DOWN = "down"
 
 
 @dataclass

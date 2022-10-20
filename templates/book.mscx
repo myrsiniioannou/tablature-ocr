@@ -178,7 +178,10 @@
               duration,
               slur,
               isBeamContinued,
-              triplet)
+              triplet,
+              articulationDirection,
+              articulationYOffset,
+              hasAccent)
       }}
     {{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}
     

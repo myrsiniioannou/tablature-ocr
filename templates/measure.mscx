@@ -9,7 +9,9 @@
                 duration,
                 slur,
                 isBeamContinued,
-                triplet
+                triplet,
+                articulationDirection,
+                articulationYOffset
 ) %}
 <Measure>
         <voice>
@@ -37,7 +39,15 @@
             </Tuplet>
 
 
-          {{chord(duration[2], isBeamContinued, slur[1])}}
+          {{chord(
+          duration[2],
+          isBeamContinued,
+          slur[1],
+          triplet,
+          articulationDirection,
+          articulationYOffset,
+          hasAccent
+          )}}
           
 
 

@@ -196,10 +196,42 @@
         <boxAutoSize>0</boxAutoSize>
         <HBox>
           <width>52.3</width>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>23</size>
+            <align>center,center</align>
+            <offset x="-3" y="0"/>
+            <text>F</text>
+            </Text>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>17</size>
+            <align>center,center</align>
+            <offset x="3" y="0.74"/>
+            <text>1A</text>
+            </Text>
           </HBox>
         <HBox>
           <width>52.3</width>
           <offset x="52.2978" y="0"/>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>17</size>
+            <align>center,center</align>
+            <offset x="3" y="0.74"/>
+            <text>2B</text>
+            </Text>
+          <Text>
+            <style>Frame</style>
+            <family>Arial</family>
+            <size>23</size>
+            <align>center,center</align>
+            <offset x="-3" y="0"/>
+            <text>F</text>
+            </Text>
           </HBox>
         </VBox>
       <VBox>
@@ -211,7 +243,16 @@
           <family>Arial</family>
           <size>23</size>
           <align>center,center</align>
-          <text>F3</text>
+          <offset x="-3" y="0"/>
+          <text>F</text>
+          </Text>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>17</size>
+          <align>center,center</align>
+          <offset x="3" y="0.74"/>
+          <text>3C</text>
           </Text>
         </VBox>
       <HBox>
@@ -237,13 +278,13 @@
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
-            <p1 x="0" y="-0.0998288"/>
+            <p1 x="0" y="-0.1"/>
             <baseNote>16th</baseNote>
             <Number>
               <style>Tuplet</style>
               <text>3</text>
               </Number>
-            </Tuplet>
+            </Tuplet>ζ
           <Chord>
             <durationType>16th</durationType>
             <Spanner type="Slur">
@@ -275,8 +316,13 @@
               <minDistance>-999</minDistance>
               <offset x="0" y="-5"/>
               </Articulation>
+            <Articulation>
+              <subtype>articAccentBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-9"/>
+              </Articulation>
             <Stem>
-              <offset x="0" y="7.587"/>
+              <offset x="0" y="7.6"/>
               <userLen>7.5</userLen>
               </Stem>
             <Note>
@@ -394,7 +440,338 @@
               <offset x="0" y="-4.5"/>
               </Articulation>
             <Stem>
-              <offset x="0" y="5.98973"/>
+              <offset x="0" y="6"/>
+              <userLen>6</userLen>
+              </Stem>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="6.1"/>
+                <text>p</text>
+                </Fingering>
+              <pitch>66</pitch>
+              <tpc>8</tpc>
+              <fret>2</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <RehearsalMark>
+            <minDistance>-999</minDistance>
+            <size>16</size>
+            <offset x="-0.2" y="1.9"/>
+            <framePadding>0.6</framePadding>
+            <frameWidth>0.2</frameWidth>
+            <text></text>
+            </RehearsalMark>
+          <Chord>
+            <durationType>16th</durationType>
+            <Articulation>
+              <direction>up</direction>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="2.5"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="1.6"/>
+                <text>p</text>
+                </Fingering>
+              <pitch>67</pitch>
+              <tpc>15</tpc>
+              <fret>3</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Spanner type="Slur">
+              <prev>
+                <location>
+                  <fractions>-1/12</fractions>
+                  </location>
+                </prev>
+              </Spanner>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="1.5"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <pitch>68</pitch>
+              <tpc>22</tpc>
+              <fret>4</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <endTuplet/>
+
+          <Chord>
+            <BeamMode>begin32</BeamMode>
+            <durationType>eighth</durationType>
+            <Articulation>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="2"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <pitch>66</pitch>
+              <tpc>8</tpc>
+              <fret>2</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>eighth</durationType>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-5"/>
+              </Articulation>
+            <Stem>
+              <offset x="0" y="6"/>
+              <userLen>6</userLen>
+              </Stem>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="6.1"/>
+                <text>p</text>
+                </Fingering>
+              <pitch>68</pitch>
+              <tpc>22</tpc>
+              <fret>4</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <BarLine>
+            <subtype>double</subtype>
+            </BarLine>
+          </voice>
+        </Measure>
+      <HBox>
+        <width>8</width>
+        <Text>
+          <style>Frame</style>
+          <family>Arial</family>
+          <size>9</size>
+          <align>center,center</align>
+          <text><font size="16"></font>F2</text>
+          </Text>
+        </HBox>
+      <Measure>
+        <voice>
+          <BarLine>
+            <subtype>double</subtype>
+            <span>1</span>
+            </BarLine>
+          <Tuplet>
+            <normalNotes>2</normalNotes>
+            <actualNotes>3</actualNotes>
+            <p1 x="0" y="-0.1"/>
+            <baseNote>16th</baseNote>
+            <Number>
+              <style>Tuplet</style>
+              <text>3</text>
+              </Number>
+            </Tuplet>
+          <Chord>
+            <durationType>16th</durationType>
+            <Spanner type="Slur">
+              <Slur>
+                <up>up</up>
+                </Slur>
+              <next>
+                <location>
+                  <fractions>1/24</fractions>
+                  </location>
+                </next>
+              </Spanner>
+            <Spanner type="Slur">
+              <Slur>
+                <SlurSegment no="0">
+                  <autoplace>0</autoplace>
+                  <offset x="0" y="-5.5"/>
+                  </SlurSegment>
+                <up>up</up>
+                </Slur>
+              <next>
+                <location>
+                  <fractions>1/12</fractions>
+                  </location>
+                </next>
+              </Spanner>
+            <Articulation>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-5"/>
+              </Articulation>
+            <Articulation>
+              <subtype>articAccentBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-9"/>
+              </Articulation>
+            <Stem>
+              <offset x="0" y="7.6"/>
+              <userLen>7.5</userLen>
+              </Stem>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="7.6"/>
+                <text>p</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <pitch>65</pitch>
+              <tpc>13</tpc>
+              <fret>1</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Spanner type="Slur">
+              <prev>
+                <location>
+                  <fractions>-1/24</fractions>
+                  </location>
+                </prev>
+              </Spanner>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="1.5"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <pitch>67</pitch>
+              <tpc>15</tpc>
+              <fret>3</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Spanner type="Slur">
+              <prev>
+                <location>
+                  <fractions>-1/12</fractions>
+                  </location>
+                </prev>
+              </Spanner>
+            <Articulation>
+              <direction>up</direction>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="2.5"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <pitch>68</pitch>
+              <tpc>22</tpc>
+              <fret>4</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <endTuplet/>
+          <Tuplet>
+            <normalNotes>2</normalNotes>
+            <actualNotes>3</actualNotes>
+            <baseNote>16th</baseNote>
+            <Number>
+              <style>Tuplet</style>
+              <text>3</text>
+              </Number>
+            </Tuplet>
+          <Chord>
+            <durationType>16th</durationType>
+            <Spanner type="Slur">
+              <Slur>
+                <SlurSegment no="0">
+                  <autoplace>0</autoplace>
+                  <offset x="0" y="-5.5"/>
+                  </SlurSegment>
+                <up>up</up>
+                </Slur>
+              <next>
+                <location>
+                  <fractions>1/12</fractions>
+                  </location>
+                </next>
+              </Spanner>
+            <Articulation>
+              <subtype>articAccentBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-9"/>
+              </Articulation>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-4.5"/>
+              </Articulation>
+            <Stem>
+              <offset x="0" y="6"/>
               <userLen>6</userLen>
               </Stem>
             <Note>
@@ -514,7 +891,7 @@
               <offset x="0" y="-5"/>
               </Articulation>
             <Stem>
-              <offset x="0" y="5.98973"/>
+              <offset x="0" y="6"/>
               <userLen>6</userLen>
               </Stem>
             <Note>
@@ -543,317 +920,13 @@
             </BarLine>
           </voice>
         </Measure>
-      <HBox>
-        <width>8</width>
-        <Text>
-          <style>Frame</style>
-          <family>Arial</family>
-          <size>9</size>
-          <align>center,center</align>
-          <text><font size="16"></font>F2</text>
-          </Text>
-        </HBox>
-      <Measure>
-        <voice>
-          <Tuplet>
-            <normalNotes>2</normalNotes>
-            <actualNotes>3</actualNotes>
-            <p1 x="0" y="-0.0998288"/>
-            <baseNote>16th</baseNote>
-            <Number>
-              <style>Tuplet</style>
-              <text>3</text>
-              </Number>
-            </Tuplet>
-          <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <Slur>
-                <up>up</up>
-                </Slur>
-              <next>
-                <location>
-                  <fractions>1/24</fractions>
-                  </location>
-                </next>
-              </Spanner>
-            <Spanner type="Slur">
-              <Slur>
-                <up>up</up>
-                </Slur>
-              <next>
-                <location>
-                  <fractions>1/12</fractions>
-                  </location>
-                </next>
-              </Spanner>
-            <Articulation>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-5"/>
-              </Articulation>
-            <Articulation>
-              <subtype>articAccentBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-9"/>
-              </Articulation>
-            <Stem>
-              <offset x="0" y="7.587"/>
-              <userLen>7.5</userLen>
-              </Stem>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="7.6"/>
-                <text>p</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <pitch>65</pitch>
-              <tpc>13</tpc>
-              <fret>1</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <prev>
-                <location>
-                  <fractions>-1/24</fractions>
-                  </location>
-                </prev>
-              </Spanner>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="1.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-                </Fingering>
-              <pitch>67</pitch>
-              <tpc>15</tpc>
-              <fret>3</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <prev>
-                <location>
-                  <fractions>-1/12</fractions>
-                  </location>
-                </prev>
-              </Spanner>
-            <Articulation>
-              <direction>up</direction>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <pitch>68</pitch>
-              <tpc>22</tpc>
-              <fret>4</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <endTuplet/>
-          <Tuplet>
-            <normalNotes>2</normalNotes>
-            <actualNotes>3</actualNotes>
-            <baseNote>16th</baseNote>
-            <Number>
-              <style>Tuplet</style>
-              <text>3</text>
-              </Number>
-            </Tuplet>
-          <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <Slur>
-                <up>up</up>
-                </Slur>
-              <next>
-                <location>
-                  <fractions>1/12</fractions>
-                  </location>
-                </next>
-              </Spanner>
-            <Articulation>
-              <subtype>articAccentBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-9"/>
-              </Articulation>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-4.5"/>
-              </Articulation>
-            <Stem>
-              <offset x="0" y="5.98973"/>
-              <userLen>6</userLen>
-              </Stem>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="6.1"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>66</pitch>
-              <tpc>8</tpc>
-              <fret>2</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>16th</durationType>
-            <Articulation>
-              <direction>up</direction>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="1.6"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>67</pitch>
-              <tpc>15</tpc>
-              <fret>3</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <prev>
-                <location>
-                  <fractions>-1/12</fractions>
-                  </location>
-                </prev>
-              </Spanner>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="1.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-                </Fingering>
-              <pitch>68</pitch>
-              <tpc>22</tpc>
-              <fret>4</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <endTuplet/>
-          <Chord>
-            <BeamMode>begin32</BeamMode>
-            <durationType>eighth</durationType>
-            <Articulation>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <pitch>66</pitch>
-              <tpc>8</tpc>
-              <fret>2</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>eighth</durationType>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-5"/>
-              </Articulation>
-            <Stem>
-              <offset x="0" y="5.98973"/>
-              <userLen>6</userLen>
-              </Stem>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="6.1"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>68</pitch>
-              <tpc>22</tpc>
-              <fret>4</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          </voice>
-        </Measure>
       <VBox>
         <height>4</height>
         <topGap>0</topGap>
         <boxAutoSize>0</boxAutoSize>
+        <LayoutBreak>
+          <subtype>page</subtype>
+          </LayoutBreak>
         </VBox>
       </Staff>
     </Score>

@@ -184,59 +184,287 @@
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
-            <baseNote>32nd</baseNote>
+            <p1 x="0" y="-0.1"/>
+            <baseNote>16th</baseNote>
             <Number>
               <style>Tuplet</style>
               <text>3</text>
               </Number>
-            <direction>up</direction>
             </Tuplet>
           <Chord>
-            <durationType>32nd</durationType>
+            <durationType>16th</durationType>
+            <Spanner type="Slur">
+              <Slur>
+                <up>up</up>
+                </Slur>
+              <next>
+                <location>
+                  <fractions>1/12</fractions>
+                  </location>
+                </next>
+              </Spanner>
+            <Articulation>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-5"/>
+              </Articulation>
+            <Articulation>
+              <subtype>articAccentBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-9"/>
+              </Articulation>
+            <Stem>
+              <offset x="0" y="7.6"/>
+              <userLen>7.5</userLen>
+              </Stem>
             <Note>
-              <pitch>64</pitch>
-              <tpc>18</tpc>
-              <fret>0</fret>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="7.6"/>
+                <text>p</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <pitch>65</pitch>
+              <tpc>13</tpc>
+              <fret>1</fret>
               <string>0</string>
               </Note>
             </Chord>
           <Chord>
-            <durationType>32nd</durationType>
+            <durationType>16th</durationType>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="1.5"/>
+              </Articulation>
             <Note>
-              <pitch>64</pitch>
-              <tpc>18</tpc>
-              <fret>0</fret>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <pitch>67</pitch>
+              <tpc>15</tpc>
+              <fret>3</fret>
               <string>0</string>
               </Note>
             </Chord>
           <Chord>
-            <durationType>32nd</durationType>
+            <durationType>16th</durationType>
+            <Spanner type="Slur">
+              <prev>
+                <location>
+                  <fractions>-1/12</fractions>
+                  </location>
+                </prev>
+              </Spanner>
+            <Articulation>
+              <direction>up</direction>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="2.5"/>
+              </Articulation>
             <Note>
-              <pitch>64</pitch>
-              <tpc>18</tpc>
-              <fret>0</fret>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <pitch>68</pitch>
+              <tpc>22</tpc>
+              <fret>4</fret>
               <string>0</string>
               </Note>
             </Chord>
           <endTuplet/>
-          <Rest>
+          <Tuplet>
+            <normalNotes>2</normalNotes>
+            <actualNotes>3</actualNotes>
+            <baseNote>16th</baseNote>
+            <Number>
+              <style>Tuplet</style>
+              <text>3</text>
+              </Number>
+            </Tuplet>
+          <Chord>
             <durationType>16th</durationType>
-            </Rest>
-          <Rest>
+            <Spanner type="Slur">
+              <Slur>
+                <up>up</up>
+                </Slur>
+              <next>
+                <location>
+                  <fractions>1/12</fractions>
+                  </location>
+                </next>
+              </Spanner>
+            <Articulation>
+              <subtype>articAccentBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-9"/>
+              </Articulation>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-4.5"/>
+              </Articulation>
+            <Stem>
+              <offset x="0" y="6"/>
+              <userLen>6</userLen>
+              </Stem>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="6.1"/>
+                <text>p</text>
+                </Fingering>
+              <pitch>66</pitch>
+              <tpc>8</tpc>
+              <fret>2</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <RehearsalMark>
+            <minDistance>-999</minDistance>
+            <size>16</size>
+            <offset x="-0.2" y="1.9"/>
+            <framePadding>0.6</framePadding>
+            <frameWidth>0.2</frameWidth>
+            <text></text>
+            </RehearsalMark>
+          <Chord>
             <durationType>16th</durationType>
-            </Rest>
-          <Rest>
+            <Articulation>
+              <direction>up</direction>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="2.5"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="1.6"/>
+                <text>p</text>
+                </Fingering>
+              <pitch>67</pitch>
+              <tpc>15</tpc>
+              <fret>3</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
             <durationType>16th</durationType>
-            </Rest>
-          <Rest>
-            <durationType>16th</durationType>
-            </Rest>
-          <Rest>
-            <durationType>16th</durationType>
-            </Rest>
-          <Rest>
+            <Spanner type="Slur">
+              <prev>
+                <location>
+                  <fractions>-1/12</fractions>
+                  </location>
+                </prev>
+              </Spanner>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="1.5"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <pitch>68</pitch>
+              <tpc>22</tpc>
+              <fret>4</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <endTuplet/>
+          <Chord>
+            <BeamMode>begin32</BeamMode>
             <durationType>eighth</durationType>
-            </Rest>
+            <Articulation>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="2"/>
+              </Articulation>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>i</text>
+                </Fingering>
+              <pitch>66</pitch>
+              <tpc>8</tpc>
+              <fret>2</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>eighth</durationType>
+            <Articulation>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-5"/>
+              </Articulation>
+            <Stem>
+              <offset x="0" y="6"/>
+              <userLen>6</userLen>
+              </Stem>
+            <Note>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <family>Georgia</family>
+                <size>12</size>
+                <text>m</text>
+                </Fingering>
+              <Fingering>
+                <style>RH Guitar Fingering</style>
+                <minDistance>-999</minDistance>
+                <family>Georgia</family>
+                <size>12</size>
+                <offset x="0" y="6.1"/>
+                <text>p</text>
+                </Fingering>
+              <pitch>68</pitch>
+              <tpc>22</tpc>
+              <fret>4</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
           <BarLine>
             <subtype>double</subtype>
             </BarLine>

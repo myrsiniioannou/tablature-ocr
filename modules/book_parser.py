@@ -284,8 +284,8 @@ if __name__ == '__main__':
 
 
     """
-    chord1 = Chord(positionInMeasure=0, duration='16th', note=60, articulation= "Up", stringFingering='i',)
-    chord2 = Chord(positionInMeasure=1, duration='16th', note=62, headerFingering='i', articulation= "Down", hasBox=True, hasAccent=True)
+    chord1 = Chord(positionInMeasure=0, duration='16th', note=60, articulation= "up", stringFingering='i',)
+    chord2 = Chord(positionInMeasure=1, duration='16th', note=62, headerFingering='i', articulation= "down", hasBox=True, hasAccent=True)
     chord3 = Chord(positionInMeasure=2, duration='eighth', note=66, headerFingering='m', stringFingering='p', slur=1, hasBox=False, hasAccent=False, triplet=1)
     measure1 = Measure(3, [chord1, chord2, chord3])
     measure2 = Measure(4, [chord2, chord3 ,chord1, chord3])

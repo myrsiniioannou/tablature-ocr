@@ -50,8 +50,11 @@ def render(JSON):
        # Chords
        duration = ["16th", "eighth", "16th", "eighth"],
        slur = [0, 1, 2],
-       isBeamContinued = True,
-       triplet = 1
+       isBeamContinued = True, # YOU NEED TO CALCULATE THIS 
+       triplet = 0,
+       articulationDirection = "up",
+       articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
+       hasAccent = False
        )
 
     print(render)

@@ -275,6 +275,8 @@
             <sigN>2</sigN>
             <sigD>4</sigD>
             </TimeSig>
+
+
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -285,6 +287,8 @@
               <text>3</text>
               </Number>
             </Tuplet>
+
+
           <Chord>
             <durationType>16th</durationType>
             <Spanner type="Slur">
@@ -403,6 +407,8 @@
               </Note>
             </Chord>
           <endTuplet/>
+
+          
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -655,7 +661,7 @@
             <Stem>
               <offset x="0" y="7.6"/>
               <userLen>7.5</userLen>
-              </Stem>
+            </Stem>
             <Note>
               <Fingering>
                 <style>RH Guitar Fingering</style>
