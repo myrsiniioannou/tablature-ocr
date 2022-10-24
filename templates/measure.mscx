@@ -1,304 +1,48 @@
 {% from 'chord.mscx' import chord %}
 {% macro measure(
-                sideFrames,
-                sideFrameTextOnTheLeft,
-                measureEvenNumber,
-                isMeasureFirstInRow,
-                isMeasureLastInRow,
-                isMeasureLastInPage,
                 duration,
                 slur,
                 isBeamContinued,
                 triplet,
                 articulationDirection,
-                articulationYOffset
-) %}
+                articulationYOffset,
+                hasAccent,
+                stemYoffset,
+                stemLength,
+                stringFingeringStringOffset,
+                stringFingeringTypeFingering,
+                headerFingering,
+                noteOnStringFret,
+                pitch,
+                whichStringMinusOne
+                )
+%}
+{% from 'barline.mscx' import barline %}
 <Measure>
-        <voice>
-          <BarLine>
-            <subtype>double</subtype>
-            <span>1</span>
-            </BarLine>
-          <TimeSig>
-            <sigN>2</sigN>
-            <sigD>4</sigD>
-            </TimeSig>
-
-
-
-
-          <Tuplet>
-            <normalNotes>2</normalNotes>
-            <actualNotes>3</actualNotes>
-            <p1 x="0" y="-0.1"/>
-            <baseNote>{{duration[2]}}</baseNote>
-            <Number>
-              <style>Tuplet</style>
-              <text>3</text>
-            </Number>
-            </Tuplet>
-
-
-          {{chord(
-          duration[2],
-          isBeamContinued,
-          slur[1],
-          triplet,
-          articulationDirection,
-          articulationYOffset,
-          hasAccent
-          )}}
-          
-
-
-          <Chord>
-            <durationType>{{duration[2]}}</durationType>
-            
-            <Spanner type="Slur">
-              <prev>
-                <location>
-                  <fractions>-1/8</fractions>
-                </location>
-              </prev>
-              </Spanner>
-
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="1.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-              </Fingering>
-              <pitch>67</pitch>
-              <tpc>15</tpc>
-              <fret>3</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>{{duration[2]}}</durationType>
-            <Spanner type="Slur">
-              <prev>
-                <location>
-                  <fractions>-1/12</fractions>
-                  </location>
-                </prev>
-              </Spanner>
-            <Articulation>
-              <direction>up</direction>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <pitch>68</pitch>
-              <tpc>22</tpc>
-              <fret>4</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <endTuplet/>
-
-
-
-          <Tuplet>
-            <normalNotes>2</normalNotes>
-            <actualNotes>3</actualNotes>
-            <baseNote>16th</baseNote>
-            <Number>
-              <style>Tuplet</style>
-              <text>3</text>
-              </Number>
-            </Tuplet>
-          <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <Slur>
-                <SlurSegment no="0">
-                  <autoplace>0</autoplace>
-                  <offset x="0" y="-5.5"/>
-                  </SlurSegment>
-                <up>up</up>
-                </Slur>
-              <next>
-                <location>
-                  <fractions>1/12</fractions>
-                  </location>
-                </next>
-              </Spanner>
-            <Articulation>
-              <subtype>articAccentBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-9"/>
-              </Articulation>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-4.5"/>
-              </Articulation>
-            <Stem>
-              <offset x="0" y="6"/>
-              <userLen>6</userLen>
-              </Stem>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="6.1"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>66</pitch>
-              <tpc>8</tpc>
-              <fret>2</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <RehearsalMark>
-            <minDistance>-999</minDistance>
-            <size>16</size>
-            <offset x="-0.2" y="1.9"/>
-            <framePadding>0.6</framePadding>
-            <frameWidth>0.2</frameWidth>
-            <text></text>
-            </RehearsalMark>
-          <Chord>
-            <durationType>16th</durationType>
-            <Articulation>
-              <direction>up</direction>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="1.6"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>67</pitch>
-              <tpc>15</tpc>
-              <fret>3</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>16th</durationType>
-            <Spanner type="Slur">
-              <prev>
-                <location>
-                  <fractions>-1/12</fractions>
-                  </location>
-                </prev>
-              </Spanner>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="1.5"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-                </Fingering>
-              <pitch>68</pitch>
-              <tpc>22</tpc>
-              <fret>4</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <endTuplet/>
-          <Chord>
-            <BeamMode>begin32</BeamMode>
-            <durationType>eighth</durationType>
-            <Articulation>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2"/>
-              </Articulation>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>i</text>
-                </Fingering>
-              <pitch>66</pitch>
-              <tpc>8</tpc>
-              <fret>2</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-          <Chord>
-            <durationType>eighth</durationType>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-5"/>
-              </Articulation>
-            <Stem>
-              <offset x="0" y="6"/>
-              <userLen>6</userLen>
-              </Stem>
-            <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>m</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="6.1"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>68</pitch>
-              <tpc>22</tpc>
-              <fret>4</fret>
-              <string>0</string>
-              </Note>
-            </Chord>
-
-            
-          <BarLine>
-            <subtype>double</subtype>
-            </BarLine>
-          </voice>
-        </Measure>        
+  <voice>
+    {{barline()}}   
+    <TimeSig>
+      <sigN>2</sigN>
+      <sigD>4</sigD>
+    </TimeSig>
+    {{chord(
+            duration,
+            slur,
+            isBeamContinued,
+            triplet,
+            articulationDirection,
+            articulationYOffset,
+            hasAccent,
+            stemYoffset,
+            stemLength,
+            stringFingeringStringOffset,
+            stringFingeringTypeFingering,
+            headerFingering,
+            noteOnStringFret,
+            pitch,
+            whichStringMinusOne
+    )}}
+    {{barline()}}
+  </voice>
+</Measure>        
 {% endmacro %}

@@ -1,0 +1,19 @@
+{% macro measure(pageTitle)
+      <VBox>
+        <height>75.4484</height>
+        <topGap>0</topGap>
+        <bottomGap>0</bottomGap>
+        <boxAutoSize>0</boxAutoSize>
+        <Text>
+          <style>Title</style>
+          <family>Arial</family>
+          <size>88</size>
+          <align>center,baseline</align>
+          <text>{{pageTitle}}</text>
+          </Text>
+        <LayoutBreak>
+          <subtype>page</subtype>
+          </LayoutBreak>
+        </VBox>
+{% endmacro %}
+

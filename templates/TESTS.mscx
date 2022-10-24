@@ -325,10 +325,15 @@
               <minDistance>-999</minDistance>
               <offset x="0" y="-9"/>
               </Articulation>
+
+
+
             <Stem>
               <offset x="0" y="7.6"/>
               <userLen>7.5</userLen>
-              </Stem>
+            </Stem>
+
+
             <Note>
               <Fingering>
                 <style>RH Guitar Fingering</style>
@@ -337,19 +342,23 @@
                 <size>12</size>
                 <offset x="0" y="7.6"/>
                 <text>p</text>
-                </Fingering>
+              </Fingering>
+              
               <Fingering>
                 <style>RH Guitar Fingering</style>
                 <family>Georgia</family>
                 <size>12</size>
                 <text>i</text>
-                </Fingering>
+              </Fingering>
+
               <pitch>65</pitch>
               <tpc>13</tpc>
               <fret>1</fret>
               <string>0</string>
               </Note>
             </Chord>
+
+
           <Chord>
             <durationType>16th</durationType>
             <Spanner type="Slur">
@@ -371,7 +380,7 @@
                 <family>Georgia</family>
                 <size>12</size>
                 <text>m</text>
-                </Fingering>
+              </Fingering>
               <pitch>67</pitch>
               <tpc>15</tpc>
               <fret>3</fret>

@@ -1,0 +1,5 @@
+{% macro barline() %}
+    <BarLine>
+      <subtype>double</subtype>
+    </BarLine>
+{% endmacro %}

@@ -1,22 +1,29 @@
-        {% macro chord(
-          duration,
-          isBeamContinued,
-          slur,
-          triplet,
-          articulationDirection,
-          articulationYOffset,
-          hasAccent
-          ) %}
-
+{% macro chord(
+              duration,
+              slur,
+              isBeamContinued,
+              triplet,
+              articulationDirection,
+              articulationYOffset,
+              hasAccent,
+              stemYoffset,
+              stemLength,
+              stringFingeringStringOffset,
+              stringFingeringTypeFingering,
+              headerFingering,
+              noteOnStringFret,
+              pitch,
+              whichStringMinusOne
+  )%}
 
 
     <!--TRIPLET START-->
-      {% if triplet = 1 %}
+      {% if triplet == "1" %}
         <Tuplet>
           <normalNotes>2</normalNotes>
           <actualNotes>3</actualNotes>
           <p1 x="0" y="-0.1"/>
-          <baseNote>{{duration[2]}}</baseNote>
+          <baseNote>{{duration}}</baseNote>
           <Number>
             <style>Tuplet</style>
             <text>3</text>
@@ -38,9 +45,9 @@
 
 
           <!--SIMPLE SLUR (syzephxi)-->
-          {% if  slur != 0 %}
+          {% if  slur != "0" %}
             <Spanner type="Slur">
-              {% if  slur == 1 %}
+              {% if  slur == "1" %}
                 <Slur>
                   <up>up</up>
                 </Slur>
@@ -49,7 +56,7 @@
                     <fractions>1/24</fractions>
                   </location>
                 </next>
-              {% elif  slur == 2 %}
+              {% elif  slur == "2" %}
                 <prev>
                   <location>
                     <fractions>-1/24</fractions>
@@ -61,9 +68,9 @@
 
    
           <!--Triplet Slur-->
-          {% if  (triplet != 0) and (triplet != 2) %}
+          {% if  (triplet != "0") and (triplet != "2") %}
             <Spanner type="Slur">
-              {% if  slur == 1 %}
+              {% if  slur == "1" %}
                 <Slur>
                   <SlurSegment no="0">
                     <autoplace>0</autoplace>
@@ -76,7 +83,7 @@
                     <fractions>1/12</fractions>
                   </location>
                 </next>
-              {% elif  slur == 3 %}
+              {% elif  slur == "3" %}
                 <prev>
                   <location>
                     <fractions>-1/12</fractions>
@@ -88,9 +95,9 @@
 
 
           <!--ARTICULATION (UP & DOWN ARROWS)-->
-          {% if (articulationDirection = "up") or articulationDirection = "down") %}
+          {% if (articulationDirection == "up") or (articulationDirection == "down") %}
             <Articulation>
-              {% if articulationDirection = "up" %}
+              {% if articulationDirection == "up" %}
                 <direction>up</direction>
                 <subtype>articMarcatoAbove</subtype>
                 <minDistance>-999</minDistance>
@@ -110,7 +117,7 @@
             <Articulation>
               <subtype>articAccentBelow</subtype>
               <minDistance>-999</minDistance>
-              {% if triplet!=0 %}
+              {% if triplet != "0" %}
                 <offset x="0" y="-9"/>
               {% else %}
                 <offset x="0" y="-7"/>
@@ -119,64 +126,52 @@
           {% endif %}
 
 
-
-          ALLO STEM GIA THN KATHE XORDH, GIA YPOLOGIZE
-          SAN SYNARTHSH THS XORDHS TOY NOTE
-          ΚΑΙ ΕΠΙΣΗΣ ΝΑ ΛΑΒΕΙΣ ΥΠΟΨΗ ΤΗ ΔΙΑΡΚΕΙΑ ΓΙΑΤΙ ΜΕ ΤΑ 
-          16Α ΕΧΕΙΣ 2 ΓΡΑΜΜΕΣ, ΜΕ ΤΑ 8Α ΜΙΑ ΚΑΙ ΜΕ ΤΑ 4,2 ΚΑΜΙΑ
           <!--STEM-->
-
+          <!--If there's not string fingering, there's no stem-->
+          {% if stringFingeringTypeFingering %}
             <Stem>
-              <offset x="0" y="7.6"/>
-              <userLen>7.5</userLen>
+              <offset x="0" y={{stemYoffset}}/>
+              <userLen>{{stemLength}}</userLen>
             </Stem>
-
-            <Stem>
-              <offset x="0" y="6"/>
-              <userLen>6</userLen>
-            </Stem>
+          {% endif %}
 
 
-
+          <!--NOTE-->
             <Note>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
+              <!--STRING FINGERING-->
+              {% if stringFingeringTypeFingering %}
+                  <Fingering>
+                    <style>RH Guitar Fingering</style>
+                    <minDistance>-999</minDistance>
+                    <family>Georgia</family>
+                    <size>12</size>
+                    <!--STRING FINGERING OFFSET-->
+                    <offset x="0" y={{stringFingeringStringOffset}}/>
+                    <text>{{stringFingeringTypeFingering}}</text>
+                  </Fingering>
+              {% endif %}
 
-                <offset x="0" y="7.6"/>
-                <text>p</text>
 
+              <!--HEADER FINGERING-->
+              {% if headerFingering %}
+                <Fingering>
+                  <style>RH Guitar Fingering</style>
+                  <family>Georgia</family>
+                  <size>12</size>
+                  <text>{{headerFingering}}</text>
                 </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <family>Georgia</family>
-                <size>12</size>
+              {% endif %}
+              <!--NOTE-->
+              <pitch>{{pitch}}</pitch>
+              <fret>{{noteOnStringFret}}</fret>
+              <string>{{whichStringMinusOne}}</string>
+            </Note>
 
-                <text>i</text>
-
-                </Fingering>
-
-              <pitch>65</pitch>
-
-              <tpc>13</tpc>
-
-              <fret>1</fret>
-
-              <string>0</string>
-
-              </Note>
-
-
-
-
-            </Chord>
+        </Chord>
 
     <!--TUPLET END-->
-    {% if triplet = 3 %}
+    {% if triplet == "3" %}
       <endTuplet/>
     {% endif %}
-          
-
+        
 {% endmacro %}

@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="3.02">
-
-{% from 'header.mscx' import header %}
-{% from 'horizontalBox.mscx' import horizontalBox %}
-{% from 'measure.mscx' import measure %}
-{% from 'verticalBox.mscx' import verticalBox %}
-
   <programVersion>3.6.2</programVersion>
   <programRevision>3224f34</programRevision>
   <Score>
@@ -49,7 +43,7 @@
       <measureNumberPosBelow x="0" y="1"/>
       <footerAlign>center,center</footerAlign>
       <Spatium>1.753</Spatium>
-      </Style>
+    </Style>
     <showInvisible>1</showInvisible>
     <showUnprintable>1</showUnprintable>
     <showFrames>1</showFrames>
@@ -91,9 +85,9 @@
           <upsideDown>0</upsideDown>
           <showTabFingering>1</showTabFingering>
           <useNumbers>1</useNumbers>
-          </StaffType>
+        </StaffType>
         <defaultClef>G8vb</defaultClef>
-        </Staff>
+      </Staff>
       <trackName>Guitar [Tablature]</trackName>
       <Instrument id="guitar-nylon">
         <trackName>Classical Guitar [Tablature]</trackName>
@@ -111,97 +105,59 @@
           <string>55</string>
           <string>59</string>
           <string>64</string>
-          </StringData>
+        </StringData>
         <Articulation>
           <velocity>100</velocity>
           <gateTime>100</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="staccatissimo">
           <velocity>100</velocity>
           <gateTime>33</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="staccato">
           <velocity>100</velocity>
           <gateTime>50</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="portato">
           <velocity>100</velocity>
           <gateTime>67</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="tenuto">
           <velocity>100</velocity>
           <gateTime>100</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="marcato">
           <velocity>120</velocity>
           <gateTime>67</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="sforzato">
           <velocity>150</velocity>
           <gateTime>100</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="sforzatoStaccato">
           <velocity>150</velocity>
           <gateTime>50</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="marcatoStaccato">
           <velocity>120</velocity>
           <gateTime>50</gateTime>
-          </Articulation>
+        </Articulation>
         <Articulation name="marcatoTenuto">
           <velocity>120</velocity>
           <gateTime>100</gateTime>
-          </Articulation>
+        </Articulation>
         <Channel>
           <program value="24"/>
           <synti>Fluid</synti>
-          </Channel>
+        </Channel>
         <Channel name="mute">
           <program value="28"/>
           <synti>Fluid</synti>
-          </Channel>
+        </Channel>
         <Channel name="harmony">
           <program value="24"/>
           <synti>Fluid</synti>
-          </Channel>
-        </Instrument>
-      </Part>
+        </Channel>
+      </Instrument>
+    </Part>
     <Staff id="1">
-    {{header(singleHeading, doubleHeading, paragraph, paragraphSymbol, paragraphText1, paragraphText2)}}
-    {{horizontalBox(sideFrames, sideFrameTextOnTheLeft, isMeasureFirstInRow)}}
-    {{measure(sideFrames,
-              sideFrameTextOnTheLeft,
-              measureEvenNumber,
-              isMeasureFirstInRow,
-              isMeasureLastInRow,
-              isMeasureLastInPage,
-              duration,
-              slur,
-              isBeamContinued,
-              triplet,
-              articulationDirection,
-              articulationYOffset,
-              hasAccent)
-      }}
-    {{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}
-    
-
-    {{horizontalBox(sideFrames, sideFrameTextOnTheLeft, isMeasureFirstInRow)}}
-    {{measure(sideFrames,
-              sideFrameTextOnTheLeft,
-              measureEvenNumber,
-              isMeasureFirstInRow,
-              isMeasureLastInRow,
-              isMeasureLastInPage,
-              duration,
-              slur,
-              isBeamContinued,
-              triplet)
-      }}
-    {{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}
-    
-
-
-      </Staff>
-    </Score>
-  </museScore>
