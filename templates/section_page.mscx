@@ -1,4 +1,3 @@
-{% macro measure(pageTitle)
       <VBox>
         <height>75.4484</height>
         <topGap>0</topGap>
@@ -10,10 +9,8 @@
           <size>88</size>
           <align>center,baseline</align>
           <text>{{pageTitle}}</text>
-          </Text>
+        </Text>
         <LayoutBreak>
           <subtype>page</subtype>
-          </LayoutBreak>
-        </VBox>
-{% endmacro %}
-
+        </LayoutBreak>
+      </VBox>

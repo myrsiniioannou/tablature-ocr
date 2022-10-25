@@ -205,24 +205,6 @@
           <subtype>page</subtype>
           </LayoutBreak>
         </VBox>
-      <HBox>
-        <width>5</width>
-        <LayoutBreak>
-          <subtype>page</subtype>
-          </LayoutBreak>
-        </HBox>
-      <VBox>
-        <height>10</height>
-        <LayoutBreak>
-          <subtype>page</subtype>
-          </LayoutBreak>
-        </VBox>
-      <VBox>
-        <height>10</height>
-        <LayoutBreak>
-          <subtype>page</subtype>
-          </LayoutBreak>
-        </VBox>
       </Staff>
     </Score>
   </museScore>

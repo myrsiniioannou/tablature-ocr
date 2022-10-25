@@ -3,7 +3,9 @@ from domain_model import *
 import json
 from jinja2 import Environment, FileSystemLoader
 
+
 def setValues():
+    # Set Values on paragraphs, headings, measures, and side frame text
     paragraphs = {
         "I A":[1,4],
         "I B": [3,5]
@@ -20,53 +22,83 @@ def setValues():
     return paragraphs, headings, measures, sideFrameTextExistence
 
 
+def loadJSON(JSONFile):
+    with open(JSONFile, 'r') as f:
+        book = json.load(f)
+    return book
 
 
-def render(JSON):
-    # Load JSON BOOK FILE
-    with open(JSON, 'r') as f:
-        bookInJsonFormat = json.load(f)
-    # Template Load
+def templateLoading():
     file_loader = FileSystemLoader("templates")
     env = Environment(loader = file_loader)
+    return env
 
 
-    # 1. Set Values on paragraphs, headings, measures, and side frame text
+def initializeBookRendering(env, JSONbook):
+    bookStart = env.get_template("book_start.mscx").render(
+    NumberOfStrings = JSONbook["numberofstrings"]
+    )
+    return bookStart
+
+
+
+def finalizeBookRendering(env):
+    bookEnd = env.get_template("book_end.mscx").render()
+    return bookEnd
+
+
+def renderSectionPage(env, content):
+    sectionPageTitle = content["sectionpagetitle"].upper()
+    sectionPageRendering = env.get_template("section_page.mscx").render(pageTitle = sectionPageTitle)
+    return sectionPageRendering
+
+
+def renderNotationPage(env, content):
+    print(content["measures"])
+
+
+
+
+
+
+
+
+def renderBook(JSON):
+    # Load JSON Book File
+    bookInJsonFormat = loadJSON(JSON)
+
+    # Template Loading
+    environment = templateLoading()
+
+    # Set Values on paragraphs, headings, measures, and side frame text
     paragraphs, headings, measures, sideFrameTextExistence = setValues()
 
-    
-    # 2. Initialize the book and append rendered book_start
-    bookRender = ""
-    bookStart = env.get_template("book_start.mscx").render(
-        NumberOfStrings = bookInJsonFormat["numberofstrings"]
-    )
-    bookRender += bookStart
+    # Initialize the book and append rendered book_start
+    bookRendering = initializeBookRendering(environment, bookInJsonFormat)
+
+
+
+
 
     # 3. For every page in JSON file, render notation and section pages
-        # 5. RENDER SECTION PAGE
-
 
     for pageList in bookInJsonFormat["pages"]:
         for pageType, pageContent in pageList.items():
-            
-            print(pageType)
-            print('---------------------------------------------')
-            print(pageContent)
-            print('#############################################')
+            if pageType == "sectionpage" and pageContent:
+                bookRendering += renderSectionPage(environment, pageContent)
+            elif pageType == "notationpage" and pageContent:
+                #bookRendering += renderNotationPage(environment, pageContent)
+                renderNotationPage(environment, pageContent)
+            print("---------------------------------------------------------")
 
 
 
 
 
-    # IF:
-    # sectionPageTitle = JSON.smth.capitalize()
-    # sectionPageRener = env.get_template("section_page.mscx").render(pageTitle = sectionPageTitle)
 
+    #generateDataTransferObject
 
-    
-    # ELIF:
-
-
+    # DATA TRANSFER OBJECT FUNCTION
 
 
     # render = env.get_template("notationPage.mscx").render(
@@ -112,27 +144,25 @@ def render(JSON):
 
 
 
-
-
-
-
-
-    # # 6. Append rendered book_end
-    # bookEnd = env.get_template("book_end.mscx").render()
-    # bookRender += bookEnd
-
-    # print(bookRender)
+    # Finalizing book rendering by appending the end template
+    bookRendering += finalizeBookRendering(environment)
 
 
 
 
 
 
+    #print(bookRendering)
 
-    # 7. Save musescore file
-    # musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\bookRENDER.mscx"
+
+
+
+
+    # Save musescore file
+    # musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\bookRendering.mscx"
     # with open(f"{musescoreOutputFile}", "w") as f:
-    #     f.write(bookRender)
+    #     f.write(bookRendering)
+
 
 
 if __name__ == '__main__':
@@ -141,4 +171,4 @@ if __name__ == '__main__':
     #
     #
     JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\book1.json"
-    render(JSON_book_directory)
+    renderBook(JSON_book_directory)
