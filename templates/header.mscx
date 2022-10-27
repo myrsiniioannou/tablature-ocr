@@ -1,4 +1,4 @@
-{% macro header(singleHeading, doubleHeading, paragraph, paragraphSymbol, paragraphText1, paragraphText2) %}
+{% macro header(singleHeading, doubleHeading, paragraph, headerLetter, heading1Text, heading2Text) %}
       <VBox>
         <height>10</height>
         <topGap>0</topGap>
@@ -43,7 +43,7 @@
             <size>23</size>
             <align>center,center</align>
             <offset x="-3" y="0"/>
-            <text>{{paragraphSymbol}}</text>
+            <text>{{headerLetter}}</text>
             </Text>
           <Text>
             <style>Frame</style>
@@ -51,7 +51,7 @@
             <size>17</size>
             <align>center,center</align>
             <offset x="3" y="0.74"/>
-            <text>{{paragraphText1}}</text>
+            <text>{{heading1Text}}</text>
             </Text>
           </HBox>
         <HBox>
@@ -63,7 +63,7 @@
             <size>17</size>
             <align>center,center</align>
             <offset x="3" y="0.74"/>
-            <text>{{paragraphText2}}</text>
+            <text>{{heading2Text}}</text>
             </Text>
           <Text>
             <style>Frame</style>
@@ -71,7 +71,7 @@
             <size>23</size>
             <align>center,center</align>
             <offset x="-3" y="0"/>
-            <text>{{paragraphSymbol}}</text>
+            <text>{{headerLetter}}</text>
             </Text>
           </HBox>
         </VBox>
@@ -87,7 +87,7 @@
           <size>23</size>
           <align>center,center</align>
           <offset x="-3" y="0"/>
-          <text>{{paragraphSymbol}}</text>
+          <text>{{headerLetter}}</text>
           </Text>
         <Text>
           <style>Frame</style>
@@ -95,7 +95,7 @@
           <size>17</size>
           <align>center,center</align>
           <offset x="3" y="0.74"/>
-          <text>{{paragraphText1}}</text>
+          <text>{{heading1Text}}</text>
           </Text>
         </VBox>
       {% endif %}

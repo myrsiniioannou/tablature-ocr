@@ -161,3 +161,9 @@
       </Instrument>
     </Part>
     <Staff id="1">
+
+    {{bookContent}}
+
+    </Staff>
+  </Score>
+</museScore>

@@ -1,25 +1,30 @@
-
 from domain_model import *
 import json
 from jinja2 import Environment, FileSystemLoader
 
 
-def setValues():
+def loadValues():
     # Set Values on paragraphs, headings, measures, and side frame text
-    paragraphs = {
-        "I A":[1,4],
-        "I B": [3,5]
+    # PAGE NUMBERS HERE ARE THE SAME AS IN THE BOOK. Don't deduct 1 to start from 0.
+    values = {
+        "paragraphs" : {
+            "IA":[1,10],
+            "IB": [6,20]
+        },
+        "headings" : {
+            "doubleHeading": [*range(1,8), *range(18,30)],
+            "singleHeading": [*range(8,18), *range(30,40)]
+        },
+        "sideFrameTextExistence" : [*range(1,8), *range(18,30)],
+        "headerLetter" : {
+            "F" : [*range(1,41)]
+        },
+        "measures" : {
+            "Horizontal": 2,
+            "Vertical" : 6
+        }
     }
-    headings = {
-        "doubleHeading": [*range(1,8), *range(18,30)],
-        "singleHeading": [*range(8,18), *range(30,40)]
-    }
-    measures = {
-        "Horizontal": 2,
-        "Vertical" : 6
-    }
-    sideFrameTextExistence = True
-    return paragraphs, headings, measures, sideFrameTextExistence
+    return values
 
 
 def loadJSON(JSONFile):
@@ -34,87 +39,28 @@ def templateLoading():
     return env
 
 
-def initializeBookRendering(env, JSONbook):
-    bookStart = env.get_template("book_start.mscx").render(
-    NumberOfStrings = JSONbook["numberofstrings"]
-    )
-    return bookStart
-
-
-
-def finalizeBookRendering(env):
-    bookEnd = env.get_template("book_end.mscx").render()
-    return bookEnd
-
-
-def renderSectionPage(env, content):
-    sectionPageTitle = content["sectionpagetitle"].upper()
-    sectionPageRendering = env.get_template("section_page.mscx").render(pageTitle = sectionPageTitle)
+def renderSectionPage(env, sectionPage):
+    sectionPageTitle = sectionPage["sectionpagetitle"].upper()
+    sectionPageRendering = env.get_template("sectionPage.mscx").render(pageTitle = sectionPageTitle)
     return sectionPageRendering
 
 
-def renderNotationPage(env, content):
-    print(content["measures"])
 
 
 
+def renderChords(env, chord):
 
 
-
-
-
-def renderBook(JSON):
-    # Load JSON Book File
-    bookInJsonFormat = loadJSON(JSON)
-
-    # Template Loading
-    environment = templateLoading()
-
-    # Set Values on paragraphs, headings, measures, and side frame text
-    paragraphs, headings, measures, sideFrameTextExistence = setValues()
-
-    # Initialize the book and append rendered book_start
-    bookRendering = initializeBookRendering(environment, bookInJsonFormat)
-
-
-
-
-
-    # 3. For every page in JSON file, render notation and section pages
-
-    for pageList in bookInJsonFormat["pages"]:
-        for pageType, pageContent in pageList.items():
-            if pageType == "sectionpage" and pageContent:
-                bookRendering += renderSectionPage(environment, pageContent)
-            elif pageType == "notationpage" and pageContent:
-                #bookRendering += renderNotationPage(environment, pageContent)
-                renderNotationPage(environment, pageContent)
-            print("---------------------------------------------------------")
-
-
-
-
-
+    #print(chord)
+    #print("---------------------------------")
 
     #generateDataTransferObject
 
     # DATA TRANSFER OBJECT FUNCTION
 
 
-    # render = env.get_template("notationPage.mscx").render(
-    #    singleHeading = False, # YOU NEED TO CALCULATE THIS ACCORDING TO PAGES. EASY
-    #    doubleHeading = True,
-    #    paragraph = "I A",
-    #    paragraphSymbol = "F",
-    #    paragraphText1 = "1A",
-    #    paragraphText2 = "1B",
-       
-    #    # Sideframe
-    #    sideFrames = sideFrameTextExistence,
-    #    sideFrameTextOnTheLeft = "F2",
-    #    isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS MOTHERFUCKER
-    #    isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK 
-    #    isMeasureLastInPage = False, # YOU NEED TO CALCULATE THIS - PAGE BREAK 
+    # chord = env.get_template("chord.mscx").render(
+
        
     #    # Chords
     #    duration = "16th", #"eighth",
@@ -141,27 +87,153 @@ def renderBook(JSON):
 
 
 
+    return ""
+
+
+def renderMeasure(env, measures):
+    renderedChords = ""
+    # Measures contain multiple chords that should be rendered first.
+    for chord in measures["chords"]:
+        renderedChords += renderChords(env, chord)
+    chordRendering = env.get_template("measure.mscx").render(chordContent = renderedChords)
+    return chordRendering
 
 
 
-    # Finalizing book rendering by appending the end template
-    bookRendering += finalizeBookRendering(environment)
 
 
 
 
 
-
-    #print(bookRendering)
-
+def renderNotationPage(env, notationPageIdx, notationPage, userInputtedValues):
 
 
 
 
-    # Save musescore file
-    # musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\bookRendering.mscx"
+    renderedMeasures = ""
+    # Notation Pages contain multiple measures that should be rendered first.
+    for measure in notationPage["measures"]:
+        renderedMeasures += renderMeasure(env, measure)
+    
+
+
+
+    print("pageIndex:", notationPageIdx)
+    print(notationPageIdx in userInputtedValues["paragraphs"]["IA"])
+    print(notationPageIdx in userInputtedValues["paragraphs"]["IB"])
+    print(notationPageIdx in userInputtedValues["headings"]["singleHeading"])
+    print(notationPageIdx in userInputtedValues["headings"]["doubleHeading"])
+    print(notationPageIdx in userInputtedValues["headerLetter"]["F"])
+    print(notationPageIdx in userInputtedValues["sideFrameTextExistence"])
+
+    print(userInputtedValues["measures"]["Horizontal"])
+    print(userInputtedValues["measures"]["Vertical"])
+
+
+    if notationPageIdx in userInputtedValues["paragraphs"]["IA"]:
+        paragraphText = "IA"
+    elif notationPageIdx in userInputtedValues["paragraphs"]["IB"]:
+        paragraphText = "IB"
+    else:
+        paragraphText = "  "
+
+
+    if notationPageIdx in userInputtedValues["headerLetter"]["F"]:
+        header_letter = "F"
+    else:
+        header_letter = "  "
+    
+
+
+
+    def findHeadingTexts(notationPageIdx, paragraphText):
+
+        pass
+
+    if notationPageIdx in userInputtedValues["headings"]["singleHeading"]:
+        pass
+
+
+
+    print("---------------------------------")
+
+
+    notationPageRendering = env.get_template("notationPage.mscx").render(
+        measureContent = renderedMeasures,
+
+        singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"],
+        doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],
+        paragraph = paragraphText, # IA or IB
+        headerLetter = header_letter,
+
+
+        heading1Text, heading2Text = findHeadingTexts(notationPageIdx, paragraphText),
+
+        heading1Text = "1" + paragraphText[-1],# YOU NEED TO CALCULATE THIS
+        heading2Text = "2" + paragraphText[-1],# YOU NEED TO CALCULATE THIS
+        
+
+
+    #     # Sideframe
+    #     sideFrames = sideFrameTextExistence,# YOU NEED TO CALCULATE THIS
+    #     sideFrameTextOnTheLeft = "F2",# YOU NEED TO CALCULATE THIS
+
+
+    
+    #     isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS
+    #     isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK 
+    #     isMeasureLastInPage = False, # YOU NEED TO CALCULATE THIS - PAGE BREAK 
+        
+        
+)
+    return  "" #notationPageRendering
+
+
+def iterateOverPagesAndRenderTheirContent(env, JSONbook, userInputtedValues):
+    notationPageIndex = 1
+    renderedPages = ""
+    for pageList in JSONbook["pages"]:
+        for pageType, pageContent in pageList.items():
+            if pageType == "sectionpage" and pageContent:
+                renderedPages += renderSectionPage(env, pageContent)
+            elif pageType == "notationpage" and pageContent:
+                renderedPages += renderNotationPage(env, notationPageIndex, pageContent, userInputtedValues)
+                notationPageIndex +=1 
+    return renderedPages
+
+
+def finalizeBookRendering(env, stringNumber, bookRenderedContent):
+    book = env.get_template("book.mscx").render(
+    NumberOfStrings = stringNumber,
+    bookContent = bookRenderedContent)
+    return book
+
+
+def renderBook(JSON):
+    # Load the Set Values of the book.
+    setValues = loadValues()
+
+    # Load JSON Book File
+    bookInJsonFormat = loadJSON(JSON)
+
+    # Template Loading
+    environment = templateLoading()
+
+    # Iterate over every page (section or notation) and render its content
+    bookRendering = iterateOverPagesAndRenderTheirContent(environment, bookInJsonFormat, setValues)
+
+    #Finalize the book by adding the book template XML-info
+    stringNumber = bookInJsonFormat["numberofstrings"]
+    output = finalizeBookRendering(environment, stringNumber, bookRendering)
+
+    
+
+    # Save the Musescore file
+    # musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook.mscx"
     # with open(f"{musescoreOutputFile}", "w") as f:
-    #     f.write(bookRendering)
+    #     f.write(output)
+
+
 
 
 

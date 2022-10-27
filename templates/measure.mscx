@@ -1,22 +1,4 @@
 {% from 'chord.mscx' import chord %}
-{% macro measure(
-                duration,
-                slur,
-                isBeamContinued,
-                triplet,
-                articulationDirection,
-                articulationYOffset,
-                hasAccent,
-                stemYoffset,
-                stemLength,
-                stringFingeringStringOffset,
-                stringFingeringTypeFingering,
-                headerFingering,
-                noteOnStringFret,
-                pitch,
-                whichStringMinusOne
-                )
-%}
 {% from 'barline.mscx' import barline %}
 <Measure>
   <voice>
@@ -25,24 +7,7 @@
       <sigN>2</sigN>
       <sigD>4</sigD>
     </TimeSig>
-    {{chord(
-            duration,
-            slur,
-            isBeamContinued,
-            triplet,
-            articulationDirection,
-            articulationYOffset,
-            hasAccent,
-            stemYoffset,
-            stemLength,
-            stringFingeringStringOffset,
-            stringFingeringTypeFingering,
-            headerFingering,
-            noteOnStringFret,
-            pitch,
-            whichStringMinusOne
-    )}}
+    {{chordContent}}
     {{barline()}}
   </voice>
-</Measure>        
-{% endmacro %}
+</Measure>

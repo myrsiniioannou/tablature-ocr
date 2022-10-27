@@ -15,8 +15,6 @@
               pitch,
               whichStringMinusOne
   )%}
-
-
     <!--TRIPLET START-->
       {% if triplet == "1" %}
         <Tuplet>
@@ -31,7 +29,6 @@
         </Tuplet>
       {% endif %}
 
-
         <!--CHORD START-->
         <Chord>
           <!--BEAM CONTINUATION-->
@@ -39,10 +36,8 @@
             <BeamMode>begin32</BeamMode>
           {% endif %}
 
-
           <!--DURATION-->
           <durationType>{{duration}}</durationType>
-
 
           <!--SIMPLE SLUR (syzephxi)-->
           {% if  slur != "0" %}
@@ -66,7 +61,6 @@
             </Spanner>
           {% endif %}
 
-   
           <!--Triplet Slur-->
           {% if  (triplet != "0") and (triplet != "2") %}
             <Spanner type="Slur">
@@ -93,7 +87,6 @@
             </Spanner>
           {% endif %}
 
-
           <!--ARTICULATION (UP & DOWN ARROWS)-->
           {% if (articulationDirection == "up") or (articulationDirection == "down") %}
             <Articulation>
@@ -111,7 +104,6 @@
             </Articulation>
           {% endif %}
           
-
           <!--ACCENT-->
           {% if hasAccent %}
             <Articulation>
@@ -125,7 +117,6 @@
             </Articulation>
           {% endif %}
 
-
           <!--STEM-->
           <!--If there's not string fingering, there's no stem-->
           {% if stringFingeringTypeFingering %}
@@ -134,7 +125,6 @@
               <userLen>{{stemLength}}</userLen>
             </Stem>
           {% endif %}
-
 
           <!--NOTE-->
             <Note>
@@ -151,7 +141,6 @@
                   </Fingering>
               {% endif %}
 
-
               <!--HEADER FINGERING-->
               {% if headerFingering %}
                 <Fingering>
@@ -166,12 +155,10 @@
               <fret>{{noteOnStringFret}}</fret>
               <string>{{whichStringMinusOne}}</string>
             </Note>
-
         </Chord>
 
     <!--TUPLET END-->
     {% if triplet == "3" %}
       <endTuplet/>
     {% endif %}
-        
 {% endmacro %}

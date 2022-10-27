@@ -1,28 +1,7 @@
 {% from 'header.mscx' import header %}
 {% from 'horizontalBox.mscx' import horizontalBox %}
-{% from 'measure.mscx' import measure %}
 {% from 'verticalBox.mscx' import verticalBox %}
-      
-{{header(singleHeading, doubleHeading, paragraph, paragraphSymbol, paragraphText1, paragraphText2)}}
-
+{{header(singleHeading, doubleHeading, paragraph, headerLetter, heading1Text, heading2Text)}}
 {{horizontalBox(sideFrames, sideFrameTextOnTheLeft, isMeasureFirstInRow)}}
-
-{{measure(
-        duration,
-        slur,
-        isBeamContinued,
-        triplet,
-        articulationDirection,
-        articulationYOffset,
-        hasAccent,
-        stemYoffset,
-        stemLength,
-        stringFingeringStringOffset,
-        stringFingeringTypeFingering,
-        headerFingering,
-        noteOnStringFret,
-        pitch,
-        whichStringMinusOne
-        )}}
-
+{{measureContent}}
 {{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}
