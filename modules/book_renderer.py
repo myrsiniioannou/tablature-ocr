@@ -1,5 +1,8 @@
+from matplotlib.dviread import Box
+from soupsieve import closest
 from domain_model import *
 import json
+import copy
 from jinja2 import Environment, FileSystemLoader
 
 
@@ -8,12 +11,12 @@ def loadValues():
     # PAGE NUMBERS HERE ARE THE SAME AS IN THE BOOK. Don't deduct 1 to start from 0.
     values = {
         "paragraphs" : {
-            "IA":[1,10],
-            "IB": [6,20]
+            "IA": [1, 8],
+            "IB": [5, 6]
         },
         "headings" : {
-            "doubleHeading": [*range(1,8), *range(18,30)],
-            "singleHeading": [*range(8,18), *range(30,40)]
+            "singleHeading": [*range(4,18), *range(30,40)],
+            "doubleHeading": [*range(1,4), *range(18,30)]
         },
         "sideFrameTextExistence" : [*range(1,8), *range(18,30)],
         "headerLetter" : {
@@ -99,7 +102,35 @@ def renderMeasure(env, measures):
     return chordRendering
 
 
+def findHeadingTexts(notationPageIdx, userInputtedValues):
+    allParagraphPages = userInputtedValues["paragraphs"]["IA"] + userInputtedValues["paragraphs"]["IB"]
+    allParagraphPages.sort()
+    closestParagraphPage = min(allParagraphPages, key = lambda x:abs(x - notationPageIdx))
+    if closestParagraphPage <= notationPageIdx:
+        MINClosestParagraphPage = copy.deepcopy(closestParagraphPage)
+    elif (closestParagraphPage > notationPageIdx and (allParagraphPages.index(closestParagraphPage) - 1) > 0):
+        MINClosestParagraphPage = allParagraphPages[allParagraphPages.index(closestParagraphPage) - 1]
+    else:
+        MINClosestParagraphPage = allParagraphPages[0]
 
+    if MINClosestParagraphPage in userInputtedValues["paragraphs"]["IA"]:
+        paragraphLetter = "A"
+    else:
+        paragraphLetter = "B"
+    paragraphAndNotationPageDifference = abs(notationPageIdx - MINClosestParagraphPage)
+    hasPageSingleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"]
+    hasPageDoubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"]
+    if hasPageSingleHeading and not hasPageDoubleHeading:
+        heading1 = str(paragraphAndNotationPageDifference + 1) + paragraphLetter
+        heading2 = None
+    elif hasPageDoubleHeading and not hasPageSingleHeading:
+        heading1 = str((2*paragraphAndNotationPageDifference) + 1) + paragraphLetter
+        heading2 = str((2*paragraphAndNotationPageDifference) + 2) + paragraphLetter
+    else:
+        heading1 = None
+        heading2 = None       
+
+    return heading1, heading2
 
 
 
@@ -118,24 +149,21 @@ def renderNotationPage(env, notationPageIdx, notationPage, userInputtedValues):
 
 
 
-    print("pageIndex:", notationPageIdx)
-    print(notationPageIdx in userInputtedValues["paragraphs"]["IA"])
-    print(notationPageIdx in userInputtedValues["paragraphs"]["IB"])
-    print(notationPageIdx in userInputtedValues["headings"]["singleHeading"])
-    print(notationPageIdx in userInputtedValues["headings"]["doubleHeading"])
-    print(notationPageIdx in userInputtedValues["headerLetter"]["F"])
-    print(notationPageIdx in userInputtedValues["sideFrameTextExistence"])
+    # print("pageIndex:", notationPageIdx)
+    # print(notationPageIdx in userInputtedValues["paragraphs"]["IA"])
+    # print(notationPageIdx in userInputtedValues["paragraphs"]["IB"])
+    # print(notationPageIdx in userInputtedValues["headings"]["singleHeading"])
+    # print(notationPageIdx in userInputtedValues["headings"]["doubleHeading"])
+    # print(notationPageIdx in userInputtedValues["headerLetter"]["F"])
+    # print(notationPageIdx in userInputtedValues["sideFrameTextExistence"])
 
-    print(userInputtedValues["measures"]["Horizontal"])
-    print(userInputtedValues["measures"]["Vertical"])
-
+    # print(userInputtedValues["measures"]["Horizontal"])
+    # print(userInputtedValues["measures"]["Vertical"])
 
     if notationPageIdx in userInputtedValues["paragraphs"]["IA"]:
         paragraphText = "IA"
-    elif notationPageIdx in userInputtedValues["paragraphs"]["IB"]:
-        paragraphText = "IB"
     else:
-        paragraphText = "  "
+        paragraphText = "IB"
 
 
     if notationPageIdx in userInputtedValues["headerLetter"]["F"]:
@@ -143,49 +171,45 @@ def renderNotationPage(env, notationPageIdx, notationPage, userInputtedValues):
     else:
         header_letter = "  "
     
+    heading1Text, heading2Text = findHeadingTexts(notationPageIdx, userInputtedValues)
 
 
-
-    def findHeadingTexts(notationPageIdx, paragraphText):
-
-        pass
-
-    if notationPageIdx in userInputtedValues["headings"]["singleHeading"]:
-        pass
+    print("------------------------------------------------------------------")
 
 
-
-    print("---------------------------------")
-
-
-    notationPageRendering = env.get_template("notationPage.mscx").render(
-        measureContent = renderedMeasures,
-
-        singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"],
-        doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],
-        paragraph = paragraphText, # IA or IB
-        headerLetter = header_letter,
-
-
-        heading1Text, heading2Text = findHeadingTexts(notationPageIdx, paragraphText),
-
-        heading1Text = "1" + paragraphText[-1],# YOU NEED TO CALCULATE THIS
-        heading2Text = "2" + paragraphText[-1],# YOU NEED TO CALCULATE THIS
-        
-
+    # notationPageRendering = env.get_template("notationPage.mscx").render(
+    #     measureContent = renderedMeasures,
+    #     singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"], #----- DONE
+    #     doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],#----- DONE
+    #     paragraph = paragraphText, #----- DONE
+    #     headerLetter = header_letter, #----- DONE
+    #     heading1Text = heading1Text, #----- DONE
+    #     heading2Text = heading2Text, #----- DONE
 
     #     # Sideframe
-    #     sideFrames = sideFrameTextExistence,# YOU NEED TO CALCULATE THIS
+    #     sideFrames = notationPageIdx in userInputtedValues["sideFrameTextExistence"], #----- DONE
+
+    ################################################
+    ################################################
+
+    # EDO EXEIS MEINEI PATSAVOUTISA
+
+    # PREPEI NA FTIAKSEIS ALLOUS 2 RENDERES 
+    # 1 GIA TO HORIZONTAL BOX 
+    # 1 GIA TO VERTICAL BOX 
+
+    # KAI NA ANADIAMORFOSEIS TO NOTATION PAGE 
+    # TO MEASURE THA MPEI ANAMESA TON 2
+    ################################################
+    ################################################
+
     #     sideFrameTextOnTheLeft = "F2",# YOU NEED TO CALCULATE THIS
-
-
-    
     #     isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS
     #     isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK 
     #     isMeasureLastInPage = False, # YOU NEED TO CALCULATE THIS - PAGE BREAK 
         
         
-)
+#)
     return  "" #notationPageRendering
 
 
