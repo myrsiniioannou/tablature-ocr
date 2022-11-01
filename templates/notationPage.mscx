@@ -1,7 +1,3 @@
 {% from 'header.mscx' import header %}
-{% from 'horizontalBox.mscx' import horizontalBox %}
-{% from 'verticalBox.mscx' import verticalBox %}
 {{header(singleHeading, doubleHeading, paragraph, headerLetter, heading1Text, heading2Text)}}
-{{horizontalBox(sideFrames, sideFrameTextOnTheLeft, isMeasureFirstInRow)}}
 {{measureContent}}
-{{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}

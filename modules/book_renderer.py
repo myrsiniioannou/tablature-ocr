@@ -1,3 +1,5 @@
+from stat import SF_APPEND
+from tkinter.messagebox import NO
 from matplotlib.dviread import Box
 from soupsieve import closest
 from domain_model import *
@@ -18,9 +20,17 @@ def loadValues():
             "singleHeading": [*range(4,18), *range(30,40)],
             "doubleHeading": [*range(1,4), *range(18,30)]
         },
-        "sideFrameTextExistence" : [*range(1,8), *range(18,30)],
+        "sideFrameTextExistence" :{
+            "sideFrameTextExistencePages" : [*range(1,5)],
+            "sameFrameTextInMultiMeasuredRow" : [*range(1,5)],
+            "sideFrameLetter" : {
+                "A" : [1,2],
+                "B" : [3,4,5,6,7]
+            }
+        },
         "headerLetter" : {
-            "F" : [*range(1,41)]
+            "F" : [1,2],
+            "E" : [3,4,5,6,7],
         },
         "measures" : {
             "Horizontal": 2,
@@ -66,26 +76,59 @@ def renderChords(env, chord):
 
        
     #    # Chords
-    #    duration = "16th", #"eighth",
-    #    slur = 0,
-    #    isBeamContinued = True, # YOU NEED TO CALCULATE THIS 
-    #    triplet = 0,
-    #    articulationDirection = "up",
-    #    articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
+
+
+    # 1  duration = "16th", #"eighth",
+
+
+    # 2  slur = 0,
+
+
+    # 3  isBeamContinued = True, # YOU NEED TO CALCULATE THIS 
+
+    # 4  triplet = 0,
+
+
+    # 5  articulationDirection = "up",
+
+
+    # 6  articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
     #    # TO ARTICULATION EINAI -5 OTAN EXEI STEM ME STRING FINGERING
     #    # TO STEM SYSXETIZETAI KAPOS ME TO OFFSET TOU STRING FINGERING
-    #    hasAccent = False,
-    #    stemYoffset = 7.6, # YOU NEED TO CALCULATE THIS 
-    #    stemLength = 7.5, # YOU NEED TO CALCULATE THIS 
-    #    stringFingeringStringOffset = 7.6, # YPOLOGIZETAI ANALOGA ME THN KATHE XORDH
+
+
+    # 7  hasAccent = False,
+
+
+
+    # 8  stemYoffset = 7.6, # YOU NEED TO CALCULATE THIS 
+
+
+
+    # 9  stemLength = 7.5, # YOU NEED TO CALCULATE THIS 
+
+
+
+    # 10 stringFingeringStringOffset = 7.6, # YPOLOGIZETAI ANALOGA ME THN KATHE XORDH
     #    # KAI ISOS TO POIO GRAMMA EXEI PANO. H KATHE XORDH EXEI ENA SYGKEKRIMENO OFFSET.
     #    # KANE TEST
     #    # paizei na sxetizetai me to stemYoffset
-    #    stringFingeringTypeFingering = "p",
-    #    headerFingering = "p",
-    #    noteOnStringFret = 1,
-    #    pitch = whichStringPitch + noteOnStringFret, # to whichStringPitch einai to pitch ths ekastote xordhs + TO FRET
-    #    whichStringMinusOne = 0
+
+
+
+    # 11 stringFingeringTypeFingering = "p",
+
+
+    # 12 headerFingering = "p",
+
+
+    # 13 noteOnStringFret = 1,
+
+
+    # 14 pitch = whichStringPitch + noteOnStringFret, # to whichStringPitch einai to pitch ths ekastote xordhs + TO FRET
+
+
+    # 15 whichStringMinusOne = 0
     #    )
 
 
@@ -93,13 +136,40 @@ def renderChords(env, chord):
     return ""
 
 
-def renderMeasure(env, measures):
+
+def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
+    measureFrameText = ""
+    if notationPageIndex in userValues["sideFrameTextExistence"]["sideFrameTextExistencePages"]:
+        frameText = [key for key, value in userValues["sideFrameTextExistence"]["sideFrameLetter"].items() if notationPageIndex in value]
+        measureFrameText += frameText[0]
+        if notationPageIndex in userValues["sideFrameTextExistence"]["sameFrameTextInMultiMeasuredRow"]:
+            col = int(userValues["measures"]["Horizontal"])
+            measureFrameText += str(abs(measureIndex%col - measureIndex)//col + 1)
+        else:
+            measureFrameText += measureIndex + 1 # Because we start from 0
+    return measureFrameText
+
+
+
+def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues):
     renderedChords = ""
     # Measures contain multiple chords that should be rendered first.
-    for chord in measures["chords"]:
+    for chord in measure["chords"]:
         renderedChords += renderChords(env, chord)
-    chordRendering = env.get_template("measure.mscx").render(chordContent = renderedChords)
-    return chordRendering
+    measureRendering = env.get_template("measure.mscx").render(
+        chordContent = renderedChords,
+        sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues)
+        )
+  
+    #     isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS    
+    #     isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK  
+    #     isMeasureLastInPage = False, # YOU NEED TO CALCULATE THIS - PAGE BREAK 
+       
+
+    # FTIAKSE TO horizontal kaiiiii to vertical BOXXXXXXXXX
+
+
+    return ""#measureRendering
 
 
 def findHeadingTexts(notationPageIdx, userInputtedValues):
@@ -129,88 +199,45 @@ def findHeadingTexts(notationPageIdx, userInputtedValues):
     else:
         heading1 = None
         heading2 = None       
-
     return heading1, heading2
 
 
+def findParagraphText(notationPageIndex, userValues):
+    if notationPageIndex in userValues["paragraphs"]["IA"]:
+        text = "IA"
+    elif notationPageIndex in userValues["paragraphs"]["IB"]:
+        text = "IB"
+    else:
+        text = None
+    return text
 
+
+def findHeaderLetter(notationPageIndex, userValues):
+    headerLetter = ""
+    for letter in userValues["headerLetter"].keys():
+        if notationPageIndex in userValues["headerLetter"][letter]:
+            headerLetter = letter
+    return headerLetter
 
 
 def renderNotationPage(env, notationPageIdx, notationPage, userInputtedValues):
-
-
-
-
     renderedMeasures = ""
     # Notation Pages contain multiple measures that should be rendered first.
-    for measure in notationPage["measures"]:
-        renderedMeasures += renderMeasure(env, measure)
-    
-
-
-
-    # print("pageIndex:", notationPageIdx)
-    # print(notationPageIdx in userInputtedValues["paragraphs"]["IA"])
-    # print(notationPageIdx in userInputtedValues["paragraphs"]["IB"])
-    # print(notationPageIdx in userInputtedValues["headings"]["singleHeading"])
-    # print(notationPageIdx in userInputtedValues["headings"]["doubleHeading"])
-    # print(notationPageIdx in userInputtedValues["headerLetter"]["F"])
-    # print(notationPageIdx in userInputtedValues["sideFrameTextExistence"])
-
-    # print(userInputtedValues["measures"]["Horizontal"])
-    # print(userInputtedValues["measures"]["Vertical"])
-
-    if notationPageIdx in userInputtedValues["paragraphs"]["IA"]:
-        paragraphText = "IA"
-    else:
-        paragraphText = "IB"
-
-
-    if notationPageIdx in userInputtedValues["headerLetter"]["F"]:
-        header_letter = "F"
-    else:
-        header_letter = "  "
-    
+    for measureIndex, measure in enumerate(notationPage["measures"]):
+        renderedMeasures += renderMeasure(env,measureIndex, measure, notationPageIdx, userInputtedValues)
+    paragraphText = findParagraphText(notationPageIdx, userInputtedValues)
+    header_letter = findHeaderLetter(notationPageIdx, userInputtedValues)
     heading1Text, heading2Text = findHeadingTexts(notationPageIdx, userInputtedValues)
 
-
-    print("------------------------------------------------------------------")
-
-
-    # notationPageRendering = env.get_template("notationPage.mscx").render(
-    #     measureContent = renderedMeasures,
-    #     singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"], #----- DONE
-    #     doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],#----- DONE
-    #     paragraph = paragraphText, #----- DONE
-    #     headerLetter = header_letter, #----- DONE
-    #     heading1Text = heading1Text, #----- DONE
-    #     heading2Text = heading2Text, #----- DONE
-
-    #     # Sideframe
-    #     sideFrames = notationPageIdx in userInputtedValues["sideFrameTextExistence"], #----- DONE
-
-    ################################################
-    ################################################
-
-    # EDO EXEIS MEINEI PATSAVOUTISA
-
-    # PREPEI NA FTIAKSEIS ALLOUS 2 RENDERES 
-    # 1 GIA TO HORIZONTAL BOX 
-    # 1 GIA TO VERTICAL BOX 
-
-    # KAI NA ANADIAMORFOSEIS TO NOTATION PAGE 
-    # TO MEASURE THA MPEI ANAMESA TON 2
-    ################################################
-    ################################################
-
-    #     sideFrameTextOnTheLeft = "F2",# YOU NEED TO CALCULATE THIS
-    #     isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS
-    #     isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK 
-    #     isMeasureLastInPage = False, # YOU NEED TO CALCULATE THIS - PAGE BREAK 
-        
-        
-#)
-    return  "" #notationPageRendering
+    notationPageRendering = env.get_template("notationPage.mscx").render(
+        measureContent = renderedMeasures,
+        singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"],
+        doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],
+        paragraph = paragraphText,
+        headerLetter = header_letter,
+        heading1Text = heading1Text,
+        heading2Text = heading2Text)
+    return  notationPageRendering
 
 
 def iterateOverPagesAndRenderTheirContent(env, JSONbook, userInputtedValues):

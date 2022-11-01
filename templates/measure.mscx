@@ -1,5 +1,15 @@
-{% from 'chord.mscx' import chord %}
+{% from 'horizontalBox.mscx' import horizontalBox %}
 {% from 'barline.mscx' import barline %}
+{% from 'chord.mscx' import chord %}
+{% from 'verticalBox.mscx' import verticalBox %}
+
+
+
+{% macro measure(chordContent, sideFrames, sideFrameText, isMeasureFirstInRow) %}
+
+{{horizontalBox(sideFrameText, isMeasureFirstInRow)}}
+
+
 <Measure>
   <voice>
     {{barline()}}   
@@ -11,3 +21,12 @@
     {{barline()}}
   </voice>
 </Measure>
+
+
+
+{{verticalBox(isMeasureLastInRow, isMeasureLastInPage)}}
+
+
+
+
+{% endmacro %}

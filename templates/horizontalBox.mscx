@@ -1,4 +1,11 @@
-{% macro horizontalBox(sideFrames, sideFrameTextOnTheLeft, isMeasureFirstInRow) %}
+{% macro horizontalBox(sideFrameText, isMeasureFirstInRow) %}
+
+
+# AN EXEI SIDEFRAMETEXT TOTEEEEEEEEEE
+IF sideFrameText::::::
+
+
+
 {% if ((isMeasureFirstInRow and sideFrames) or (not isMeasureFirstInRow)) %}  
   <HBox>
     {% if isMeasureFirstInRow %}
@@ -16,7 +23,7 @@
         <align>center,center</align>
       {% endif %}
       {% if sideFrames %}
-        <text><font size="16"></font>{{sideFrameTextOnTheLeft}}</text>
+        <text><font size="16"></font>{{sideFrameText}}</text>
       {% endif %}
     </Text>
   </HBox>
