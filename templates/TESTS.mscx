@@ -403,6 +403,14 @@
               </Note>
             </Chord>
           <endTuplet/>
+          <RehearsalMark>
+            <minDistance>-999</minDistance>
+            <size>16</size>
+            <offset x="-0.2" y="1.9"/>
+            <framePadding>0.6</framePadding>
+            <frameWidth>0.2</frameWidth>
+            <text></text>
+            </RehearsalMark>
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -464,14 +472,6 @@
               <string>0</string>
               </Note>
             </Chord>
-          <RehearsalMark>
-            <minDistance>-999</minDistance>
-            <size>16</size>
-            <offset x="-0.2" y="1.9"/>
-            <framePadding>0.6</framePadding>
-            <frameWidth>0.2</frameWidth>
-            <text></text>
-            </RehearsalMark>
           <Chord>
             <durationType>16th</durationType>
             <Articulation>
@@ -600,11 +600,10 @@
           </Text>
         </HBox>
       <Measure>
+        <LayoutBreak>
+          <subtype>page</subtype>
+          </LayoutBreak>
         <voice>
-          <BarLine>
-            <subtype>double</subtype>
-            <span>1</span>
-            </BarLine>
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -914,18 +913,12 @@
               <string>0</string>
               </Note>
             </Chord>
-          <BarLine>
-            <subtype>double</subtype>
-            </BarLine>
           </voice>
         </Measure>
       <VBox>
-        <height>4</height>
+        <height>5</height>
         <topGap>0</topGap>
         <boxAutoSize>0</boxAutoSize>
-        <LayoutBreak>
-          <subtype>page</subtype>
-          </LayoutBreak>
         </VBox>
       </Staff>
     </Score>

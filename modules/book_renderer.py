@@ -64,76 +64,64 @@ def renderSectionPage(env, sectionPage):
 def renderChords(env, chord):
 
 
-    #print(chord)
-    #print("---------------------------------")
-
-    #generateDataTransferObject
-
-    # DATA TRANSFER OBJECT FUNCTION
+    print(chord)
+    print(chord["duration"])
+    print(chord["slur"])
+    print(chord["triplet"])
+    print(chord["articulation"])
+    print(chord["hasAccent"])
+    print("---------------------------------")
 
 
     # chord = env.get_template("chord.mscx").render(
 
-       
-    #    # Chords
+
+    #duration = chord["duration"],
+    #hasBox = chord["hasBox"],
+    #hasAccent = chord["hasAccent"],
+    #articulationDirection = chord["articulation"],
+    #slur = chord["slur"],
+    #triplet = chord["triplet"],
+    #noteNoteOnStringFret = chord["note"]["noteOnString"],
+    #noteStringMinusOne = chord["note"]["string"] - 1,
+    #headerFingering = chord["headerFingering"],
 
 
-    # 1  duration = "16th", #"eighth",
+    #stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],    
 
+    # 1  isBeamContinued = True, # YOU NEED TO CALCULATE THIS 
 
-    # 2  slur = 0,
-
-
-    # 3  isBeamContinued = True, # YOU NEED TO CALCULATE THIS 
-
-    # 4  triplet = 0,
-
-
-    # 5  articulationDirection = "up",
-
-
-    # 6  articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
+    
+    # 2  articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
     #    # TO ARTICULATION EINAI -5 OTAN EXEI STEM ME STRING FINGERING
     #    # TO STEM SYSXETIZETAI KAPOS ME TO OFFSET TOU STRING FINGERING
 
+    # 3  stemYoffset = 7.6, # YOU NEED TO CALCULATE THIS 
 
-    # 7  hasAccent = False,
+    # 4  stemLength = 7.5, # YOU NEED TO CALCULATE THIS 
 
-
-
-    # 8  stemYoffset = 7.6, # YOU NEED TO CALCULATE THIS 
-
-
-
-    # 9  stemLength = 7.5, # YOU NEED TO CALCULATE THIS 
-
-
-
-    # 10 stringFingeringStringOffset = 7.6, # YPOLOGIZETAI ANALOGA ME THN KATHE XORDH
+    # 5 stringFingeringStringOffset = 7.6,
+    # paizei na sxetizetai me to stemYoffset
+    # # YPOLOGIZETAI ANALOGA ME THN KATHE XORDH
     #    # KAI ISOS TO POIO GRAMMA EXEI PANO. H KATHE XORDH EXEI ENA SYGKEKRIMENO OFFSET.
     #    # KANE TEST
-    #    # paizei na sxetizetai me to stemYoffset
+    #    
 
+    # 6 pitch = whichStringPitch + noteOnStringFret, # to whichStringPitch einai to pitch ths ekastote xordhs + TO FRET
 
-
-    # 11 stringFingeringTypeFingering = "p",
-
-
-    # 12 headerFingering = "p",
-
-
-    # 13 noteOnStringFret = 1,
-
-
-    # 14 pitch = whichStringPitch + noteOnStringFret, # to whichStringPitch einai to pitch ths ekastote xordhs + TO FRET
-
-
-    # 15 whichStringMinusOne = 0
-    #    )
 
 
 
     return ""
+
+def isMeasureFirstInRow(idx, col):
+    return idx%col == 0
+
+def isMeasureLastInRow(idx, col):
+    return idx%col == col-1
+
+def isMeasureLastInPage(idx, col, rows):
+    return idx == rows*col
 
 
 
@@ -158,18 +146,12 @@ def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues):
         renderedChords += renderChords(env, chord)
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
-        sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues)
+        sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues),
+        isMeasureFirstInRow = isMeasureFirstInRow(measureIndex, userValues["measures"]["Horizontal"]),
+        isMeasureLastInRow = isMeasureLastInRow(measureIndex, userValues["measures"]["Horizontal"]),
+        isMeasureLastInPage = isMeasureLastInPage(measureIndex, userValues["measures"]["Horizontal"], userValues["measures"]["Vertical"])
         )
-  
-    #     isMeasureFirstInRow = False, # YOU NEED TO CALCULATE THIS    
-    #     isMeasureLastInRow = False, # YOU NEED TO CALCULATE THIS - FOR VERTICAL BOX BREAK  
-    #     isMeasureLastInPage = False, # YOU NEED TO CALCULATE THIS - PAGE BREAK 
-       
-
-    # FTIAKSE TO horizontal kaiiiii to vertical BOXXXXXXXXX
-
-
-    return ""#measureRendering
+    return measureRendering
 
 
 def findHeadingTexts(notationPageIdx, userInputtedValues):
@@ -182,7 +164,6 @@ def findHeadingTexts(notationPageIdx, userInputtedValues):
         MINClosestParagraphPage = allParagraphPages[allParagraphPages.index(closestParagraphPage) - 1]
     else:
         MINClosestParagraphPage = allParagraphPages[0]
-
     if MINClosestParagraphPage in userInputtedValues["paragraphs"]["IA"]:
         paragraphLetter = "A"
     else:
@@ -276,7 +257,6 @@ def renderBook(JSON):
     #Finalize the book by adding the book template XML-info
     stringNumber = bookInJsonFormat["numberofstrings"]
     output = finalizeBookRendering(environment, stringNumber, bookRendering)
-
     
 
     # Save the Musescore file

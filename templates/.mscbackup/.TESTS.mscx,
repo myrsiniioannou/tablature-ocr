@@ -275,8 +275,6 @@
             <sigN>2</sigN>
             <sigD>4</sigD>
             </TimeSig>
-
-
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -287,8 +285,6 @@
               <text>3</text>
               </Number>
             </Tuplet>
-
-
           <Chord>
             <durationType>16th</durationType>
             <Spanner type="Slur">
@@ -325,15 +321,10 @@
               <minDistance>-999</minDistance>
               <offset x="0" y="-9"/>
               </Articulation>
-
-
-
             <Stem>
               <offset x="0" y="7.6"/>
               <userLen>7.5</userLen>
-            </Stem>
-
-
+              </Stem>
             <Note>
               <Fingering>
                 <style>RH Guitar Fingering</style>
@@ -342,23 +333,19 @@
                 <size>12</size>
                 <offset x="0" y="7.6"/>
                 <text>p</text>
-              </Fingering>
-              
+                </Fingering>
               <Fingering>
                 <style>RH Guitar Fingering</style>
                 <family>Georgia</family>
                 <size>12</size>
                 <text>i</text>
-              </Fingering>
-
+                </Fingering>
               <pitch>65</pitch>
               <tpc>13</tpc>
               <fret>1</fret>
               <string>0</string>
               </Note>
             </Chord>
-
-
           <Chord>
             <durationType>16th</durationType>
             <Spanner type="Slur">
@@ -380,7 +367,7 @@
                 <family>Georgia</family>
                 <size>12</size>
                 <text>m</text>
-              </Fingering>
+                </Fingering>
               <pitch>67</pitch>
               <tpc>15</tpc>
               <fret>3</fret>
@@ -416,8 +403,6 @@
               </Note>
             </Chord>
           <endTuplet/>
-
-          
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -545,7 +530,6 @@
               </Note>
             </Chord>
           <endTuplet/>
-
           <Chord>
             <BeamMode>begin32</BeamMode>
             <durationType>eighth</durationType>
@@ -616,11 +600,10 @@
           </Text>
         </HBox>
       <Measure>
+        <LayoutBreak>
+          <subtype>page</subtype>
+          </LayoutBreak>
         <voice>
-          <BarLine>
-            <subtype>double</subtype>
-            <span>1</span>
-            </BarLine>
           <Tuplet>
             <normalNotes>2</normalNotes>
             <actualNotes>3</actualNotes>
@@ -670,7 +653,7 @@
             <Stem>
               <offset x="0" y="7.6"/>
               <userLen>7.5</userLen>
-            </Stem>
+              </Stem>
             <Note>
               <Fingering>
                 <style>RH Guitar Fingering</style>
@@ -930,18 +913,12 @@
               <string>0</string>
               </Note>
             </Chord>
-          <BarLine>
-            <subtype>double</subtype>
-            </BarLine>
           </voice>
         </Measure>
       <VBox>
-        <height>4</height>
+        <height>5</height>
         <topGap>0</topGap>
         <boxAutoSize>0</boxAutoSize>
-        <LayoutBreak>
-          <subtype>page</subtype>
-          </LayoutBreak>
         </VBox>
       </Staff>
     </Score>

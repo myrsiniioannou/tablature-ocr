@@ -190,7 +190,7 @@ def parseMeasure(mdf, UserInputData, amountOfChords):
                        articulation = articulationDecoding(UserInputData["articulation"][chordIndex]),
                        slur = UserInputData["slur"][chordIndex],
                        triplet = UserInputData["triplet"][chordIndex],
-                       note = Note(noteonstring=noteDecoding(mdf,chordIndex), string=noteStringDecoding(mdf,chordIndex)),
+                       note = Note(noteOnString=noteDecoding(mdf,chordIndex), string=noteStringDecoding(mdf,chordIndex)),
                        headerFingering = FingeringType(fingeringDecoding(mdf, chordIndex, headerOrNot=True)),
                        stringFingering = StringFingering(string=stringFingeringDecoding(mdf, chordIndex),
                                                         typeFingering=FingeringType(fingeringDecoding(mdf, chordIndex, headerOrNot=False))))

@@ -51,7 +51,7 @@ class StringFingering:
 
 @dataclass
 class Note:
-    noteonstring: Optional[int] = None
+    noteOnString: Optional[int] = None
     string: Optional[int] = None
 
 

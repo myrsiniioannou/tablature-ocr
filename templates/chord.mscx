@@ -1,20 +1,57 @@
 {% macro chord(
               duration,
-              slur,
-              isBeamContinued,
-              triplet,
-              articulationDirection,
-              articulationYOffset,
+              hasBox,
               hasAccent,
+              articulationDirection,
+              slur,
+              triplet,
+              noteNoteOnStringFret,
+
+
+              isBeamContinued,
+              
+              
+              articulationYOffset,
+              
+              
               stemYoffset,
               stemLength,
               stringFingeringStringOffset,
               stringFingeringTypeFingering,
               headerFingering,
-              noteOnStringFret,
+              
               pitch,
               whichStringMinusOne
+
+
+
+
+    duration = chord["duration"],
+    hasBox = chord["hasBox"],
+    hasAccent = chord["hasAccent"],
+    articulationDirection = chord["articulation"],
+    slur = chord["slur"],
+    triplet = chord["triplet"],
+    noteNoteOnStringFret = chord["note"]["noteOnString"],
+    noteStringMinusOne = chord["note"]["string"] - 1,
+    headerFingering = chord["headerFingering"],
   )%}
+  
+
+
+    <!--REHEARSAL MARK-->
+    {% if hasBox %}
+      <RehearsalMark>
+        <minDistance>-999</minDistance>
+        <size>16</size>
+        <offset x="-0.2" y="1.9"/>
+        <framePadding>0.6</framePadding>
+        <frameWidth>0.2</frameWidth>
+        <text></text>
+      </RehearsalMark>
+    {% endif %}
+
+
     <!--TRIPLET START-->
       {% if triplet == "1" %}
         <Tuplet>

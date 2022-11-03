@@ -1,0 +1,13 @@
+{% macro verticalBoxAndBreaks(isMeasureLastInRow, isMeasureLastInPage) %}
+    {% if isMeasureLastInRow %}
+        <VBox>
+            <height>5</height>
+            <topGap>0</topGap>
+            <boxAutoSize>0</boxAutoSize>
+        </VBox>
+    {% elif isMeasureLastInPage %}
+        <LayoutBreak>
+            <subtype>page</subtype>
+        </LayoutBreak>
+    {% endif %}
+{% endmacro %}
