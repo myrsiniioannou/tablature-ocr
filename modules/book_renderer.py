@@ -12,6 +12,22 @@ def loadValues():
     # Set Values on paragraphs, headings, measures, and side frame text
     # PAGE NUMBERS HERE ARE THE SAME AS IN THE BOOK. Don't deduct 1 to start from 0.
     values = {
+        "timeSignature" : {
+            "twoFour": {       
+                "pages": [*range(1,3)],
+                "numerator": 2 ,
+                "denominator": 4
+            },
+            "fourFour": {       
+                "pages": [*range(3,5)],
+                "numerator": 4 ,
+                "denominator": 4
+            }
+        },
+        "measures" : {
+            "Horizontal": 2,
+            "Vertical" : 6
+        },
         "paragraphs" : {
             "IA": [1, 8],
             "IB": [5, 6]
@@ -20,7 +36,7 @@ def loadValues():
             "singleHeading": [*range(4,18), *range(30,40)],
             "doubleHeading": [*range(1,4), *range(18,30)]
         },
-        "sideFrameTextExistence" :{
+        "sideFrameTextExistence" : {
             "sideFrameTextExistencePages" : [*range(1,5)],
             "sameFrameTextInMultiMeasuredRow" : [*range(1,5)],
             "sideFrameLetter" : {
@@ -31,10 +47,6 @@ def loadValues():
         "headerLetter" : {
             "F" : [1,2],
             "E" : [3,4,5,6,7],
-        },
-        "measures" : {
-            "Horizontal": 2,
-            "Vertical" : 6
         }
     }
     return values
@@ -59,17 +71,22 @@ def renderSectionPage(env, sectionPage):
 
 
 
+          
+          
+          
+def findNotePitch(noteOnString, string):
+    defaultStringPitches = [64, 59, 55, 50, 45, 40]    
+    return (defaultStringPitches[string - 1] + noteOnString) if noteOnString else 45
+    
+def findNoteStringMinusOne(string):
+    return (string - 1) if string else None
 
 
 def renderChords(env, chord):
 
 
-    print(chord)
-    print(chord["duration"])
-    print(chord["slur"])
-    print(chord["triplet"])
-    print(chord["articulation"])
-    print(chord["hasAccent"])
+    #print(chord["duration"])
+
     print("---------------------------------")
 
 
@@ -83,11 +100,11 @@ def renderChords(env, chord):
     #slur = chord["slur"],
     #triplet = chord["triplet"],
     #noteNoteOnStringFret = chord["note"]["noteOnString"],
-    #noteStringMinusOne = chord["note"]["string"] - 1,
+    #noteStringMinusOne = findNoteStringMinusOne(chord["note"]["string"]),
     #headerFingering = chord["headerFingering"],
+    #stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
+    #pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"])
 
-
-    #stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],    
 
     # 1  isBeamContinued = True, # YOU NEED TO CALCULATE THIS 
 
@@ -105,9 +122,7 @@ def renderChords(env, chord):
     # # YPOLOGIZETAI ANALOGA ME THN KATHE XORDH
     #    # KAI ISOS TO POIO GRAMMA EXEI PANO. H KATHE XORDH EXEI ENA SYGKEKRIMENO OFFSET.
     #    # KANE TEST
-    #    
 
-    # 6 pitch = whichStringPitch + noteOnStringFret, # to whichStringPitch einai to pitch ths ekastote xordhs + TO FRET
 
 
 
@@ -139,17 +154,20 @@ def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
 
 
 
-def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues):
+def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, timeSignNumerator, timeSignDenominator):
     renderedChords = ""
     # Measures contain multiple chords that should be rendered first.
     for chord in measure["chords"]:
-        renderedChords += renderChords(env, chord)
+       renderedChords += renderChords(env, chord)
+    
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
         sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues),
         isMeasureFirstInRow = isMeasureFirstInRow(measureIndex, userValues["measures"]["Horizontal"]),
         isMeasureLastInRow = isMeasureLastInRow(measureIndex, userValues["measures"]["Horizontal"]),
-        isMeasureLastInPage = isMeasureLastInPage(measureIndex, userValues["measures"]["Horizontal"], userValues["measures"]["Vertical"])
+        isMeasureLastInPage = isMeasureLastInPage(measureIndex, userValues["measures"]["Horizontal"], userValues["measures"]["Vertical"]),
+        numerator = timeSignNumerator, 
+        denominator = timeSignDenominator
         )
     return measureRendering
 
@@ -201,24 +219,38 @@ def findHeaderLetter(notationPageIndex, userValues):
     return headerLetter
 
 
+def findTimeSignature(pageIndex, userInputtedValues):
+    for timeSign, tSElements in userInputtedValues["timeSignature"].items():
+        for element, value in tSElements.items():
+            if element == 'pages':
+                print(element, value)
+                print("notationPageIndex: ", pageIndex)
+                print(pageIndex in value)
+
+    print("---------------------------------------------------------------------------------------")
+
+    return "a", "b"
+
 def renderNotationPage(env, notationPageIdx, notationPage, userInputtedValues):
     renderedMeasures = ""
+    timeSignNumerator, timeSignDenominator = findTimeSignature(notationPageIdx, userInputtedValues)
     # Notation Pages contain multiple measures that should be rendered first.
-    for measureIndex, measure in enumerate(notationPage["measures"]):
-        renderedMeasures += renderMeasure(env,measureIndex, measure, notationPageIdx, userInputtedValues)
-    paragraphText = findParagraphText(notationPageIdx, userInputtedValues)
-    header_letter = findHeaderLetter(notationPageIdx, userInputtedValues)
-    heading1Text, heading2Text = findHeadingTexts(notationPageIdx, userInputtedValues)
+    # for measureIndex, measure in enumerate(notationPage["measures"]):
+    #     renderedMeasures += renderMeasure(env,measureIndex, measure, notationPageIdx, userInputtedValues, timeSignNumerator, timeSignDenominator)
+    # paragraphText = findParagraphText(notationPageIdx, userInputtedValues)
+    # header_letter = findHeaderLetter(notationPageIdx, userInputtedValues)
+    # heading1Text, heading2Text = findHeadingTexts(notationPageIdx, userInputtedValues)
 
-    notationPageRendering = env.get_template("notationPage.mscx").render(
-        measureContent = renderedMeasures,
-        singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"],
-        doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],
-        paragraph = paragraphText,
-        headerLetter = header_letter,
-        heading1Text = heading1Text,
-        heading2Text = heading2Text)
-    return  notationPageRendering
+    # notationPageRendering = env.get_template("notationPage.mscx").render(
+    #     measureContent = renderedMeasures,
+    #     singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"],
+    #     doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],
+    #     paragraph = paragraphText,
+    #     headerLetter = header_letter,
+    #     heading1Text = heading1Text,
+    #     heading2Text = heading2Text)
+
+    return  ""#notationPageRendering
 
 
 def iterateOverPagesAndRenderTheirContent(env, JSONbook, userInputtedValues):

@@ -1,0 +1,6 @@
+{% macro timeSignature(numerator, denominator) %}
+    <TimeSig>
+      <sigN>{{numerator}}</sigN>
+      <sigD>{{denominator}}</sigD>
+    </TimeSig>
+{% endmacro %}

@@ -6,35 +6,16 @@
               slur,
               triplet,
               noteNoteOnStringFret,
-
-
+              noteStringMinusOne,
+              headerFingering,
+              stringFingeringTypeFingering,
               isBeamContinued,
-              
-              
-              articulationYOffset,
-              
-              
+              articulationYOffset,             
               stemYoffset,
               stemLength,
               stringFingeringStringOffset,
-              stringFingeringTypeFingering,
-              headerFingering,
-              
-              pitch,
-              whichStringMinusOne
+              pitch
 
-
-
-
-    duration = chord["duration"],
-    hasBox = chord["hasBox"],
-    hasAccent = chord["hasAccent"],
-    articulationDirection = chord["articulation"],
-    slur = chord["slur"],
-    triplet = chord["triplet"],
-    noteNoteOnStringFret = chord["note"]["noteOnString"],
-    noteStringMinusOne = chord["note"]["string"] - 1,
-    headerFingering = chord["headerFingering"],
   )%}
   
 
@@ -188,9 +169,16 @@
                 </Fingering>
               {% endif %}
               <!--NOTE-->
-              <pitch>{{pitch}}</pitch>
-              <fret>{{noteOnStringFret}}</fret>
-              <string>{{whichStringMinusOne}}</string>
+              {% if noteNoteOnStringFret and noteStringMinusOne %}
+                <pitch>{{pitch}}</pitch>
+                <fret>{{noteOnStringFret}}</fret>
+                <string>{{noteStringMinusOne}}</string>
+              {% else %}
+                <pitch>45</pitch>
+                <fret>0</fret>
+                <string>0</string>
+                <visible>0</visible>         
+              {% endif %}
             </Note>
         </Chord>
 

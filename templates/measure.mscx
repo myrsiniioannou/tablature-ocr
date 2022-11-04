@@ -1,19 +1,17 @@
 {% from 'horizontalBox.mscx' import horizontalBox %}
 {% from 'barline.mscx' import barline %}
+{% from 'timeSignature.mscx' import timeSignature %}
 {% from 'chord.mscx' import chord %}
 {% from 'verticalBoxAndBreaks.mscx' import verticalBoxAndBreaks %}
-{% macro measure(chordContent, sideFrameText, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage) %}
-{{horizontalBox(sideFrameText, isMeasureFirstInRow)}}
-<Measure>
-  <voice>
-    {{barline()}}   
-    <TimeSig>
-      <sigN>2</sigN>
-      <sigD>4</sigD>
-    </TimeSig>
-    {{chordContent}}
-    {{barline()}}
-  </voice>
-</Measure>
-{{verticalBoxAndBreaks(isMeasureLastInRow, isMeasureLastInPage)}}
+{% macro measure(chordContent, sideFrameText, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage, numerator, denominator) %}
+  {{horizontalBox(sideFrameText, isMeasureFirstInRow)}}
+  <Measure>
+    <voice>
+      {{barline()}}   
+      {{timeSignature(numerator, denominator)}
+      {{chordContent}}
+      {{barline()}}
+    </voice>
+  </Measure>
+  {{verticalBoxAndBreaks(isMeasureLastInRow, isMeasureLastInPage)}}
 {% endmacro %}
