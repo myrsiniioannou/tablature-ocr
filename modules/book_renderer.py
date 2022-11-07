@@ -47,9 +47,35 @@ def loadValues():
         "headerLetter" : {
             "F" : [1,2],
             "E" : [3,4,5,6,7],
+        },
+        "beamBreaks" : [*range(4,18), *range(30,40)],
+    }
+
+    pageBreakPatterns  = {
+        "pattern1" : {
+            "pages" : [range(1,2)],
+            "pageBreaks" : [5,8]
+        },
+        "pattern2" : {
+            "pages" : [range(2,3)],
+            "pageBreaks" : [7,16]
+        },
+        "pattern3" : {
+            "pages" : [range(3,200)],
+            "pageBreaks" : [9]
         }
     }
+    values["pageBreaksRanges"] = findPageBreaks(pageBreakPatterns)
     return values
+
+
+def findPageBreaks(patterns):
+    pageBreaksRanges = dict()
+    for pattern, vals in patterns.items():
+        for pageRange in vals["pages"]:
+            for page in pageRange:
+                pageBreaksRanges[page] = vals["pageBreaks"]
+    return pageBreaksRanges
 
 
 def loadJSON(JSONFile):
@@ -69,26 +95,25 @@ def renderSectionPage(env, sectionPage):
     sectionPageRendering = env.get_template("sectionPage.mscx").render(pageTitle = sectionPageTitle)
     return sectionPageRendering
 
-
-
-          
-          
           
 def findNotePitch(noteOnString, string):
     defaultStringPitches = [64, 59, 55, 50, 45, 40]    
     return (defaultStringPitches[string - 1] + noteOnString) if noteOnString else 45
     
+
 def findNoteStringMinusOne(string):
     return (string - 1) if string else None
 
 
-def renderChords(env, chord):
+def isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues):
+    previousIndex = chordIdxPlusOne-1   
+    return False if previousIndex in userInputtedValues['pageBreaksRanges'][notationPageIdx] else True
+
+
+def renderChords(env, chord, chordIdxPlusOne, notationPageIdx, userInputtedValues):
 
 
     #print(chord["duration"])
-
-    print("---------------------------------")
-
 
     # chord = env.get_template("chord.mscx").render(
 
@@ -104,40 +129,42 @@ def renderChords(env, chord):
     #headerFingering = chord["headerFingering"],
     #stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
     #pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"])
+    #beamContinued = isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues)
 
 
-    # 1  isBeamContinued = True, # YOU NEED TO CALCULATE THIS 
+    # ISOS PREPEI NA YPOLOGISTEI KATI MAZIKO POY NA EPHREAZEI TIS 4 TIMES APO KATO
 
-    
-    # 2  articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
+    # ta arrows einai auta
+    # 1  articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
     #    # TO ARTICULATION EINAI -5 OTAN EXEI STEM ME STRING FINGERING
     #    # TO STEM SYSXETIZETAI KAPOS ME TO OFFSET TOU STRING FINGERING
 
-    # 3  stemYoffset = 7.6, # YOU NEED TO CALCULATE THIS 
 
-    # 4  stemLength = 7.5, # YOU NEED TO CALCULATE THIS 
 
-    # 5 stringFingeringStringOffset = 7.6,
-    # paizei na sxetizetai me to stemYoffset
+    # 2  stemYoffset = 7.6, # YOU NEED TO CALCULATE THIS 
+
+    # 3  stemLength = 7.5, # YOU NEED TO CALCULATE THIS  # paizei na sxetizetai me to stemYoffset
+
+    # 4 stringFingeringStringOffset = 7.6, # paizei na sxetizetai me to stemYoffset
+    
     # # YPOLOGIZETAI ANALOGA ME THN KATHE XORDH
     #    # KAI ISOS TO POIO GRAMMA EXEI PANO. H KATHE XORDH EXEI ENA SYGKEKRIMENO OFFSET.
     #    # KANE TEST
 
 
-
-
-
     return ""
 
+
 def isMeasureFirstInRow(idx, col):
-    return idx%col == 0
+    return idx % col == 0
+
 
 def isMeasureLastInRow(idx, col):
-    return idx%col == col-1
+    return idx % col == col-1
+
 
 def isMeasureLastInPage(idx, col, rows):
     return idx == rows*col
-
 
 
 def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
@@ -153,13 +180,12 @@ def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
     return measureFrameText
 
 
-
 def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, timeSignNumerator, timeSignDenominator):
     renderedChords = ""
     # Measures contain multiple chords that should be rendered first.
-    for chord in measure["chords"]:
-       renderedChords += renderChords(env, chord)
-    
+    for chordIndexPlusOne, chord in enumerate(measure["chords"][:-1], start = 2):
+        renderedChords += renderChords(env, chord, chordIndexPlusOne, notationPageIndex, userValues)
+
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
         sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues),
@@ -167,8 +193,7 @@ def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, tim
         isMeasureLastInRow = isMeasureLastInRow(measureIndex, userValues["measures"]["Horizontal"]),
         isMeasureLastInPage = isMeasureLastInPage(measureIndex, userValues["measures"]["Horizontal"], userValues["measures"]["Vertical"]),
         numerator = timeSignNumerator, 
-        denominator = timeSignDenominator
-        )
+        denominator = timeSignDenominator)
     return measureRendering
 
 
@@ -220,37 +245,35 @@ def findHeaderLetter(notationPageIndex, userValues):
 
 
 def findTimeSignature(pageIndex, userInputtedValues):
+    numerator = ""
+    denominator = ""
     for timeSign, tSElements in userInputtedValues["timeSignature"].items():
         for element, value in tSElements.items():
-            if element == 'pages':
-                print(element, value)
-                print("notationPageIndex: ", pageIndex)
-                print(pageIndex in value)
+            if (element == 'pages') and (pageIndex in value):
+                numerator = tSElements["numerator"]
+                denominator = tSElements["denominator"]
+    return numerator, denominator
 
-    print("---------------------------------------------------------------------------------------")
-
-    return "a", "b"
 
 def renderNotationPage(env, notationPageIdx, notationPage, userInputtedValues):
     renderedMeasures = ""
     timeSignNumerator, timeSignDenominator = findTimeSignature(notationPageIdx, userInputtedValues)
-    # Notation Pages contain multiple measures that should be rendered first.
-    # for measureIndex, measure in enumerate(notationPage["measures"]):
-    #     renderedMeasures += renderMeasure(env,measureIndex, measure, notationPageIdx, userInputtedValues, timeSignNumerator, timeSignDenominator)
-    # paragraphText = findParagraphText(notationPageIdx, userInputtedValues)
-    # header_letter = findHeaderLetter(notationPageIdx, userInputtedValues)
-    # heading1Text, heading2Text = findHeadingTexts(notationPageIdx, userInputtedValues)
+    #Notation Pages contain multiple measures that should be rendered first.
+    for measureIndex, measure in enumerate(notationPage["measures"]):
+        renderedMeasures += renderMeasure(env,measureIndex, measure, notationPageIdx, userInputtedValues, timeSignNumerator, timeSignDenominator)
+    paragraphText = findParagraphText(notationPageIdx, userInputtedValues)
+    header_letter = findHeaderLetter(notationPageIdx, userInputtedValues)
+    heading1Text, heading2Text = findHeadingTexts(notationPageIdx, userInputtedValues)
 
-    # notationPageRendering = env.get_template("notationPage.mscx").render(
-    #     measureContent = renderedMeasures,
-    #     singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"],
-    #     doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],
-    #     paragraph = paragraphText,
-    #     headerLetter = header_letter,
-    #     heading1Text = heading1Text,
-    #     heading2Text = heading2Text)
-
-    return  ""#notationPageRendering
+    notationPageRendering = env.get_template("notationPage.mscx").render(
+        measureContent = renderedMeasures,
+        singleHeading = notationPageIdx in userInputtedValues["headings"]["singleHeading"],
+        doubleHeading = notationPageIdx in userInputtedValues["headings"]["doubleHeading"],
+        paragraph = paragraphText,
+        headerLetter = header_letter,
+        heading1Text = heading1Text,
+        heading2Text = heading2Text)
+    return  notationPageRendering
 
 
 def iterateOverPagesAndRenderTheirContent(env, JSONbook, userInputtedValues):
@@ -290,7 +313,6 @@ def renderBook(JSON):
     stringNumber = bookInJsonFormat["numberofstrings"]
     output = finalizeBookRendering(environment, stringNumber, bookRendering)
     
-
     # Save the Musescore file
     # musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook.mscx"
     # with open(f"{musescoreOutputFile}", "w") as f:
@@ -299,11 +321,7 @@ def renderBook(JSON):
 
 
 
-
 if __name__ == '__main__':
-    #
-    # YOU NEED TO GIVE SOME INPUT AT THE TOP OF THE CODE
-    #
-    #
+
     JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\book1.json"
     renderBook(JSON_book_directory)

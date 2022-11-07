@@ -8,7 +8,7 @@
   <Measure>
     <voice>
       {{barline()}}   
-      {{timeSignature(numerator, denominator)}
+      {{timeSignature(numerator, denominator)}}
       {{chordContent}}
       {{barline()}}
     </voice>

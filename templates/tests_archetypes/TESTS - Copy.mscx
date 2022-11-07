@@ -163,6 +163,155 @@
     <Staff id="1">
       <HBox>
         <width>5</width>
+        </HBox>
+      <Measure>
+        <voice>
+          <TimeSig>
+            <sigN>4</sigN>
+            <sigD>4</sigD>
+            </TimeSig>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Rest>
+            <durationType>16th</durationType>
+            </Rest>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <HBox>
+        <width>5</width>
         <Text>
           <style>Frame</style>
           <family>Arial</family>
@@ -173,25 +322,8 @@
         </HBox>
       <Measure>
         <voice>
-          <BarLine>
-            <subtype>double</subtype>
-            <span>1</span>
-            </BarLine>
-          <TimeSig>
-            <sigN>2</sigN>
-            <sigD>4</sigD>
-            </TimeSig>
           <Chord>
-            <BeamMode>begin32</BeamMode>
-            <durationType>quarter</durationType>
-            <Note>
-              <pitch>59</pitch>
-              <tpc>19</tpc>
-              <fret>0</fret>
-              <string>1</string>
-              </Note>
-            </Chord>
-          <Chord>
+            <BeamMode>mid</BeamMode>
             <durationType>eighth</durationType>
             <Note>
               <pitch>64</pitch>
@@ -201,26 +333,123 @@
               </Note>
             </Chord>
           <Chord>
-            <durationType>16th</durationType>
+            <BeamMode>mid</BeamMode>
+            <durationType>eighth</durationType>
             <Note>
-              <pitch>64</pitch>
-              <tpc>18</tpc>
-              <fret>0</fret>
+              <pitch>65</pitch>
+              <tpc>13</tpc>
+              <fret>1</fret>
               <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>eighth</durationType>
+            <Note>
+              <pitch>61</pitch>
+              <tpc>21</tpc>
+              <fret>2</fret>
+              <string>1</string>
               </Note>
             </Chord>
           <Chord>
             <durationType>16th</durationType>
             <Note>
-              <pitch>59</pitch>
-              <tpc>19</tpc>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
               <fret>0</fret>
-              <string>1</string>
+              <string>2</string>
               </Note>
             </Chord>
-          <BarLine>
-            <subtype>double</subtype>
-            </BarLine>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>58</pitch>
+              <tpc>24</tpc>
+              <fret>3</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>eighth</durationType>
+            <Note>
+              <pitch>50</pitch>
+              <tpc>16</tpc>
+              <fret>0</fret>
+              <string>3</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>eighth</durationType>
+            <Note>
+              <pitch>40</pitch>
+              <tpc>18</tpc>
+              <fret>0</fret>
+              <string>5</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>begin</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>56</pitch>
+              <tpc>22</tpc>
+              <fret>1</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>57</pitch>
+              <tpc>17</tpc>
+              <fret>2</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>begin</BeamMode>
+            <durationType>32nd</durationType>
+            <Note>
+              <pitch>58</pitch>
+              <tpc>12</tpc>
+              <fret>3</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>32nd</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>32nd</durationType>
+            <Note>
+              <pitch>59</pitch>
+              <tpc>19</tpc>
+              <fret>4</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>32nd</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
           </voice>
         </Measure>
       </Staff>

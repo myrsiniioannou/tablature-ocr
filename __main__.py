@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     ############HERE--------------------------------------------------------------
     # 5th Step - Render Book
-
+    renderBook()
     
     
     print("Book Done!")

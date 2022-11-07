@@ -9,7 +9,7 @@
               noteStringMinusOne,
               headerFingering,
               stringFingeringTypeFingering,
-              isBeamContinued,
+              beamContinued,
               articulationYOffset,             
               stemYoffset,
               stemLength,
@@ -50,8 +50,10 @@
         <!--CHORD START-->
         <Chord>
           <!--BEAM CONTINUATION-->
-          {% if isBeamContinued %}
-            <BeamMode>begin32</BeamMode>
+          {% if beamContinued %}
+            <BeamMode>mid</BeamMode>
+          {% else %}
+            <BeamMode>begin</BeamMode>
           {% endif %}
 
           <!--DURATION-->
