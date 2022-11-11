@@ -174,9 +174,9 @@ def hasBoxOrAccentDecoding(hasBoxOrAccentInput):
 
 def stringFingeringDecoding(mdf, idx):
     stringFingering = mdf[(mdf["Position"]==idx) & (mdf["String"]!=0) & (~mdf["Label"].str.isdigit())]
-    stringFingering = stringFingering["String"].to_numpy().astype(str)
-    if stringFingering.size != 0:
-        return stringFingering[0]
+    stringFingering = stringFingering["String"].to_numpy().astype(int)
+    return int(stringFingering[0]) if stringFingering.size != 0 else None
+
 
 
 def parseMeasure(mdf, UserInputData, amountOfChords):

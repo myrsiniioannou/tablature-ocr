@@ -3,7 +3,6 @@
 {% from 'timeSignature.mscx' import timeSignature %}
 {% from 'chord.mscx' import chord %}
 {% from 'verticalBoxAndBreaks.mscx' import verticalBoxAndBreaks %}
-{% macro measure(chordContent, sideFrameText, isMeasureFirstInRow, isMeasureLastInRow, isMeasureLastInPage, numerator, denominator) %}
   {{horizontalBox(sideFrameText, isMeasureFirstInRow)}}
   <Measure>
     <voice>
@@ -14,4 +13,3 @@
     </voice>
   </Measure>
   {{verticalBoxAndBreaks(isMeasureLastInRow, isMeasureLastInPage)}}
-{% endmacro %}

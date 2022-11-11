@@ -1,3 +1,4 @@
+    <!--REHEARSAL MARK-->
     {% if hasBox %}
       <RehearsalMark>
         <minDistance>-999</minDistance>
@@ -8,6 +9,7 @@
         <text></text>
       </RehearsalMark>
     {% endif %}
+    <!--TRIPLET START-->
       {% if triplet == "1" %}
         <Tuplet>
           <normalNotes>2</normalNotes>
@@ -20,13 +22,17 @@
           </Number>
         </Tuplet>
       {% endif %}
+        <!--CHORD START-->
         <Chord>
+          <!--BEAM CONTINUATION-->
           {% if beamContinued %}
-          <BeamMode>mid</BeamMode>
+            <BeamMode>mid</BeamMode>
           {% else %}
-          <BeamMode>begin</BeamMode>
+            <BeamMode>begin</BeamMode>
           {% endif %}
+          <!--DURATION-->
           <durationType>{{duration}}</durationType>
+          <!--SIMPLE SLUR (syzephxi)-->
           {% if  slur != "0" %}
             <Spanner type="Slur">
               {% if  slur == "1" %}
@@ -47,8 +53,7 @@
               {% endif %}
             </Spanner>
           {% endif %}
-
-
+          <!--Triplet Slur-->
           {% if  (triplet != "0") and (triplet != "2") %}
             <Spanner type="Slur">
               {% if  slur == "1" %}
@@ -73,6 +78,7 @@
               {% endif %}
             </Spanner>
           {% endif %}
+          <!--ARTICULATION (UP & DOWN ARROWS)-->
           {% if (articulationDirection == "up") or (articulationDirection == "down") %}
             <Articulation>
               {% if articulationDirection == "up" %}
@@ -88,6 +94,7 @@
               {% endif %}
             </Articulation>
           {% endif %}
+          <!--ACCENT-->
           {% if hasAccent %}
             <Articulation>
               <subtype>articAccentBelow</subtype>
@@ -99,23 +106,29 @@
               {% endif %}
             </Articulation>
           {% endif %}
+          <!--STEM-->
+          <!--If there's not string fingering, there's no stem-->
           {% if stringFingeringTypeFingering %}
             <Stem>
               <offset x="0" y={{stemYOffsetStemLengthFingeringOffset}}/>
               <userLen>{{stemYOffsetStemLengthFingeringOffset}}</userLen>
             </Stem>
           {% endif %}
+          <!--NOTE-->
             <Note>
+              <!--STRING FINGERING-->
               {% if stringFingeringTypeFingering %}
                   <Fingering>
                     <style>RH Guitar Fingering</style>
                     <minDistance>-999</minDistance>
                     <family>Georgia</family>
                     <size>12</size>
+                    <!--STRING FINGERING OFFSET-->
                     <offset x="0" y={{stemYOffsetStemLengthFingeringOffset}}/>
                     <text>{{stringFingeringTypeFingering}}</text>
                   </Fingering>
               {% endif %}
+              <!--HEADER FINGERING-->
               {% if headerFingering %}
                 <Fingering>
                   <style>RH Guitar Fingering</style>
@@ -124,6 +137,7 @@
                   <text>{{headerFingering}}</text>
                 </Fingering>
               {% endif %}
+              <!--NOTE-->
               {% if noteNoteOnStringFret and noteStringMinusOne %}
                 <pitch>{{pitch}}</pitch>
                 <fret>{{noteOnStringFret}}</fret>
@@ -136,6 +150,7 @@
               {% endif %}
             </Note>
         </Chord>
+    <!--TUPLET END-->
     {% if triplet == "3" %}
       <endTuplet/>
     {% endif %}

@@ -13,7 +13,7 @@
           <align>left,center</align>
           <offset x="9" y="0"/>
           <text>{{paragraph}}</text>
-          </Text>
+        </Text>
         <Text>
           <style>Frame</style>
           <size>38</size>
@@ -21,15 +21,15 @@
           <color r="147" g="13" b="23" a="255"/>
           <align>left,center</align>
           <text>&#167;</text>
-          </Text>
+        </Text>
           {% endif %}
         <Image>
           <offset x="49.3" y="0"/>
           <path>a621a367685546af85bc2b772493daf6.svg</path>
           <linkPath>C:/Users/merse/Desktop/Tablature OCR/files/logo/SVG/THIS ONE WORKS.svg</linkPath>
           <size w="6" h="6"/>
-          </Image>
-        </VBox>
+        </Image>
+      </VBox>
       {% if doubleHeading %}
       <VBox>
         <height>7</height>
@@ -44,7 +44,7 @@
             <align>center,center</align>
             <offset x="-3" y="0"/>
             <text>{{headerLetter}}</text>
-            </Text>
+          </Text>
           <Text>
             <style>Frame</style>
             <family>Arial</family>
@@ -52,8 +52,8 @@
             <align>center,center</align>
             <offset x="3" y="0.74"/>
             <text>{{heading1Text}}</text>
-            </Text>
-          </HBox>
+          </Text>
+        </HBox>
         <HBox>
           <width>52.3</width>
           <offset x="52.2978" y="0"/>
@@ -64,7 +64,7 @@
             <align>center,center</align>
             <offset x="3" y="0.74"/>
             <text>{{heading2Text}}</text>
-            </Text>
+          </Text>
           <Text>
             <style>Frame</style>
             <family>Arial</family>
@@ -72,7 +72,7 @@
             <align>center,center</align>
             <offset x="-3" y="0"/>
             <text>{{headerLetter}}</text>
-            </Text>
+          </Text>
           </HBox>
         </VBox>
       {% endif %}
@@ -88,7 +88,7 @@
           <align>center,center</align>
           <offset x="-3" y="0"/>
           <text>{{headerLetter}}</text>
-          </Text>
+        </Text>
         <Text>
           <style>Frame</style>
           <family>Arial</family>
@@ -96,7 +96,7 @@
           <align>center,center</align>
           <offset x="3" y="0.74"/>
           <text>{{heading1Text}}</text>
-          </Text>
-        </VBox>
+        </Text>
+      </VBox>
       {% endif %}
 {% endmacro %}

@@ -6,16 +6,17 @@ from domain_model import *
 import json
 import copy
 from jinja2 import Environment, FileSystemLoader
+import math
 
 
 def loadValues():
     # Set Values on paragraphs, headings, measures, and side frame text
-    # PAGE NUMBERS HERE ARE THE SAME AS IN THE BOOK. Don't deduct 1 to start from 0.
+    # PAGE NUMBERS HERE ARE THE SAME AS IN THE BOOK. Don't deduct 1 in order to start from 0.
     values = {
         "timeSignature" : {
             "twoFour": {       
                 "pages": [*range(1,3)],
-                "numerator": 2 ,
+                "numerator": 4 ,
                 "denominator": 4
             },
             "fourFour": {       
@@ -107,52 +108,75 @@ def findNoteStringMinusOne(string):
 
 def isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues):
     previousIndex = chordIdxPlusOne-1   
-    return False if previousIndex in userInputtedValues['pageBreaksRanges'][notationPageIdx] else True
+    return False if (previousIndex in userInputtedValues['pageBreaksRanges'][notationPageIdx]) or previousIndex == 1 else True
+
+
+def findStemOffsetLengthFingeringOffset(chord):
+    if chord["stringFingering"]["string"] == 6:
+        offset = 7.60
+    elif chord["stringFingering"]["string"] == 5:
+        offset = 6.10
+    elif chord["stringFingering"]["string"] == 4:
+        offset = 4.50    
+    elif chord["stringFingering"]["string"] == 3:
+        offset = 3.10
+    elif chord["stringFingering"]["string"] == 2:
+        offset = 1.60
+    else:
+        offset = 0    
+    return offset
+
+
+def findArticulationOffset(chord):
+    offset = {
+        "16th": {
+            "up" : 2.50,
+            "down" : 1.50
+        },
+        "eighth": {
+            "up" : 2,
+            "down" : 1
+        },
+        "quarter": {
+            "up" : 0,
+            "down" : 0
+        },
+        "half": {
+            "up" : 0,
+            "down" : 0
+        },
+        "double": {
+            "up" : 0,
+            "down" : 0
+        }
+    }
+    try:
+        chordTypeOffset = offset[chord["duration"]][chord["articulation"]]
+    except:
+        chordTypeOffset = 0
+    stemOffset = findStemOffsetLengthFingeringOffset(chord)
+    finalOffset = '{:.2f}'.format(round(chordTypeOffset - stemOffset, 2))
+    return finalOffset
 
 
 def renderChords(env, chord, chordIdxPlusOne, notationPageIdx, userInputtedValues):
-
-
-    #print(chord["duration"])
-
-    # chord = env.get_template("chord.mscx").render(
-
-
-    #duration = chord["duration"],
-    #hasBox = chord["hasBox"],
-    #hasAccent = chord["hasAccent"],
-    #articulationDirection = chord["articulation"],
-    #slur = chord["slur"],
-    #triplet = chord["triplet"],
-    #noteNoteOnStringFret = chord["note"]["noteOnString"],
-    #noteStringMinusOne = findNoteStringMinusOne(chord["note"]["string"]),
-    #headerFingering = chord["headerFingering"],
-    #stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
-    #pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"])
-    #beamContinued = isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues)
-
-
-    # ISOS PREPEI NA YPOLOGISTEI KATI MAZIKO POY NA EPHREAZEI TIS 4 TIMES APO KATO
-
-    # ta arrows einai auta
-    # 1  articulationYOffset = -5, # YOU NEED TO CALCULATE THE OFFSET ACCORDING TO THE NOTEE
-    #    # TO ARTICULATION EINAI -5 OTAN EXEI STEM ME STRING FINGERING
-    #    # TO STEM SYSXETIZETAI KAPOS ME TO OFFSET TOU STRING FINGERING
-
-
-
-    # 2  stemYoffset = 7.6, # YOU NEED TO CALCULATE THIS 
-
-    # 3  stemLength = 7.5, # YOU NEED TO CALCULATE THIS  # paizei na sxetizetai me to stemYoffset
-
-    # 4 stringFingeringStringOffset = 7.6, # paizei na sxetizetai me to stemYoffset
-    
-    # # YPOLOGIZETAI ANALOGA ME THN KATHE XORDH
-    #    # KAI ISOS TO POIO GRAMMA EXEI PANO. H KATHE XORDH EXEI ENA SYGKEKRIMENO OFFSET.
-    #    # KANE TEST
-
-
-    return ""
+    chordRendering = env.get_template("chord.mscx").render(
+        duration = chord["duration"],
+        hasBox = chord["hasBox"],
+        hasAccent = chord["hasAccent"],
+        articulationDirection = chord["articulation"],
+        articulationYOffset = f'"{findArticulationOffset(chord)}"', 
+        slur = chord["slur"],
+        triplet = chord["triplet"],
+        noteNoteOnStringFret = chord["note"]["noteOnString"],
+        noteStringMinusOne = findNoteStringMinusOne(chord["note"]["string"]),
+        headerFingering = chord["headerFingering"],
+        stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
+        pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"]),
+        beamContinued = isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues),
+        stemYOffsetStemLengthFingeringOffset = f'"{findStemOffsetLengthFingeringOffset(chord)}"'
+        )
+    return chordRendering
 
 
 def isMeasureFirstInRow(idx, col):
@@ -185,6 +209,7 @@ def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, tim
     # Measures contain multiple chords that should be rendered first.
     for chordIndexPlusOne, chord in enumerate(measure["chords"][:-1], start = 2):
         renderedChords += renderChords(env, chord, chordIndexPlusOne, notationPageIndex, userValues)
+        
 
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
@@ -313,15 +338,17 @@ def renderBook(JSON):
     stringNumber = bookInJsonFormat["numberofstrings"]
     output = finalizeBookRendering(environment, stringNumber, bookRendering)
     
+
     # Save the Musescore file
-    # musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook.mscx"
-    # with open(f"{musescoreOutputFile}", "w") as f:
-    #     f.write(output)
+    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook.mscx"
+    with open(f"{musescoreOutputFile}", "w") as f:
+         f.write(output)
+
+    print("Book Rendering Done!")
 
 
 
 
 if __name__ == '__main__':
-
     JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\book1.json"
     renderBook(JSON_book_directory)
