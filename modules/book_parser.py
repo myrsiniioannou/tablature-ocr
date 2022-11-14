@@ -144,7 +144,7 @@ def fingeringDecoding(mdf,idx, headerOrNot):
         elif fingeringList[0]=="dot":
             fingering = FingeringType.DOT
     else:
-        fingering = FingeringType.NO_FINGERING
+        fingering = None
     return fingering
 
 
@@ -183,6 +183,9 @@ def parseMeasure(mdf, UserInputData, amountOfChords):
     measure = []
     for chordIndex in range(amountOfChords):
 
+        headerFingeringType = fingeringDecoding(mdf, chordIndex, headerOrNot=True)
+        stringFingeringTypeFingering = fingeringDecoding(mdf, chordIndex, headerOrNot=False)
+
         # For each chordIndex/Position (in df), it must create a chord object
         chord = Chord(duration = durationDecoding(UserInputData["chordDurationInteger"][chordIndex]),
                        hasBox = hasBoxOrAccentDecoding(UserInputData["hasBox"][chordIndex]),
@@ -191,11 +194,12 @@ def parseMeasure(mdf, UserInputData, amountOfChords):
                        slur = UserInputData["slur"][chordIndex],
                        triplet = UserInputData["triplet"][chordIndex],
                        note = Note(noteOnString=noteDecoding(mdf,chordIndex), string=noteStringDecoding(mdf,chordIndex)),
-                       headerFingering = FingeringType(fingeringDecoding(mdf, chordIndex, headerOrNot=True)),
+                       headerFingering = FingeringType(headerFingeringType) if headerFingeringType else None,
                        stringFingering = StringFingering(string=stringFingeringDecoding(mdf, chordIndex),
-                                                        typeFingering=FingeringType(fingeringDecoding(mdf, chordIndex, headerOrNot=False))))
+                                                        typeFingering = FingeringType(stringFingeringTypeFingering) if stringFingeringTypeFingering else None))
         
         measure.append(chord)
+        print(chord)
     return measure
 
 

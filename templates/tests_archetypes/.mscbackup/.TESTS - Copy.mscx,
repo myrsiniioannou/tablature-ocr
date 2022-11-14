@@ -333,7 +333,7 @@
               <direction>down</direction>
               <subtype>articMarcatoBelow</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="1.5"/>
+              <offset x="0" y="-4.6"/>
               </Articulation>
             <Stem>
               <offset x="0" y="6.1"/>
@@ -373,7 +373,7 @@
               <direction>up</direction>
               <subtype>articMarcatoAbove</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="2.5"/>
+              <offset x="0" y="-2"/>
               </Articulation>
             <Stem>
               <offset x="0" y="4.5"/>
@@ -427,6 +427,11 @@
                   </location>
                 </next>
               </Spanner>
+            <Articulation>
+              <subtype>articMarcatoAbove</subtype>
+              <minDistance>-999</minDistance>
+              <offset x="0" y="-0.6"/>
+              </Articulation>
             <Stem>
               <offset x="0" y="3.1"/>
               <userLen>3.1</userLen>
@@ -458,7 +463,7 @@
               <direction>up</direction>
               <subtype>articMarcatoAbove</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="2.5"/>
+              <offset x="0" y="0.9"/>
               </Articulation>
             <Stem>
               <offset x="0" y="1.6"/>
@@ -530,7 +535,7 @@
             <Articulation>
               <subtype>articMarcatoAbove</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="2"/>
+              <offset x="0" y="1.9"/>
               </Articulation>
             <Stem>
               <userLen>0.1</userLen>

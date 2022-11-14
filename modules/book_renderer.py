@@ -160,6 +160,7 @@ def findArticulationOffset(chord):
 
 
 def renderChords(env, chord, chordIdxPlusOne, notationPageIdx, userInputtedValues):
+    stemYOffsetStemLengthFingeringOffset = findStemOffsetLengthFingeringOffset(chord)
     chordRendering = env.get_template("chord.mscx").render(
         duration = chord["duration"],
         hasBox = chord["hasBox"],
@@ -174,7 +175,8 @@ def renderChords(env, chord, chordIdxPlusOne, notationPageIdx, userInputtedValue
         stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
         pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"]),
         beamContinued = isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues),
-        stemYOffsetStemLengthFingeringOffset = f'"{findStemOffsetLengthFingeringOffset(chord)}"'
+        stemYOffsetFingeringOffset = f'"{stemYOffsetStemLengthFingeringOffset}"',
+        stemLength = stemYOffsetStemLengthFingeringOffset
         )
     return chordRendering
 
@@ -210,7 +212,6 @@ def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, tim
     for chordIndexPlusOne, chord in enumerate(measure["chords"][:-1], start = 2):
         renderedChords += renderChords(env, chord, chordIndexPlusOne, notationPageIndex, userValues)
         
-
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
         sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues),
@@ -340,7 +341,7 @@ def renderBook(JSON):
     
 
     # Save the Musescore file
-    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook.mscx"
+    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook1.mscx"
     with open(f"{musescoreOutputFile}", "w") as f:
          f.write(output)
 

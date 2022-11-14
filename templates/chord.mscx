@@ -101,8 +101,8 @@
           {% endif %}
           {% if stringFingeringTypeFingering %}
             <Stem>
-              <offset x="0" y={{stemYOffsetStemLengthFingeringOffset}}/>
-              <userLen>{{stemYOffsetStemLengthFingeringOffset}}</userLen>
+              <offset x="0" y={{stemYOffsetFingeringOffset}}/>
+              <userLen>{{stemLength}}</userLen>
             </Stem>
           {% endif %}
             <Note>
@@ -112,7 +112,7 @@
                     <minDistance>-999</minDistance>
                     <family>Georgia</family>
                     <size>12</size>
-                    <offset x="0" y={{stemYOffsetStemLengthFingeringOffset}}/>
+                    <offset x="0" y={{stemYOffsetFingeringOffset}}/>
                     <text>{{stringFingeringTypeFingering}}</text>
                   </Fingering>
               {% endif %}
@@ -124,12 +124,13 @@
                   <text>{{headerFingering}}</text>
                 </Fingering>
               {% endif %}
-              {% if noteNoteOnStringFret and noteStringMinusOne %}
+
+              {% if noteNoteOnStringFret %}
                 <pitch>{{pitch}}</pitch>
-                <fret>{{noteOnStringFret}}</fret>
+                <fret>{{noteNoteOnStringFret}}</fret>
                 <string>{{noteStringMinusOne}}</string>
               {% else %}
-                <pitch>45</pitch>
+                <pitch>64</pitch>
                 <fret>0</fret>
                 <string>0</string>
                 <visible>0</visible>         

@@ -40,7 +40,6 @@ class FingeringType(str, Enum):
     M = "m"
     A = "a"
     DOT = "dot"
-    NO_FINGERING = None
     
 
 @dataclass
@@ -77,12 +76,6 @@ class Measure:
 @dataclass
 class NotationPage:
     measures: Measure = field(default_factory=list)
-
-
-#@dataclass
-#class SectionPageTitle(str, Enum):
-    #CHAPTER = "Chapter"
-    #UNIT = "Unit"
 
 
 @dataclass
