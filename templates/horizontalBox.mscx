@@ -4,7 +4,7 @@
       {% if isMeasureFirstInRow %}
         <width>5</width>
       {% else %}
-        <width>8</width>
+        <width>7</width>
       {% endif %}
       {% if sideFrameText %}
         <Text>

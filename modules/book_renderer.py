@@ -14,14 +14,9 @@ def loadValues():
     # PAGE NUMBERS HERE ARE THE SAME AS IN THE BOOK. Don't deduct 1 in order to start from 0.
     values = {
         "timeSignature" : {
-            "twoFour": {       
-                "pages": [*range(1,3)],
-                "numerator": 4 ,
-                "denominator": 4
-            },
             "fourFour": {       
-                "pages": [*range(3,5)],
-                "numerator": 4 ,
+                "pages": [*range(1,6)],
+                "numerator": 4,
                 "denominator": 4
             }
         },
@@ -48,8 +43,7 @@ def loadValues():
         "headerLetter" : {
             "F" : [1,2],
             "E" : [3,4,5,6,7],
-        },
-        "beamBreaks" : [*range(4,18), *range(30,40)],
+        }
     }
 
     pageBreakPatterns  = {
@@ -107,7 +101,7 @@ def findNoteStringMinusOne(string):
 
 
 def isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues):
-    previousIndex = chordIdxPlusOne-1   
+    previousIndex = chordIdxPlusOne-1
     return False if (previousIndex in userInputtedValues['pageBreaksRanges'][notationPageIdx]) or previousIndex == 1 else True
 
 
@@ -190,7 +184,7 @@ def isMeasureLastInRow(idx, col):
 
 
 def isMeasureLastInPage(idx, col, rows):
-    return idx == rows*col
+    return idx == (rows*col-1)
 
 
 def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
@@ -209,9 +203,10 @@ def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
 def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, timeSignNumerator, timeSignDenominator):
     renderedChords = ""
     # Measures contain multiple chords that should be rendered first.
-    for chordIndexPlusOne, chord in enumerate(measure["chords"][:-1], start = 2):
+    for chordIndex, chord in enumerate(measure["chords"][:], start = 1):
+        chordIndexPlusOne = chordIndex + 1
         renderedChords += renderChords(env, chord, chordIndexPlusOne, notationPageIndex, userValues)
-        
+    
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
         sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues),

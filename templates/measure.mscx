@@ -3,13 +3,13 @@
 {% from 'timeSignature.mscx' import timeSignature %}
 {% from 'chord.mscx' import chord %}
 {% from 'verticalBoxAndBreaks.mscx' import verticalBoxAndBreaks %}
-  {{horizontalBox(sideFrameText, isMeasureFirstInRow)}}
-  <Measure>
-    <voice>
-      {{barline()}}   
-      {{timeSignature(numerator, denominator)}}
-      {{chordContent}}
-      {{barline()}}
-    </voice>
-  </Measure>
-  {{verticalBoxAndBreaks(isMeasureLastInRow, isMeasureLastInPage)}}
+{{horizontalBox(sideFrameText, isMeasureFirstInRow)}}
+<Measure>
+  <voice>
+    {{barline()}}   
+    {{timeSignature(numerator, denominator)}}
+    {{chordContent}}
+    {{barline()}}
+  </voice>
+{{verticalBoxAndBreaks(isMeasureLastInRow, isMeasureLastInPage)}}
+</Measure>
