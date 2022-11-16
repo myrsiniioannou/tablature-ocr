@@ -96,8 +96,8 @@ def findNotePitch(noteOnString, string):
     return (defaultStringPitches[string - 1] + noteOnString) if noteOnString else 45
     
 
-def findNoteStringMinusOne(string):
-    return (string - 1) if string else None
+def findNoteString(string):
+    return string if string else None
 
 
 def isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues):
@@ -124,22 +124,22 @@ def findStemOffsetLengthFingeringOffset(chord):
 def findArticulationOffset(chord):
     offset = {
         "16th": {
-            "up" : 2.50,
-            "down" : 1.50
+            "up" : 2.5,
+            "down" : 1.5
         },
         "eighth": {
             "up" : 2,
             "down" : 1
         },
         "quarter": {
-            "up" : 0,
+            "up" : 1,
             "down" : 0
         },
         "half": {
-            "up" : 0,
-            "down" : 0
+            "up" : 1.5,
+            "down" : 0.5
         },
-        "double": {
+        "whole": {
             "up" : 0,
             "down" : 0
         }
@@ -152,27 +152,54 @@ def findArticulationOffset(chord):
     finalOffset = '{:.2f}'.format(round(chordTypeOffset - stemOffset, 2))
     return finalOffset
 
+def findTripletYoffset(noteString):
 
-def renderChords(env, chord, chordIdxPlusOne, notationPageIdx, userInputtedValues):
-    stemYOffsetStemLengthFingeringOffset = findStemOffsetLengthFingeringOffset(chord)
-    chordRendering = env.get_template("chord.mscx").render(
-        duration = chord["duration"],
-        hasBox = chord["hasBox"],
-        hasAccent = chord["hasAccent"],
-        articulationDirection = chord["articulation"],
-        articulationYOffset = f'"{findArticulationOffset(chord)}"', 
-        slur = chord["slur"],
-        triplet = chord["triplet"],
-        noteNoteOnStringFret = chord["note"]["noteOnString"],
-        noteStringMinusOne = findNoteStringMinusOne(chord["note"]["string"]),
-        headerFingering = chord["headerFingering"],
-        stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
-        pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"]),
-        beamContinued = isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues),
-        stemYOffsetFingeringOffset = f'"{stemYOffsetStemLengthFingeringOffset}"',
-        stemLength = stemYOffsetStemLengthFingeringOffset
-        )
-    return chordRendering
+    firstTripletoffset = 5.5 + (noteString-1)*1.5
+    thirdTripletOffset = 0
+
+
+
+    return '{:.2f}'.format(firstTripletoffset), '{:.2f}'.format(thirdTripletOffset)
+
+
+def renderChords(env, chord, chordIdx, notationPageIdx, userInputtedValues):
+    #stemYOffsetStemLengthFingeringOffset = findStemOffsetLengthFingeringOffset(chord)
+    noteString = findNoteString(chord["note"]["string"])
+    #if chord["triplet"] == 1:
+        
+        # print("chordIdx: ",chordIdx-1, "String: ",noteString)
+
+        # print(chord["note"]["string"])
+        # print('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^')
+        # # Chord Idx + 1 because the index starts from 1. We need 2 notes after, therefore +1
+        # print("chordIdx3: ", chordIdx + 1, "String: ",noteString)
+
+        # print('---------------------------------')
+
+
+    
+    # firstTripletYoffset, thirdTripletYoffset = findTripletYoffset(noteString)
+
+    # chordRendering = env.get_template("chord.mscx").render(
+    #     duration = chord["duration"],
+    #     hasBox = chord["hasBox"],
+    #     hasAccent = chord["hasAccent"],
+    #     articulationDirection = chord["articulation"],
+    #     articulationYOffset = f'"{findArticulationOffset(chord)}"', 
+    #     slur = chord["slur"],
+    #     triplet = chord["triplet"],
+    #     noteNoteOnStringFret = chord["note"]["noteOnString"],
+    #     noteStringMinusOne = noteString - 1,
+    #     headerFingering = chord["headerFingering"],
+    #     stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
+    #     pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"]),
+    #     beamContinued = isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues),
+    #     stemYOffsetFingeringOffset = f'"{stemYOffsetStemLengthFingeringOffset}"',
+    #     stemLength = stemYOffsetStemLengthFingeringOffset,
+    #     firstTripletYoffset = firstTripletYoffset,
+    #     thirdTripletYoffset = thirdTripletYoffset
+    #     )
+    return ""#chordRendering
 
 
 def isMeasureFirstInRow(idx, col):
@@ -203,9 +230,19 @@ def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
 def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, timeSignNumerator, timeSignDenominator):
     renderedChords = ""
     # Measures contain multiple chords that should be rendered first.
-    for chordIndex, chord in enumerate(measure["chords"][:], start = 1):
-        chordIndexPlusOne = chordIndex + 1
-        renderedChords += renderChords(env, chord, chordIndexPlusOne, notationPageIndex, userValues)
+    for chordIndex, chord in enumerate(measure["chords"], start = 1):
+        # if this is the first note of the triplet and the third one exist then return the string of the third one
+        if chord["triplet"] == 1 and measure["chords"][chordIndex+1]:
+            print("IDX:", chordIndex)
+            print(chord)
+            print("IDX:", chordIndex+2)
+            print(measure["chords"][chordIndex+1])
+            print(measure["chords"][chordIndex+1]["note"]["string"])
+            stringOfThirdTriplet = measure["chords"][chordIndex+1]["note"]["string"]
+            print("--------------------------------------------------------")
+
+
+        renderedChords += renderChords(env, chord, chordIndex, notationPageIndex, userValues)
     
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,

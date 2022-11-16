@@ -10,6 +10,7 @@
     {% endif %}
     {% if triplet == 1 %}
       <Tuplet>
+        <offset x="0" y="0.7"/>
         <normalNotes>2</normalNotes>
         <actualNotes>3</actualNotes>
         <p1 x="0" y="-0.1"/>
@@ -20,6 +21,7 @@
         </Number>
         <family>Georgia</family>
         <italic>0</italic>
+        <minDistance>0.4</minDistance>
       </Tuplet>
     {% endif %}
     <Chord>
@@ -54,8 +56,9 @@
           {% if  triplet == 1 %}
             <Slur>
               <SlurSegment no="0">
+                <o4 x="0" y={{thirdTripletYoffset}}/>
                 <autoplace>0</autoplace>
-                <offset x="0" y="-5.5"/>
+                <offset x="0" y={{firstTripletYoffset}}/>
                 </SlurSegment>
               <up>up</up>
             </Slur>

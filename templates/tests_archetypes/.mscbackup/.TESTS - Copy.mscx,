@@ -9,9 +9,9 @@
     <Style>
       <pageWidth>8.5</pageWidth>
       <pageHeight>11.6902</pageHeight>
-      <pagePrintableWidth>7.2189</pagePrintableWidth>
-      <pageEvenLeftMargin>0.640551</pageEvenLeftMargin>
-      <pageOddLeftMargin>0.640551</pageOddLeftMargin>
+      <pagePrintableWidth>7.39764</pagePrintableWidth>
+      <pageEvenLeftMargin>0.551181</pageEvenLeftMargin>
+      <pageOddLeftMargin>0.551181</pageOddLeftMargin>
       <pageEvenTopMargin>0.590157</pageEvenTopMargin>
       <pageEvenBottomMargin>0.590157</pageEvenBottomMargin>
       <pageOddTopMargin>1.10236</pageOddTopMargin>
@@ -167,17 +167,21 @@
       <Measure>
         <voice>
           <TimeSig>
-            <sigN>4</sigN>
+            <sigN>5</sigN>
             <sigD>4</sigD>
             </TimeSig>
           <Chord>
             <durationType>16th</durationType>
-            <Articulation>
-              <direction>up</direction>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2.5"/>
-              </Articulation>
+            <Note>
+              <visible>0</visible>
+              <pitch>64</pitch>
+              <tpc>18</tpc>
+              <fret>0</fret>
+              <string>0</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
             <Note>
               <pitch>55</pitch>
               <tpc>15</tpc>
@@ -187,12 +191,6 @@
             </Chord>
           <Chord>
             <durationType>16th</durationType>
-            <Articulation>
-              <direction>down</direction>
-              <subtype>articMarcatoBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="1.5"/>
-              </Articulation>
             <Note>
               <pitch>55</pitch>
               <tpc>15</tpc>
@@ -201,13 +199,397 @@
               </Note>
             </Chord>
           <Chord>
-            <durationType>eighth</durationType>
-            <Articulation>
-              <direction>up</direction>
-              <subtype>articMarcatoAbove</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="2"/>
-              </Articulation>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <HBox>
+        <width>5</width>
+        </HBox>
+      <Measure>
+        <LayoutBreak>
+          <subtype>line</subtype>
+          </LayoutBreak>
+        <voice>
+          <TimeSig>
+            <sigN>5</sigN>
+            <sigD>4</sigD>
+            </TimeSig>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          </voice>
+        </Measure>
+      <HBox>
+        <width>5</width>
+        </HBox>
+      <Measure>
+        <voice>
+          <Chord>
+            <BeamMode>mid</BeamMode>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
+            <Note>
+              <pitch>55</pitch>
+              <tpc>15</tpc>
+              <fret>0</fret>
+              <string>2</string>
+              </Note>
+            </Chord>
+          <Chord>
+            <durationType>16th</durationType>
             <Note>
               <pitch>55</pitch>
               <tpc>15</tpc>
@@ -247,10 +629,10 @@
               </Note>
             </Chord>
           <Rest>
-            <durationType>16th</durationType>
+            <durationType>quarter</durationType>
             </Rest>
           <Rest>
-            <durationType>16th</durationType>
+            <durationType>eighth</durationType>
             </Rest>
           </voice>
         </Measure>
@@ -281,8 +663,9 @@
             <Spanner type="Slur">
               <Slur>
                 <SlurSegment no="0">
+                  <o4 x="0" y="-3"/>
                   <autoplace>0</autoplace>
-                  <offset x="0" y="-5.5"/>
+                  <offset x="0" y="-10"/>
                   </SlurSegment>
                 <up>up</up>
                 </Slur>
@@ -297,14 +680,9 @@
               <minDistance>-999</minDistance>
               <offset x="0" y="-5"/>
               </Articulation>
-            <Articulation>
-              <subtype>articAccentBelow</subtype>
-              <minDistance>-999</minDistance>
-              <offset x="0" y="-9"/>
-              </Articulation>
             <Stem>
               <offset x="0" y="7.6"/>
-              <userLen>7.6</userLen>
+              <userLen>7.5</userLen>
               </Stem>
             <Note>
               <Fingering>
@@ -321,10 +699,10 @@
                 <size>12</size>
                 <text>i</text>
                 </Fingering>
-              <pitch>65</pitch>
-              <tpc>13</tpc>
-              <fret>1</fret>
-              <string>0</string>
+              <pitch>50</pitch>
+              <tpc>16</tpc>
+              <fret>0</fret>
+              <string>3</string>
               </Note>
             </Chord>
           <Chord>
@@ -333,12 +711,8 @@
               <direction>down</direction>
               <subtype>articMarcatoBelow</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="-4.6"/>
+              <offset x="0" y="1.5"/>
               </Articulation>
-            <Stem>
-              <offset x="0" y="6.1"/>
-              <userLen>6.1</userLen>
-              </Stem>
             <Note>
               <Fingering>
                 <style>RH Guitar Fingering</style>
@@ -346,17 +720,9 @@
                 <size>12</size>
                 <text>m</text>
                 </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="6.1"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>66</pitch>
-              <tpc>20</tpc>
-              <fret>2</fret>
+              <pitch>65</pitch>
+              <tpc>13</tpc>
+              <fret>1</fret>
               <string>0</string>
               </Note>
             </Chord>
@@ -373,12 +739,8 @@
               <direction>up</direction>
               <subtype>articMarcatoAbove</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="-2"/>
+              <offset x="0" y="2.5"/>
               </Articulation>
-            <Stem>
-              <offset x="0" y="4.5"/>
-              <userLen>4.5</userLen>
-              </Stem>
             <Note>
               <Fingering>
                 <style>RH Guitar Fingering</style>
@@ -386,18 +748,10 @@
                 <size>12</size>
                 <text>i</text>
                 </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="4.5"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>67</pitch>
-              <tpc>15</tpc>
-              <fret>3</fret>
-              <string>0</string>
+              <pitch>40</pitch>
+              <tpc>18</tpc>
+              <fret>0</fret>
+              <string>5</string>
               </Note>
             </Chord>
           <endTuplet/>
@@ -428,13 +782,14 @@
                 </next>
               </Spanner>
             <Articulation>
-              <subtype>articMarcatoAbove</subtype>
+              <direction>down</direction>
+              <subtype>articMarcatoBelow</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="-0.6"/>
+              <offset x="0" y="-4.5"/>
               </Articulation>
             <Stem>
-              <offset x="0" y="3.1"/>
-              <userLen>3.1</userLen>
+              <offset x="0" y="6"/>
+              <userLen>6</userLen>
               </Stem>
             <Note>
               <Fingering>
@@ -448,12 +803,12 @@
                 <minDistance>-999</minDistance>
                 <family>Georgia</family>
                 <size>12</size>
-                <offset x="0" y="3.1"/>
+                <offset x="0" y="6.1"/>
                 <text>p</text>
                 </Fingering>
-              <pitch>68</pitch>
-              <tpc>22</tpc>
-              <fret>4</fret>
+              <pitch>66</pitch>
+              <tpc>8</tpc>
+              <fret>2</fret>
               <string>0</string>
               </Note>
             </Chord>
@@ -463,14 +818,9 @@
               <direction>up</direction>
               <subtype>articMarcatoAbove</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="0.9"/>
+              <offset x="0" y="2.5"/>
               </Articulation>
-            <Stem>
-              <offset x="0" y="1.6"/>
-              <userLen>1.6</userLen>
-              </Stem>
             <Note>
-              <visible>0</visible>
               <Fingering>
                 <style>RH Guitar Fingering</style>
                 <family>Georgia</family>
@@ -485,9 +835,9 @@
                 <offset x="0" y="1.6"/>
                 <text>p</text>
                 </Fingering>
-              <pitch>69</pitch>
-              <tpc>17</tpc>
-              <fret>5</fret>
+              <pitch>67</pitch>
+              <tpc>15</tpc>
+              <fret>3</fret>
               <string>0</string>
               </Note>
             </Chord>
@@ -507,24 +857,15 @@
               <offset x="0" y="1.5"/>
               </Articulation>
             <Note>
-              <visible>0</visible>
               <Fingering>
                 <style>RH Guitar Fingering</style>
                 <family>Georgia</family>
                 <size>12</size>
                 <text>m</text>
                 </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <offset x="0" y="0.1"/>
-                <text>p</text>
-                </Fingering>
-              <pitch>70</pitch>
-              <tpc>24</tpc>
-              <fret>6</fret>
+              <pitch>68</pitch>
+              <tpc>22</tpc>
+              <fret>4</fret>
               <string>0</string>
               </Note>
             </Chord>
@@ -535,25 +876,14 @@
             <Articulation>
               <subtype>articMarcatoAbove</subtype>
               <minDistance>-999</minDistance>
-              <offset x="0" y="1.9"/>
+              <offset x="0" y="2"/>
               </Articulation>
-            <Stem>
-              <userLen>0.1</userLen>
-              </Stem>
             <Note>
-              <visible>0</visible>
               <Fingering>
                 <style>RH Guitar Fingering</style>
                 <family>Georgia</family>
                 <size>12</size>
                 <text>i</text>
-                </Fingering>
-              <Fingering>
-                <style>RH Guitar Fingering</style>
-                <minDistance>-999</minDistance>
-                <family>Georgia</family>
-                <size>12</size>
-                <text>p</text>
                 </Fingering>
               <pitch>66</pitch>
               <tpc>8</tpc>
@@ -561,9 +891,6 @@
               <string>0</string>
               </Note>
             </Chord>
-          <Segment>
-            <leadingSpace>0.0805858</leadingSpace>
-            </Segment>
           <Chord>
             <durationType>eighth</durationType>
             <Articulation>
@@ -600,6 +927,9 @@
             </Chord>
           <Rest>
             <durationType>half</durationType>
+            </Rest>
+          <Rest>
+            <durationType>quarter</durationType>
             </Rest>
           </voice>
         </Measure>

@@ -100,7 +100,7 @@ def durationDecoding(durationInteger):
     elif durationInteger == 3:
         duration = ChordDuration.HALF
     elif durationInteger == 4:
-        duration = ChordDuration.DOUBLE
+        duration = ChordDuration.WHOLE
     return duration
 
 

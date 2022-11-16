@@ -9,7 +9,7 @@ class ChordDuration(str, Enum):
     EIGHTH = "eighth"
     QUARTER = "quarter"
     HALF = "half"
-    DOUBLE = "double"
+    WHOLE = "whole"
       
 
 @dataclass

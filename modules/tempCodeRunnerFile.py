@@ -1,1 +1,1 @@
-isMeasureLastInRow(measureIndex, userValues["measures"]["Horizontal"])
+thirdChordFromCurrent
