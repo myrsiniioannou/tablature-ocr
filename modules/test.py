@@ -1,3 +1,4 @@
-l = [1,2,3]
+a = [1, 2]
+v = map(lambda x: x - 1, [1, 2])
 
-print(len(l))
+print(map(lambda x: x - 1, [1, 2]))

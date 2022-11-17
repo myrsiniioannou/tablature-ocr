@@ -115,7 +115,7 @@
                 <minDistance>-999</minDistance>
                 <family>Georgia</family>
                 <size>12</size>
-                <offset x="0" y={{stemYOffsetFingeringOffset}}/>
+                <offset x="0" y={{stemYOffsetFingeringOffsetWithouNoteOffset}}/>
                 <text>{{stringFingeringTypeFingering}}</text>
               </Fingering>
           {% endif %}
