@@ -29,12 +29,12 @@ def loadValues():
             "IB": [5, 6]
         },
         "headings" : {
-            "singleHeading": [*range(4,18), *range(30,40)],
-            "doubleHeading": [*range(1,4), *range(18,30)]
+            "singleHeading": [],
+            "doubleHeading": [*range(1,8)]
         },
         "sideFrameTextExistence" : {
-            "sideFrameTextExistencePages" : [*range(1,5)],
-            "sameFrameTextInMultiMeasuredRow" : [*range(1,5)],
+            "sideFrameTextExistencePages" : [],
+            "sameFrameTextInMultiMeasuredRow" : [],
             "sideFrameLetter" : {
                 "A" : [1,2],
                 "B" : [3,4,5,6,7]
@@ -45,32 +45,46 @@ def loadValues():
             "E" : [3,4,5,6,7],
         }
     }
-
-    pageBreakPatterns  = {
+    doubleBeamBreaks  = {
         "pattern1" : {
             "pages" : [range(1,2)],
-            "pageBreaks" : [5,8]
+            "beamBreaks" : [5,10]
         },
         "pattern2" : {
             "pages" : [range(2,3)],
-            "pageBreaks" : [7,16]
+            "beamBreaks" : [7,16]
         },
         "pattern3" : {
             "pages" : [range(3,200)],
-            "pageBreaks" : [9]
+            "beamBreaks" : [9]
         }
     }
-    values["pageBreaksRanges"] = findPageBreaks(pageBreakPatterns)
+    singleBeamBreaks  = {
+        "pattern1" : {
+            "pages" : [range(1,2)],
+            "beamBreaks" : [13]
+        },
+        "pattern2" : {
+            "pages" : [range(2,3)],
+            "beamBreaks" : [9,11]
+        },
+        "pattern3" : {
+            "pages" : [range(3,200)],
+            "beamBreaks" : [15]
+        }
+    }
+    values["doubleBeamBreakRanges"] = findPageBreaks(doubleBeamBreaks)
+    values["singleBeamBreakRanges"] = findPageBreaks(singleBeamBreaks)
     return values
 
 
 def findPageBreaks(patterns):
-    pageBreaksRanges = dict()
+    beamBreakRanges = dict()
     for pattern, vals in patterns.items():
         for pageRange in vals["pages"]:
             for page in pageRange:
-                pageBreaksRanges[page] = vals["pageBreaks"]
-    return pageBreaksRanges
+                beamBreakRanges[page] = vals["beamBreaks"]
+    return beamBreakRanges
 
 
 def loadJSON(JSONFile):
@@ -96,22 +110,21 @@ def findNotePitch(noteOnString, string):
     return (defaultStringPitches[string - 1] + noteOnString) if noteOnString else 45
     
 
-def isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues):
-    previousIndex = chordIdxPlusOne-1
-    return False if (previousIndex in userInputtedValues['pageBreaksRanges'][notationPageIdx]) or previousIndex == 1 else True
+def isBeamBreaking(chordIdx, beamBreakRanges):
+    return True if (chordIdx in beamBreakRanges) or chordIdx == 1 else False
 
 
 def findStemOffsetLengthFingeringOffset(chordString):
     if chordString == 6:
-        offset = 7.60
+        offset = 7.6
     elif chordString == 5:
-        offset = 6.10
+        offset = 6.1
     elif chordString == 4:
-        offset = 4.50    
+        offset = 4.6 
     elif chordString == 3:
-        offset = 3.10
+        offset = 3.1
     elif chordString == 2:
-        offset = 1.60
+        offset = 1.6
     else:
         offset = 0    
     return offset
@@ -161,7 +174,6 @@ def findTripletYoffset(stringOfCurrentNoteInChord, stringOfThirdTripletOfCurrent
 def renderChords(env, chord, chordIdx, notationPageIdx, userInputtedValues, stringOfThirdTripletOfCurrentChord):
     stemYOffsetStemLengthFingeringOffset = findStemOffsetLengthFingeringOffset(chord["stringFingering"]["string"]) 
     firstTripletYoffset, thirdTripletYoffset = findTripletYoffset(chord["note"]["string"], stringOfThirdTripletOfCurrentChord)
-    chordIdxPlusOne = chordIdx + 1
     chordRendering = env.get_template("chord.mscx").render(
         duration = chord["duration"],
         hasBox = chord["hasBox"],
@@ -175,7 +187,8 @@ def renderChords(env, chord, chordIdx, notationPageIdx, userInputtedValues, stri
         headerFingering = chord["headerFingering"],
         stringFingeringTypeFingering = chord["stringFingering"]["typeFingering"],
         pitch = findNotePitch(chord["note"]["noteOnString"], chord["note"]["string"]),
-        beamContinued = isBeamContinued(chordIdxPlusOne, notationPageIdx, userInputtedValues),
+        doubleBeamBreaking = isBeamBreaking(chordIdx, userInputtedValues['doubleBeamBreakRanges'][notationPageIdx]),
+        singleBeamBreaking = isBeamBreaking(chordIdx, userInputtedValues['singleBeamBreakRanges'][notationPageIdx]),
         stemYOffsetFingeringOffset = f'"{stemYOffsetStemLengthFingeringOffset}"',
         stemYOffsetFingeringOffsetWithouNoteOffset = f'"{stemYOffsetStemLengthFingeringOffset - (1.5*(chord["note"]["string"]-1) if chord["note"]["string"] else 0)}"', 
         stemLength = stemYOffsetStemLengthFingeringOffset,
@@ -206,7 +219,7 @@ def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
             col = int(userValues["measures"]["Horizontal"])
             measureFrameText += str(abs(measureIndex%col - measureIndex)//col + 1)
         else:
-            measureFrameText += measureIndex + 1 # Because we start from 0
+            measureFrameText += str(measureIndex + 1) # Because we start from 0
     return measureFrameText
 
 

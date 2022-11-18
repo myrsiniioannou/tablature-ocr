@@ -2,7 +2,7 @@
   {% if (sideFrameText) or (not isMeasureFirstInRow)%}
     <HBox>
       {% if isMeasureFirstInRow %}
-        <width>5</width>
+        <width>6</width>
       {% else %}
         <width>7</width>
       {% endif %}

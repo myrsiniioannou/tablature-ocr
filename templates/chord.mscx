@@ -25,10 +25,12 @@
       </Tuplet>
     {% endif %}
     <Chord>
-      {% if beamContinued %}
-      <BeamMode>mid</BeamMode>
-      {% else %}
+      {% if doubleBeamBreaking %}
       <BeamMode>begin</BeamMode>
+      {% elif singleBeamBreaking %}
+      <BeamMode>begin32</BeamMode>
+      {% else %}
+      <BeamMode>mid</BeamMode>
       {% endif %}
       <durationType>{{duration}}</durationType>
       {% if  slur != 0 %}

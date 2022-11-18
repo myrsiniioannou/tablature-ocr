@@ -1,6 +1,6 @@
 {% macro header(singleHeading, doubleHeading, paragraph, headerLetter, heading1Text, heading2Text) %}
       <VBox>
-        <height>10</height>
+        <height>11</height>
         <topGap>0</topGap>
         <boxAutoSize>0</boxAutoSize>
         {% if paragraph %}
@@ -24,7 +24,7 @@
         </Text>
           {% endif %}
         <Image>
-          <offset x="49.3" y="0"/>
+          <offset x="51.75" y="0"/>
           <path>a621a367685546af85bc2b772493daf6.svg</path>
           <linkPath>C:/Users/merse/Desktop/Tablature OCR/files/logo/SVG/THIS ONE WORKS.svg</linkPath>
           <size w="6" h="6"/>
@@ -36,7 +36,7 @@
         <topGap>0</topGap>
         <boxAutoSize>0</boxAutoSize>
         <HBox>
-          <width>52.3</width>
+          <width>54.8</width>
           <Text>
             <style>Frame</style>
             <family>Arial</family>
@@ -55,8 +55,9 @@
           </Text>
         </HBox>
         <HBox>
-          <width>52.3</width>
-          <offset x="52.2978" y="0"/>
+          <width>54.8</width>
+          <topGap>-29</topGap>
+          <offset x="54.8" y="0"/>
           <Text>
             <style>Frame</style>
             <family>Arial</family>
