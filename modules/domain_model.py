@@ -96,7 +96,7 @@ class Book:
 
 
 if __name__ == '__main__':
-    
+    '''
     # Testing
     chord1 = Chord(duration=ChordDuration.SIXTEENTH, note=1, articulation= "Up", stringFingering= StringFingering(string=1, typeFingering=FingeringType("p")))
 
@@ -122,3 +122,4 @@ if __name__ == '__main__':
 
     #print(book1)
     print(json.dumps(book1, indent=3, default=vars))
+    '''

@@ -1,1 +1,1 @@
-           "beamBreaks" : [13]
+chordDurationInteger

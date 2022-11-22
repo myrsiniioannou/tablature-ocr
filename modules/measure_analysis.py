@@ -1,76 +1,112 @@
-#from PIL import Image
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-#from IPython.display import Image
 from sklearn.cluster import KMeans
 import pandas as pd
-#import tqdm as notebook_tqdm
-from detecto import core #, utils, visualize
-from detecto.visualize import show_labeled_image #, plot_prediction_grid
-#from torchvision import transforms
-#import torch
+from detecto import core
+from detecto.visualize import show_labeled_image
 from pathlib import Path
+
+
+def loadValues():
+    values = {
+            "stringNumber" : 6, 
+            "noteNumber": {
+                "8": {
+                    "pages": [*range(1,3)],
+                },
+                "10" : {
+                    "pages": [*range(3,4)],
+                },
+                "12" : {
+                    "pages": [*range(4,6)],
+                }
+            },
+            "fingeringNumber": {
+                "15": {
+                    "pages": [*range(1,3)],
+                },
+                "16" : {
+                    "pages": [*range(3,4)],
+                },
+                "17" : {
+                    "pages": [*range(4,6)],
+                }
+            },
+            "chordNumber": {
+                "15": {
+                    "pages": [*range(1,3)],
+                },
+                "16" : {
+                    "pages": [*range(3,4)],
+                },
+                "17" : {
+                    "pages": [*range(4,6)],
+                }
+            },
+            "headerNumber": {
+                "15": {
+                    "pages": [*range(1,3)],
+                },
+                "16" : {
+                    "pages": [*range(3,4)],
+                },
+                "17" : {
+                    "pages": [*range(4,6)],
+                }
+            },
+            "headerExistence": {
+                True: {
+                    "pages": [*range(1,3)],
+                },
+                False : {
+                    "pages": [*range(3,6)],
+                }
+            },
+            "noteStringExistence": {
+                True: {
+                    "pages": [*range(1,3)],
+                },
+                False : {
+                    "pages": [*range(3,6)],
+                }
+            },
+            "noteStrings": {
+                "1": {
+                    "pages": [*range(1,3)],
+                },
+                "2" : {
+                    "pages": [*range(3,6)],
+                }
+            }
+    }
+    return values
+
+def measureDataFromInput(pageFolder):
+    measureValues = loadValues()
+    measureData = {
+    "stringNumber":measureValues["stringNumber"],
+    "noteNumber": int([key for key, value in measureValues["noteNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "fingeringNumber" : int([key for key, value in measureValues["fingeringNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "chordNumber" : int([key for key, value in measureValues["chordNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "headerNumber" : int([key for key, value in measureValues["headerNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "headerExistence" : bool([key for key, value in measureValues["headerExistence"].items() if (int(pageFolder) in value["pages"])][0]),
+    "noteStringExistence" : bool([key for key, value in measureValues["noteStringExistence"].items() if (int(pageFolder) in value["pages"])][0]),
+    "noteStrings" : [int(key) for key, value in measureValues["noteStrings"].items() if (int(pageFolder) in value["pages"])],
+    }
+    return measureData
 
 
 def incorectResponse():
     print("That's not a correct response, try again")
 
 
-def measureUserInput(data):
-    # NOTES = 1,2,3,4,5,6.. = labels with integers
-    # FINGERING = p,i,m,a   = labels with strings
-
-    while True:
-        try:
-            usePreviousData = str(input("Use previous data? Y/N "))
-            if usePreviousData == 'y' or usePreviousData == 'n':
-                break
-            else:
-                raise ValueError()
-        except ValueError:
-            incorectResponse()
-            
-    if usePreviousData == "n":
-
-        while True:
-            try:
-                data["stringNumber"], data["noteNumber"], data["fingeringNumber"], data["chordNumber"], data["headerNumber"] = map (int, input("Enter: String Number, Note Number, Fingering Number, Chord Number, Header Number: \n").split())
-                break
-            except ValueError:
-                incorectResponse()
-                
-        while True:
-            try:
-                data["headerExistence"] =  bool(input("Header Existence (y or ENTER): "))
-                break
-            except ValueError:
-                incorectResponse()
-                
-        while True:
-            try:
-                data["noteStringExistence"] =  bool(input("Note String Existence (y or ENTER): "))
-                if data["noteStringExistence"]:
-                    while True:
-                        try:
-                            data["noteStrings"] = list(map(int,input("Note Strings: ").strip().split()))
-                            break
-                        except ValueError:
-                            incorectResponse()
-                else:
-                    data["noteStrings"] = 0
-                break
-            except ValueError:
-                incorectResponse()  
-    return data
-
 def horizontalLineDetection(imgInit):
     # Load image, convert to grayscale, Otsu's threshold
     img = imgInit.copy()
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-
     # Detect horizontal lines
     horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (18,1))
     detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
@@ -78,9 +114,6 @@ def horizontalLineDetection(imgInit):
     horizontalContours = horizontalContours[0] if len(horizontalContours) == 2 else horizontalContours[1]
     for hc in horizontalContours:
         cv2.drawContours(img, [hc], -1, (36,255,12), 2)
-    """
-    cv2.imshow('', img)
-    cv2.waitKey(0) & 0xFF"""
     plt.figure(figsize=(10, 10))
     plt.imshow(img)
     plt.show()
@@ -103,7 +136,6 @@ def removeExtraLines(df):
                 raise ValueError()
         except ValueError:
             incorectResponse()
-    
     if key == "u":
         #REMOVE UPPER LINE
         df = df[df["y"]>20]
@@ -113,7 +145,6 @@ def removeExtraLines(df):
     elif key == "b":
         df = df[df["y"]>20]
         df = df[df["y"]< 280]
-    
     return df
 
 
@@ -123,10 +154,8 @@ def findStringCentroids(stringNumber, df):
     kmeans = KMeans(n_clusters=cluster_number, random_state = 0).fit(X)
     centroids = np.copy(kmeans.cluster_centers_)
     sorted_centroids = np.sort(centroids, axis = 0)
-
     classes = sorted_centroids.flatten().tolist()
-    # If the number of centroides is 8 then remove the second one because it's the beam.
-    # Keep header and strings
+    # If the number of centroides is 8 then remove the second one because it's the beam. Keep header and strings
     if len(classes) == cluster_number:
         classes.pop(1)
     return classes
@@ -168,7 +197,6 @@ def detectStringsOrHeader(mdf, classes):
     return mdf
 
 
-
 def eliminateVeryCloseElements(mdf):
     # Copy df to avoid destroying the main one
     mdf = mdf.sort_values(by='Centroid x', ascending=True).reset_index(drop=True)
@@ -177,8 +205,6 @@ def eliminateVeryCloseElements(mdf):
     for item, row in mdf.iloc[1:].iterrows():
         distances.append(abs(mdf.loc[item,"Centroid x"] - mdf.loc[item - 1,"Centroid x"]))
     mean_distance = sum(distances)/len(distances)
-    #print("mean dist:", mean_distance)
-
     # Erase close elements
     item = 1
     previous_item =[0]
@@ -197,7 +223,6 @@ def eliminateVeryCloseElements(mdf):
                 item += 1
     except:
         pass
-    
     return mdf
 
 
@@ -208,7 +233,6 @@ def eliminateUnessescaryElementsAccordingToInput(mdf, stringNumber, noteNumber, 
         return main_df  
     # sort values by score
     mdf.sort_values(by='Score', ascending=False)
-
     try:
         # If no header, remove header items (string = 0)
         if not headerExistence:
@@ -226,7 +250,6 @@ def eliminateUnessescaryElementsAccordingToInput(mdf, stringNumber, noteNumber, 
         # Remove extra notes
         notes_df = mdf[mdf["Label"].astype(str).str.isdigit()]
         mdf = remove_rows(mdf, notes_df, noteNumber)
-
         # FINGERING
         ### If there's a note string(s), keep only the notes there and delete the fingering
         if noteStringExistence:
@@ -235,78 +258,54 @@ def eliminateUnessescaryElementsAccordingToInput(mdf, stringNumber, noteNumber, 
                 strings_on_fingering = mdf[(mdf["String"]== fs) & (~mdf["Label"].astype(str).str.isdigit())].index.tolist()
                 # Drop them
                 mdf = mdf.drop(mdf.index[strings_on_fingering]).reset_index(drop=True)
-        
-        
         # Remove extra fingering
         fingering_df = mdf[~mdf["Label"].astype(str).str.isdigit() & (mdf['String'] != 0)]
         mdf = remove_rows(mdf, fingering_df, fingeringNumber)
-
     except:
         pass
-
     # Sort according to Centroid x
     mdf = mdf.sort_values(by='Centroid x', ascending = True).reset_index(drop=True)
-    
     return mdf
     
-
-        
+  
 def chordPositionDetection(mdf, chordNumber):
     # copy the main df to change the centroids temporary because of p positioning
     centroid_df = mdf.copy()
     ## Reduce the X centroid of p because it's leaning to the right
     centroid_df.loc[centroid_df['Label'] == "p", 'Centroid x']= centroid_df["Centroid x"] - abs(centroid_df["x1"]-centroid_df["x2"])/4
-    
     X_chords = centroid_df[["Centroid x"]]
     kmeans_chords = KMeans(n_clusters=chordNumber, random_state = 0).fit(X_chords)
     centroids_chords = np.copy(kmeans_chords.cluster_centers_)
     sorted_centroids_chords = np.sort(centroids_chords, axis = 0)
-
     chord_positions = sorted_centroids_chords.flatten().tolist()
-    
     for item, row in centroid_df.iterrows():
         item_found = min(chord_positions, key = lambda x:abs(x-centroid_df.loc[item, "Centroid x"]))
         # Assign the position in the main df, not the temporary one
         mdf.loc[item, "Position"] = int(chord_positions.index(item_found))
-
     mdf["Position"] = mdf["Position"].astype(int)
     measureDF = mdf[["Label", "String", "Position"]]
-    
     return measureDF
 
 
-
 def measureAnalysis(directory, model, stringNum):
-    headerMeasureCounter = 0
-    firstFile = True
-    
-    
-    for root, dirs, measures in os.walk(directory):
-
+    headerMeasureCounter = 0   
+    for root, dirs, measures in os.walk(directory):       
         for measure in measures:
             chapterDir = os.path.basename(Path(root).parents[1])
-            unitDir = os.path.basename(Path(root).parents[0])
+            unitDir = os.path.basename(Path(root).parents[0])            
             pageFolder = (os.path.basename(root))
-            path_to_img =os.path.join(directory,chapterDir, unitDir, pageFolder, measure)
+            path_to_img =os.path.join(directory, chapterDir, unitDir, pageFolder, measure)
             image = cv2.imread(path_to_img)
             print("Analyzing image:", path_to_img)
             horizContours = horizontalLineDetection(image)
             sortedContoursDF = sortContoursAndCreateDF(horizContours)
             contourDF = removeExtraLines(sortedContoursDF)
-            centroidClasses = findStringCentroids(stringNum, contourDF)
-            
-            # Print the input data before showing the detected notation in order to compare
-            if firstFile:
-                measureData = {"stringNumber":stringNum, "noteNumber":8,"fingeringNumber" : 20, "chordNumber" : 20, "headerNumber" : 20, "headerExistence" : True, "noteStringExistence" : True, "noteStrings" : [1]}
-                firstFile = False
-            print(measureData) # Keep this print
-            
-            
+            centroidClasses = findStringCentroids(stringNum, contourDF)               
             boxes, labels, scores = detectNotation(model, image)
             measureInfoDF = dataframeCreation(boxes, labels, scores)
             DFwithStringsDetected = detectStringsOrHeader(measureInfoDF, centroidClasses)
             DFwithVeryCloseElementsEliminated = eliminateVeryCloseElements(DFwithStringsDetected)
-            measureData = measureUserInput(measureData)
+            measureData = measureDataFromInput(pageFolder)
             DFwithProperNumberOfElements = eliminateUnessescaryElementsAccordingToInput(DFwithVeryCloseElementsEliminated, **measureData)
             measureDFcleared = chordPositionDetection(DFwithProperNumberOfElements, measureData["chordNumber"])
                        
@@ -315,7 +314,6 @@ def measureAnalysis(directory, model, stringNum):
                 headerStoringArray = []
             if measureData["headerExistence"]:
                 headerStoringArray.append(measureDFcleared[measureDFcleared["String"] == 0])
-                #print(headerStoringArray)
             else:
                 # try because header might not even exist in some 3-string books
                 try:
@@ -325,10 +323,7 @@ def measureAnalysis(directory, model, stringNum):
                     pass
             if headerMeasureCounter==(len(measures)-1):
                 headerMeasureCounter = -1
-            headerMeasureCounter+=1                      
-
-
-            #print(measureDFcleared) 
+            headerMeasureCounter+=1
 
             measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
     print("Measure Analysis done!")
@@ -339,7 +334,6 @@ def measureAnalysis(directory, model, stringNum):
             
 if __name__ == '__main__':
     
-    import torchvision.models.detection as detection  
 
     dirname = os.path.dirname(__file__)
     model_path = os.path.join(dirname, '../../model/model2.pth')
