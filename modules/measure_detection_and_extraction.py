@@ -72,11 +72,7 @@ def templateWindowSizeInput():
 
 
 def sort_tablature_coordinates(tabCoordinates):
-    #print("tabCoordinates:", tabCoordinates)
-    
     sorted_tablature_coords = sorted(tabCoordinates, key=lambda d: d['y'])
-    #print("sorted_tablature_coords:", tabCoordinates)
-    
     for i in range(0, len(sorted_tablature_coords), 2):
         if sorted_tablature_coords[i]['x']>sorted_tablature_coords[i+1]['x']:
             sorted_tablature_coords[i], sorted_tablature_coords[i+1]  = sorted_tablature_coords[i+1], sorted_tablature_coords[i]
@@ -153,10 +149,8 @@ def saveMeasures(img, tabs, bookFolder, unitFolder, currentFile):
     img = cv2.addWeighted(img, contrast, img, 0, brightness)
     chapterfolder=  os.path.basename(Path(unitFolder).parents[0])
     subPartsPath = os.path.join(Path(unitFolder).parents[3],"extracted_measures", bookFolder, chapterfolder, os.path.basename(unitFolder), currentFile )
-    
     if not os.path.exists(subPartsPath):
         os.makedirs(subPartsPath)
-
     for index, i in enumerate(tabs):
         cropped_img = img[i["y"] : i["y"] + i["h"] , i["x"]: i["x"] + i["w"]]
         gray_cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
@@ -169,37 +163,29 @@ def correct_skew(image, delta=0.2, limit=10):
         histogram = np.sum(data, axis=1, dtype=float)
         score = np.sum((histogram[1:] - histogram[:-1]) ** 2, dtype=float)
         return histogram, score
-
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1] 
-
     scores = []
     angles = np.arange(-limit, limit + delta, delta)
     for angle in angles:
         histogram, score = determine_score(thresh, angle)
         scores.append(score)
-
     best_angle = angles[scores.index(max(scores))]
-
     (h, w) = image.shape[:2]
     center = (w // 2, h // 2)
     M = cv2.getRotationMatrix2D(center, best_angle, 1.0)
     rotated = cv2.warpAffine(image, M, (w, h), flags=cv2.INTER_CUBIC, \
           borderMode=cv2.BORDER_REPLICATE)
-
     return best_angle, rotated
 
 
 def skewMeasures(directory):
-    print("Skew correction process..")
+    print("Skew correction process starting..")
     for filename in os.listdir(directory):
-        
         path_to_img = os.path.join(directory, filename)
-    
         image = cv2.imread(path_to_img)
         angle, rotated = correct_skew(image)
         #print(f"Skew Correction: {angle} for file: {filename}")
-
         # Save rotated images to directory. Add a zero in case there's one integer in the file name, to sort bettter in the future
         if len(str(filename[:-4])) == 1:
             cv2.imwrite(f"{directory}/0{filename[:-4]}_rotated.jpg", rotated)
@@ -207,40 +193,26 @@ def skewMeasures(directory):
             cv2.imwrite(f"{directory}/{filename[:-4]}_rotated.jpg", rotated)
     # Delete old measures that are not rotated  
     for filename in os.listdir(directory):
-
         if not filename.endswith('rotated.jpg'):
             os.remove(os.path.join(directory, filename)) 
 
 
 def measureDetectionAndExtraction(directory):
     for root, dirs, files in os.walk(directory):
-        folderName = os.path.basename(os.path.normpath(root))
-        if folderName.startswith('chapter'):
-            #print("Chapter")
-            pass
-        elif folderName.startswith('unit'):
-            #print("Unit")
-            pass
-        # Iterate through your pages
         for filename in files:
             imagePath = os.path.join(root, filename)
             image = cv2.imread(imagePath)
             print(f"Analysing File: {imagePath}")
             print("Are you satisfied with the detected contours? (y/n):")
-            # Find subparts' coordinates
             tabCoords = find_tablature_coordinates(image)
-            # Verify the findings and add potential margin if needed
             tabsWithPotentialMargin = plot_the_tablature_coordinates_found_for_verification(tabCoords, image)
-            # Save the subMeasures
             saveMeasures(image, tabsWithPotentialMargin, os.path.basename(os.path.normpath(directory)), root, filename[:-4])
-            # Skew Correction of Measures
             baseDirectory = Path(root).parents[3]
             exctractedImgsDirectory = "extracted_measures"
             bookDirectory = os.path.basename(os.path.normpath(directory))
             chapterDirectory = os.path.basename(os.path.normpath(Path(root).parents[0]))
             unitDirectory = os.path.basename(os.path.normpath(root))
             fileDirectory = filename[:-4]
-            # --> baseDirectory/extracted_measures/book/chapter/unit/page
             measuresDirectoryPath = os.path.join(baseDirectory ,exctractedImgsDirectory, bookDirectory, chapterDirectory, unitDirectory,fileDirectory )
             skewMeasures(measuresDirectoryPath)
     print("Measure detection and extraction done!")

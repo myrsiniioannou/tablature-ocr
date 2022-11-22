@@ -6,54 +6,20 @@ from domain_model import *
 import copy
 
 
-def loadValues():
-    values = {
-        "valueSet1" : {
-            "pages": [*range(1,3)],
-            'chordDurationInteger': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'triplet': ["up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up"],
-            'articulation': [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0],
-            'slur': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            'hasBox': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            'hasAccent': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        },
-        "valueSet2" : {
-            "pages": [*range(3,4)],
-            'chordDurationInteger': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            'triplet': [1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0],
-            'articulation': ["down", None, None, "down", None, None, None, "down", None, None, None, None, "down", None, None, "down", None, "down", None, None],
-            'slur': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'hasBox': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'hasAccent': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        },
-        "valueSet3" : {
-            "pages": [*range(4,6)],
-            'chordDurationInteger': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-            'triplet': [1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0],
-            'articulation': ["up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down"],
-            'slur': [0, 1, 2, 0, 0, 0, 1, 0, 2, 0, 0, 0, 1, 2, 0, 0, 1, 0, 2, 0],
-            'hasBox': [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-            'hasAccent': [0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
-        }
-    } 
-    return values
-
-
-def pageData(pageIdx):
-    pageValues = loadValues()
+def pageData(pageIdx, measureValues):
     setValueKey = ""
-    for key, value in pageValues.items():
+    for key, value in measureValues.items():
         if pageIdx in value["pages"]:
             setValueKey = copy.deepcopy(key)
             break
     if setValueKey:
         data = {
-        'chordDurationInteger': pageValues[setValueKey]["chordDurationInteger"],
-        'triplet': pageValues[setValueKey]["triplet"],
-        'articulation': pageValues[setValueKey]["articulation"],
-        'slur': pageValues[setValueKey]["slur"],
-        'hasBox': pageValues[setValueKey]["hasBox"],
-        'hasAccent': pageValues[setValueKey]["hasAccent"]
+        'chordDurationInteger': measureValues[setValueKey]["chordDurationInteger"],
+        'triplet': measureValues[setValueKey]["triplet"],
+        'articulation': measureValues[setValueKey]["articulation"],
+        'slur': measureValues[setValueKey]["slur"],
+        'hasBox': measureValues[setValueKey]["hasBox"],
+        'hasAccent': measureValues[setValueKey]["hasAccent"]
         }
     else:
         data = {}
@@ -176,10 +142,10 @@ def parseSectionPage(rootFolder):
     return sectionPageTitle
 
 
-def parseNotationPage(directory, root, measures, notationPageNumber):
+def parseNotationPage(directory, root, measures, notationPageNumber, measureValues):
     notationPageContent = []
     dataInput = {}
-    dataInput = pageData(notationPageNumber)
+    dataInput = pageData(notationPageNumber, measureValues)
     for measure in measures:
         if measure.endswith('.csv') and dataInput:
             filePath = pathToFile(directory, root, measure)                
@@ -190,7 +156,7 @@ def parseNotationPage(directory, root, measures, notationPageNumber):
     return notationPageContent
 
 
-def parseBook(directory, stringNumber):
+def parseBook(directory, stringNumber, measureValues):
     print("Starting the parsing process..")
     bookPages = []
     notationPageNumber = 1
@@ -202,7 +168,7 @@ def parseBook(directory, stringNumber):
             page = Page(sectionpage = sectionPage)
             bookPages.append(page)
         # Notation Page
-        notationPageContent = parseNotationPage(directory, root, measures, notationPageNumber)
+        notationPageContent = parseNotationPage(directory, root, measures, notationPageNumber, measureValues)
         if notationPageContent:
             notationPage = NotationPage(measures = notationPageContent)
             page = Page(notationpage = notationPage)
@@ -221,9 +187,42 @@ def parseBook(directory, stringNumber):
 
 if __name__ == '__main__':
 
+    measureValues = {
+        "valueSet1" : {
+            "pages": [*range(1,3)],
+            'chordDurationInteger': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'triplet': ["up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up"],
+            'articulation': [1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0],
+            'slur': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            'hasBox': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            'hasAccent': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        },
+        "valueSet2" : {
+            "pages": [*range(3,4)],
+            'chordDurationInteger': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            'triplet': [1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0],
+            'articulation': ["down", None, None, "down", None, None, None, "down", None, None, None, None, "down", None, None, "down", None, "down", None, None],
+            'slur': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'hasBox': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'hasAccent': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        },
+        "valueSet3" : {
+            "pages": [*range(4,6)],
+            'chordDurationInteger': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            'triplet': [1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0],
+            'articulation': ["up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down"],
+            'slur': [0, 1, 2, 0, 0, 0, 1, 0, 2, 0, 0, 0, 1, 2, 0, 0, 1, 0, 2, 0],
+            'hasBox': [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            'hasAccent': [0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
+        }
+    } 
+
+
     bookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book3"
     numberOfStrings = 6
-    parseBook(bookDirectory, numberOfStrings)
+    parseBook(bookDirectory, numberOfStrings, measureValues)
+
+
 
 
 

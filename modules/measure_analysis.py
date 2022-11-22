@@ -9,91 +9,16 @@ from detecto.visualize import show_labeled_image
 from pathlib import Path
 
 
-def loadValues():
-    values = {
-            "stringNumber" : 6, 
-            "noteNumber": {
-                "8": {
-                    "pages": [*range(1,3)],
-                },
-                "10" : {
-                    "pages": [*range(3,4)],
-                },
-                "12" : {
-                    "pages": [*range(4,6)],
-                }
-            },
-            "fingeringNumber": {
-                "15": {
-                    "pages": [*range(1,3)],
-                },
-                "16" : {
-                    "pages": [*range(3,4)],
-                },
-                "17" : {
-                    "pages": [*range(4,6)],
-                }
-            },
-            "chordNumber": {
-                "15": {
-                    "pages": [*range(1,3)],
-                },
-                "16" : {
-                    "pages": [*range(3,4)],
-                },
-                "17" : {
-                    "pages": [*range(4,6)],
-                }
-            },
-            "headerNumber": {
-                "15": {
-                    "pages": [*range(1,3)],
-                },
-                "16" : {
-                    "pages": [*range(3,4)],
-                },
-                "17" : {
-                    "pages": [*range(4,6)],
-                }
-            },
-            "headerExistence": {
-                True: {
-                    "pages": [*range(1,3)],
-                },
-                False : {
-                    "pages": [*range(3,6)],
-                }
-            },
-            "noteStringExistence": {
-                True: {
-                    "pages": [*range(1,3)],
-                },
-                False : {
-                    "pages": [*range(3,6)],
-                }
-            },
-            "noteStrings": {
-                "1": {
-                    "pages": [*range(1,3)],
-                },
-                "2" : {
-                    "pages": [*range(3,6)],
-                }
-            }
-    }
-    return values
-
-def measureDataFromInput(pageFolder):
-    measureValues = loadValues()
+def measureDataFromInput(pageFolder, values):
     measureData = {
-    "stringNumber":measureValues["stringNumber"],
-    "noteNumber": int([key for key, value in measureValues["noteNumber"].items() if (int(pageFolder) in value["pages"])][0]),
-    "fingeringNumber" : int([key for key, value in measureValues["fingeringNumber"].items() if (int(pageFolder) in value["pages"])][0]),
-    "chordNumber" : int([key for key, value in measureValues["chordNumber"].items() if (int(pageFolder) in value["pages"])][0]),
-    "headerNumber" : int([key for key, value in measureValues["headerNumber"].items() if (int(pageFolder) in value["pages"])][0]),
-    "headerExistence" : bool([key for key, value in measureValues["headerExistence"].items() if (int(pageFolder) in value["pages"])][0]),
-    "noteStringExistence" : bool([key for key, value in measureValues["noteStringExistence"].items() if (int(pageFolder) in value["pages"])][0]),
-    "noteStrings" : [int(key) for key, value in measureValues["noteStrings"].items() if (int(pageFolder) in value["pages"])],
+    "stringNumber":values["stringNumber"],
+    "noteNumber": int([key for key, value in values["noteNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "fingeringNumber" : int([key for key, value in values["fingeringNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "chordNumber" : int([key for key, value in values["chordNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "headerNumber" : int([key for key, value in values["headerNumber"].items() if (int(pageFolder) in value["pages"])][0]),
+    "headerExistence" : bool([key for key, value in values["headerExistence"].items() if (int(pageFolder) in value["pages"])][0]),
+    "noteStringExistence" : bool([key for key, value in values["noteStringExistence"].items() if (int(pageFolder) in value["pages"])][0]),
+    "noteStrings" : [int(key) for key, value in values["noteStrings"].items() if (int(pageFolder) in value["pages"])],
     }
     return measureData
 
@@ -287,7 +212,7 @@ def chordPositionDetection(mdf, chordNumber):
     return measureDF
 
 
-def measureAnalysis(directory, model, stringNum):
+def measureAnalysis(directory, model, stringNum, pageValues):
     headerMeasureCounter = 0   
     for root, dirs, measures in os.walk(directory):       
         for measure in measures:
@@ -305,17 +230,14 @@ def measureAnalysis(directory, model, stringNum):
             measureInfoDF = dataframeCreation(boxes, labels, scores)
             DFwithStringsDetected = detectStringsOrHeader(measureInfoDF, centroidClasses)
             DFwithVeryCloseElementsEliminated = eliminateVeryCloseElements(DFwithStringsDetected)
-            measureData = measureDataFromInput(pageFolder)
+            measureData = measureDataFromInput(pageFolder, pageValues)
             DFwithProperNumberOfElements = eliminateUnessescaryElementsAccordingToInput(DFwithVeryCloseElementsEliminated, **measureData)
             measureDFcleared = chordPositionDetection(DFwithProperNumberOfElements, measureData["chordNumber"])
-                       
-            # Saving and using header
             if measureData["headerExistence"] and headerMeasureCounter==0:
                 headerStoringArray = []
             if measureData["headerExistence"]:
                 headerStoringArray.append(measureDFcleared[measureDFcleared["String"] == 0])
             else:
-                # try because header might not even exist in some 3-string books
                 try:
                     measureDFcleared = pd.concat([measureDFcleared, headerStoringArray[headerMeasureCounter]])
                     measureDFcleared = measureDFcleared.sort_values('Position',ignore_index=True)
@@ -324,7 +246,6 @@ def measureAnalysis(directory, model, stringNum):
             if headerMeasureCounter==(len(measures)-1):
                 headerMeasureCounter = -1
             headerMeasureCounter+=1
-
             measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
     print("Measure Analysis done!")
 
@@ -333,11 +254,81 @@ def measureAnalysis(directory, model, stringNum):
 
             
 if __name__ == '__main__':
-    
+    pageValues = {
+        "stringNumber" : 6, 
+        "noteNumber": {
+            "8": {
+                "pages": [*range(1,3)],
+            },
+            "10" : {
+                "pages": [*range(3,4)],
+            },
+            "12" : {
+                "pages": [*range(4,6)],
+            }
+        },
+        "fingeringNumber": {
+            "15": {
+                "pages": [*range(1,3)],
+            },
+            "16" : {
+                "pages": [*range(3,4)],
+            },
+            "17" : {
+                "pages": [*range(4,6)],
+            }
+        },
+        "chordNumber": {
+            "15": {
+                "pages": [*range(1,3)],
+            },
+            "16" : {
+                "pages": [*range(3,4)],
+            },
+            "17" : {
+                "pages": [*range(4,6)],
+            }
+        },
+        "headerNumber": {
+            "15": {
+                "pages": [*range(1,3)],
+            },
+            "16" : {
+                "pages": [*range(3,4)],
+            },
+            "17" : {
+                "pages": [*range(4,6)],
+            }
+        },
+        "headerExistence": {
+            True: {
+                "pages": [*range(1,3)],
+            },
+            False : {
+                "pages": [*range(3,6)],
+            }
+        },
+        "noteStringExistence": {
+            True: {
+                "pages": [*range(1,3)],
+            },
+            False : {
+                "pages": [*range(3,6)],
+            }
+        },
+        "noteStrings": {
+            "1": {
+                "pages": [*range(1,3)],
+            },
+            "2" : {
+                "pages": [*range(3,6)],
+            }
+        }
+    }
 
     dirname = os.path.dirname(__file__)
     model_path = os.path.join(dirname, '../../model/model2.pth')
     trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
     extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book1"
     numberOfStrings = 6
-    measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings)
+    measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)

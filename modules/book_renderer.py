@@ -9,70 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 import math
 
 
-def loadValues():
-    # Set Values on paragraphs, headings, measures, and side frame text
-    # PAGE NUMBERS HERE ARE THE SAME AS IN THE BOOK. Don't deduct 1 in order to start from 0.
-    values = {
-        "timeSignature" : {
-            "fourFour": {       
-                "pages": [*range(1,6)],
-                "numerator": 4,
-                "denominator": 4
-            }
-        },
-        "measures" : {
-            "Horizontal": 2,
-            "Vertical" : 6
-        },
-        "paragraphs" : {
-            "IA": [1, 8],
-            "IB": [5, 6]
-        },
-        "headings" : {
-            "singleHeading": [],
-            "doubleHeading": [*range(1,8)]
-        },
-        "sideFrameTextExistence" : {
-            "sideFrameTextExistencePages" : [],
-            "sameFrameTextInMultiMeasuredRow" : [],
-            "sideFrameLetter" : {
-                "A" : [1,2],
-                "B" : [3,4,5,6,7]
-            }
-        },
-        "headerLetter" : {
-            "F" : [1,2],
-            "E" : [3,4,5,6,7],
-        }
-    }
-    doubleBeamBreaks  = {
-        "pattern1" : {
-            "pages" : [range(1,2)],
-            "beamBreaks" : [5,10]
-        },
-        "pattern2" : {
-            "pages" : [range(2,3)],
-            "beamBreaks" : [7,16]
-        },
-        "pattern3" : {
-            "pages" : [range(3,200)],
-            "beamBreaks" : [9]
-        }
-    }
-    singleBeamBreaks  = {
-        "pattern1" : {
-            "pages" : [range(1,2)],
-            "beamBreaks" : [13]
-        },
-        "pattern2" : {
-            "pages" : [range(2,3)],
-            "beamBreaks" : [9,11]
-        },
-        "pattern3" : {
-            "pages" : [range(3,200)],
-            "beamBreaks" : [15]
-        }
-    }
+def loadValues(values, doubleBeamBreaks, singleBeamBreaks):
     values["doubleBeamBreakRanges"] = findPageBreaks(doubleBeamBreaks)
     values["singleBeamBreakRanges"] = findPageBreaks(singleBeamBreaks)
     return values
@@ -234,7 +171,6 @@ def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, tim
             stringOfThirdTriplet = measure["chords"][chordIndex+1]["note"]["string"]
         else:
             stringOfThirdTriplet = None
-
         renderedChords += renderChords(env, chord, chordIndex, notationPageIndex, userValues, stringOfThirdTriplet)
     
     measureRendering = env.get_template("measure.mscx").render(
@@ -347,9 +283,9 @@ def finalizeBookRendering(env, stringNumber, bookRenderedContent):
     return book
 
 
-def renderBook(JSON):
+def renderBook(JSON, values, doubleBeamBreaks, singleBeamBreaks):
     # Load the Set Values of the book.
-    setValues = loadValues()
+    setValues = loadValues(values, doubleBeamBreaks, singleBeamBreaks)
 
     # Load JSON Book File
     bookInJsonFormat = loadJSON(JSON)
@@ -364,17 +300,79 @@ def renderBook(JSON):
     stringNumber = bookInJsonFormat["numberofstrings"]
     output = finalizeBookRendering(environment, stringNumber, bookRendering)
     
-
     # Save the Musescore file
     musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook1.mscx"
     with open(f"{musescoreOutputFile}", "w") as f:
          f.write(output)
-
     print("Book Rendering Done!")
 
 
 
 
 if __name__ == '__main__':
+
+    values = {
+        "timeSignature" : {
+            "fourFour": {       
+                "pages": [*range(1,6)],
+                "numerator": 4,
+                "denominator": 4
+            }
+        },
+        "measures" : {
+            "Horizontal": 2,
+            "Vertical" : 6
+        },
+        "paragraphs" : {
+            "IA": [1, 8],
+            "IB": [5, 6]
+        },
+        "headings" : {
+            "singleHeading": [],
+            "doubleHeading": [*range(1,8)]
+        },
+        "sideFrameTextExistence" : {
+            "sideFrameTextExistencePages" : [],
+            "sameFrameTextInMultiMeasuredRow" : [],
+            "sideFrameLetter" : {
+                "A" : [1,2],
+                "B" : [3,4,5,6,7]
+            }
+        },
+        "headerLetter" : {
+            "F" : [1,2],
+            "E" : [3,4,5,6,7],
+        }
+    }
+    doubleBeamBreaks  = {
+        "pattern1" : {
+            "pages" : [range(1,2)],
+            "beamBreaks" : [5,10]
+        },
+        "pattern2" : {
+            "pages" : [range(2,3)],
+            "beamBreaks" : [7,16]
+        },
+        "pattern3" : {
+            "pages" : [range(3,200)],
+            "beamBreaks" : [9]
+        }
+    }
+    singleBeamBreaks  = {
+        "pattern1" : {
+            "pages" : [range(1,2)],
+            "beamBreaks" : [13]
+        },
+        "pattern2" : {
+            "pages" : [range(2,3)],
+            "beamBreaks" : [9,11]
+        },
+        "pattern3" : {
+            "pages" : [range(3,200)],
+            "beamBreaks" : [15]
+        }
+    }
+
+
     JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\book1.json"
-    renderBook(JSON_book_directory)
+    renderBook(JSON_book_directory, values, doubleBeamBreaks, singleBeamBreaks)
