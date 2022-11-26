@@ -95,38 +95,27 @@ def patternRepeater(directory, pageIndex, patterns, measures):
         addPatternToMeasures(directory, elementIndexes, fingeringPatterns, measures)
 
 
-
+def assignValues(headerElementsToRepeatIndexAdjustment, measureDF, repeatingTimes):
+    for elementIdx, element in enumerate(headerElementsToRepeatIndexAdjustment):
+        dfToAssign = measureDF.loc[(measureDF['Position'] == elementIdx) & (measureDF['String'] == 0), "Label"].values
+        valueToAssign = dfToAssign[0] if dfToAssign.any() else None
+        if valueToAssign:
+            for iteration in range(1, repeatingTimes):
+                repeatedIndex = iteration*len(headerElementsToRepeatIndexAdjustment)+elementIdx
+                measureDF.loc[(measureDF['Position'] == repeatedIndex) & (measureDF['String'] == 0), "Label"] = valueToAssign
 
 
 def repeatPartialMeasuresAndSaveThem(pageIdx, value, measures, directory):
     if pageIdx in value["pages"]:
-        print("pageIdx: ", pageIdx)
-        print('headerElementsToRepeat: ', value['headerElementsToRepeat'])
+        headerElementsToRepeatIndexAdjustment = [element-1 for element in value['headerElementsToRepeat']]
         for measure in measures:
             measureDirectory = os.path.join(directory, measure)
             measureDF = pd.read_csv(measureDirectory)
-            #print(measureDF[(measureDF['Position'].isin(value['headerElementsToRepeat'])) & (measureDF['String'] == 0)])
-
             totalElements = len(measureDF['Position'].unique())
-            repeatingTimes = totalElements//len(value['headerElementsToRepeat'])
-            
-            for element in value['headerElementsToRepeat']:
-                print("----------------------------------------------")
-                for a in range(1, repeatingTimes):
+            repeatingTimes = totalElements//len(headerElementsToRepeatIndexAdjustment)
+            assignValues(headerElementsToRepeatIndexAdjustment, measureDF, repeatingTimes)
 
 
-
-
-                    ##### EDO EIMAIIIIIIIIII
-                    ## PREPEI NA GINETAI ASSIGN TO 1 STO 6, TO 2 STO 7 , 3 STO 8 KTL
-                    repeatedIndex = a*len(value['headerElementsToRepeat'])+int(element)
-                    print(measureDF[(measureDF['Position'] == a) & (measureDF['String'] == 0)])
-                    print("-------------------------")
-                    print(measureDF[(measureDF['Position'] == repeatedIndex) & (measureDF['String'] == 0)])
-                    print("----##################------")
-                
-            
-            print(measureDF)
 
 def partialHeaderRepeater(pageIdx, partialHeaderRepeater, measures, directory):
     if pageIdx in [page for values in partialHeaderRepeater.values() for page in values["pages"]]:
@@ -134,13 +123,41 @@ def partialHeaderRepeater(pageIdx, partialHeaderRepeater, measures, directory):
             repeatPartialMeasuresAndSaveThem(pageIdx, value, measures, directory)
 
 
-def headerRepeatingProcesses(directory, pageIdx, headerPages, measures):
+def columnRepeater(pageIdx, columnRepeatPages, pageMeasureDimensions, measures, directory):
+    #check if page is in column repeater range
+    if pageIdx in columnRepeatPages:
+        print(pageIdx)
+        print(columnRepeatPages)
+        horizontalNumberOfMeasures = int(pageMeasureDimensions["Horizontal"])
+        print(horizontalNumberOfMeasures)
+
+        for measureIdx, measure in enumerate(measures):
+            measureDirectory = os.path.join(directory, measure)
+            measureDF = pd.read_csv(measureDirectory)
+            print("measureIdx: ", measureIdx)
+            print("modulo: ", measureIdx % horizontalNumberOfMeasures)
+
+
+            ## EDO KANO SAVE TO KATHE MEASURE THS PROTHS STHLHS KAI STH SYNEXEIA PREPEI NA TO BALO SE OLA TA YPOLOIGA MEASURES TON YPOLOIPON STHLVN
+            # NA VRO TO STRING == 0 TON ALLON DATAFRAMES KAI NA TA DIAGRAPSO KAI NA VALO TO SAVED
+            if measureIdx % horizontalNumberOfMeasures:
+                headerToCopy = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
+                print(headerToCopy)
+
+
+
+
+
+def headerRepeatingProcesses(directory, pageIdx, headerPages, measures, pageDimensions):
 
     #1 pattern repeater
     #patternRepeater(directory, pageIdx, headerPages["patterns"], measures)
     #2 partial header repeater
-    partialHeaderRepeater(pageIdx, headerPages["partialHeaderRepeater"], measures, directory)
+    #partialHeaderRepeater(pageIdx, headerPages["partialHeaderRepeater"], measures, directory)
+
     #3 column repeater
+    columnRepeater(pageIdx, headerPages["columnRepeat"], pageDimensions, measures, directory)
+
     #4 first row repeater
     #5 whole page repeater
 
@@ -148,14 +165,15 @@ def headerRepeatingProcesses(directory, pageIdx, headerPages, measures):
 
 
 
-def headerRepeater(directory, headerPages, measures):
+def headerRepeater(directory, headerPages, pageDimensions):
     for root, dirs, measures in os.walk(directory):
         pageNumber = os.path.basename(Path(root))
         # Keep only the CSV files
         CSVmeasures = list(filter(lambda measure: measure.endswith('.csv'), measures))
         if CSVmeasures:
-            headerRepeatingProcesses(root, int(pageNumber), headerPages, CSVmeasures)
+            headerRepeatingProcesses(root, int(pageNumber), headerPages, CSVmeasures, pageDimensions)
         print("------------------------------------------------------------------")
+    print("Header Repeating Process Done!")
 
 
         
@@ -165,9 +183,9 @@ if __name__ == '__main__':
 
     extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book2"
     headerRepeaterValues = {
-        "wholePage" : [1, 2, 3],
-        "firstRowToWholePage" : [4, 5, 6],
-        "columnRepeat" : [7, 8, 9],
+        "wholePage" : [1, 2, 3, 4],
+        "firstRowToWholePage" : [1, 2, 3, 4],
+        "columnRepeat" : [1, 2, 3, 4],
         "partialHeaderRepeater" : {
             "Pattern1" : {
                 "pages" :[1, 2],
