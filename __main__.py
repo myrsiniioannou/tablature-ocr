@@ -11,22 +11,7 @@ from book_renderer import *
 if __name__ == '__main__':
     bookFile = "firstBook"
     numberOfStrings = 6
-
-
-    # 2. Header Repeater Values
-
-    # SKATA ALLAGH AYTO
-    # These are the pages that have header and we use to copy their header to the other pages.
-    pagesWithHeader = [
-        {"chapter": 1, "unit": 1, "page": 1},
-        {"chapter": 1, "unit": 2, "page": 3}
-    ]
-
-
-
-
-
-
+    
     # 1. Measure Analysis Values
     pageValues = {
         "stringNumber" : 6, 
@@ -96,6 +81,40 @@ if __name__ == '__main__':
             },
             "2" : {
                 "pages": [*range(3,6)],
+            }
+        }
+    }
+
+    # 2. Headery Reoeater Values
+    headerRepeaterValues = {
+        "wholePageRepeat" : [1, 3 ], # Put the pages that we want to use as a template for the next ones. Ie if we want to copy page 1 to 2,3,4 then put [1] 
+        "firstRowRepeat" : [1, 2, 3, 4],
+        "columnRepeat" : [1, 2, 3, 4],
+        "partialHeaderRepeat" : {
+            "Pattern1" : {
+                "pages" :[1, 3],
+                "headerElementsToRepeat" : [1,2,3,4,5]
+            },
+            "Pattern2" : {
+                "pages" :[3, 4],
+                "headerElementsToRepeat" : [1,2,3]
+            }
+        },
+        "patternRepeat" : {
+            "Pattern1" : {
+                "pages" : [1,2],
+                "elementIndex" : [4,5,6,7,8],
+                "fingeringPattern" : ["e", "e", "e", "e", "e"]
+            },
+            "Pattern2" : {
+                "pages" : [3],
+                "elementIndex" : [9,10,11,12,13],
+                "fingeringPattern" : ["t", "t", "t", "t", "t"]
+            },
+            "Pattern3" : {
+                "pages" : [4,5,6],
+                "elementIndex" : [14,15,16],
+                "fingeringPattern" : ["q", "q", "q", "q", "q"]
             }
         }
     }
