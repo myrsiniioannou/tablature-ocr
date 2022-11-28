@@ -2,7 +2,9 @@ from pathlib import Path
 import os
 import pandas as pd
 import copy
-import numpy as np
+from dataclasses import dataclass
+
+
 
 def addZeroToNumberIfOneDigit(number):
     return "0" + str(number) if len(str(number)) == 1 else str(number)
@@ -62,7 +64,7 @@ def headerRepeaterOLD(directory, headerPages: dict):
         else:
             if listOfMeasureHeaderDfs:
                 concatenateDFs(root, measures, listOfMeasureHeaderDfs)
-    print("Header Repeating Process Done!")
+
 
 
 
@@ -116,63 +118,98 @@ def repeatPartialMeasuresAndSaveThem(pageIdx, value, measures, directory):
             assignValues(headerElementsToRepeatIndexAdjustment, measureDF, repeatingTimes)
 
 
-
-def partialHeaderRepeater(pageIdx, partialHeaderRepeater, measures, directory):
-    if pageIdx in [page for values in partialHeaderRepeater.values() for page in values["pages"]]:
-        for key, value in partialHeaderRepeater.items():
+def partialHeaderRepeater(pageIdx, partialHeaderRepeatPages, measures, directory):
+    if pageIdx in [page for values in partialHeaderRepeatPages.values() for page in values["pages"]]:
+        for key, value in partialHeaderRepeatPages.items():
             repeatPartialMeasuresAndSaveThem(pageIdx, value, measures, directory)
 
 
-def columnRepeater(pageIdx, columnRepeatPages, pageMeasureDimensions, measures, directory):
-    #check if page is in column repeater range
+def columnRepeater(pageIdx, columnRepeatPages, pageMeasureDimensions, measures, directory, horizontalNumberOfMeasures):
     if pageIdx in columnRepeatPages:
-        print(pageIdx)
-        print(columnRepeatPages)
-        horizontalNumberOfMeasures = int(pageMeasureDimensions["Horizontal"])
-        print(horizontalNumberOfMeasures)
-
         for measureIdx, measure in enumerate(measures):
             measureDirectory = os.path.join(directory, measure)
             measureDF = pd.read_csv(measureDirectory)
-            print("measureIdx: ", measureIdx)
-            print("modulo: ", measureIdx % horizontalNumberOfMeasures)
-
-
-            ## EDO KANO SAVE TO KATHE MEASURE THS PROTHS STHLHS KAI STH SYNEXEIA PREPEI NA TO BALO SE OLA TA YPOLOIGA MEASURES TON YPOLOIPON STHLVN
-            # NA VRO TO STRING == 0 TON ALLON DATAFRAMES KAI NA TA DIAGRAPSO KAI NA VALO TO SAVED
-            if measureIdx % horizontalNumberOfMeasures:
+            if measureIdx % horizontalNumberOfMeasures == 0:
                 headerToCopy = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
-                print(headerToCopy)
+                headerToCopy.insert(1, 'String', int(0))
+            else:
+                currentHeader = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
+                measureDF = measureDF.drop(currentHeader.index)
+                measureDF = pd.concat([measureDF, headerToCopy], ignore_index=True).sort_values('Position')
+                measureDF.to_csv(measureDirectory, index = False, encoding='utf-8')
+
+
+def firstRowRepeater(pageIdx, firstRowRepeatPages, pageMeasureDimensions, measures, directory, horizontalNumberOfMeasures):
+    if pageIdx in firstRowRepeatPages:
+        list0fModuloDFs = []
+        for measureIdx, measure in enumerate(measures):
+            measureDirectory = os.path.join(directory, measure)
+            measureDF = pd.read_csv(measureDirectory)
+            if measureIdx < horizontalNumberOfMeasures:
+                headerToCopy = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
+                headerToCopy.insert(1, 'String', int(0))
+                list0fModuloDFs.append(headerToCopy)
+            else:
+                currentHeader = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
+                measureDF = measureDF.drop(currentHeader.index)
+                measureDF = pd.concat([measureDF, list0fModuloDFs[int(measureIdx % horizontalNumberOfMeasures)]], ignore_index=True).sort_values('Position').reset_index(drop=True)
+                measureDF.to_csv(measureDirectory, index = False, encoding='utf-8')
+
+
+@dataclass
+class wholePageDFlist:
+    dfList = list
+    def updateList(self, value):
+        self.dfList.append(value)
+
+
+def wholePageRepeater(pageIdx, wholePageRepeatPages, measures, directory, list0fWholePageHeadersToRepeat):
+    if pageIdx in wholePageRepeatPages:
+        list0fWholePageHeadersToRepeat.dfList = []
+        for measureIdx, measure in enumerate(measures):
+            measureDirectory = os.path.join(directory, measure)
+            measureDF = pd.read_csv(measureDirectory)
+            headerToCopy = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
+            headerToCopy.insert(1, 'String', int(0))
+            list0fWholePageHeadersToRepeat.updateList(headerToCopy)
+    else:
+        for measureIdx, measure in enumerate(measures):
+            measureDirectory = os.path.join(directory, measure)
+            measureDF = pd.read_csv(measureDirectory)
+            currentHeader = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
+            measureDF = measureDF.drop(currentHeader.index)
+            measureDF = pd.concat([measureDF, list0fWholePageHeadersToRepeat.dfList[measureIdx]] , ignore_index=True).sort_values('Position').reset_index(drop=True)
+            measureDF.to_csv(measureDirectory, index = False, encoding='utf-8')
 
 
 
 
 
-def headerRepeatingProcesses(directory, pageIdx, headerPages, measures, pageDimensions):
-
+def headerRepeatingProcesses(directory, pageIdx, headerPages, measures, pageDimensions, list0fWholePageHeadersToRepeat):
+    horizontalNumberOfMeasures = int(pageDimensions["Horizontal"])
     #1 pattern repeater
-    #patternRepeater(directory, pageIdx, headerPages["patterns"], measures)
+    patternRepeater(directory, pageIdx, headerPages["patternRepeat"], measures)
     #2 partial header repeater
-    #partialHeaderRepeater(pageIdx, headerPages["partialHeaderRepeater"], measures, directory)
-
+    partialHeaderRepeater(pageIdx, headerPages["partialHeaderRepeat"], measures, directory)
     #3 column repeater
-    columnRepeater(pageIdx, headerPages["columnRepeat"], pageDimensions, measures, directory)
-
+    columnRepeater(pageIdx, headerPages["columnRepeat"], pageDimensions, measures, directory, horizontalNumberOfMeasures)
     #4 first row repeater
+    firstRowRepeater(pageIdx, headerPages["firstRowRepeat"], pageDimensions, measures, directory, horizontalNumberOfMeasures)
     #5 whole page repeater
-
+    wholePageRepeater(pageIdx, headerPages["wholePageRepeat"], measures, directory, list0fWholePageHeadersToRepeat)
 
 
 
 
 def headerRepeater(directory, headerPages, pageDimensions):
+    print("Header Repeating Process Starting...")
+    list0fWholePageHeadersToRepeat =  wholePageDFlist()
     for root, dirs, measures in os.walk(directory):
         pageNumber = os.path.basename(Path(root))
         # Keep only the CSV files
         CSVmeasures = list(filter(lambda measure: measure.endswith('.csv'), measures))
         if CSVmeasures:
-            headerRepeatingProcesses(root, int(pageNumber), headerPages, CSVmeasures, pageDimensions)
-        print("------------------------------------------------------------------")
+            headerRepeatingProcesses(root, int(pageNumber), headerPages, CSVmeasures, pageDimensions, list0fWholePageHeadersToRepeat)
     print("Header Repeating Process Done!")
 
 
@@ -181,14 +218,24 @@ def headerRepeater(directory, headerPages, pageDimensions):
 
 if __name__ == '__main__':
 
+
+
+## DELETE THIS
+    pagesWithHeader = [
+        {"chapter": 1, "unit": 1, "page": 1},
+        {"chapter": 1, "unit": 2, "page": 3}
+    ]
+
+
+
     extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book2"
     headerRepeaterValues = {
-        "wholePage" : [1, 2, 3, 4],
-        "firstRowToWholePage" : [1, 2, 3, 4],
+        "wholePageRepeat" : [1, 3 ], # Put the pages that we want to use as a template for the next ones. Ie if we want to copy page 1 to 2,3,4 then put [1] 
+        "firstRowRepeat" : [1, 2, 3, 4],
         "columnRepeat" : [1, 2, 3, 4],
-        "partialHeaderRepeater" : {
+        "partialHeaderRepeat" : {
             "Pattern1" : {
-                "pages" :[1, 2],
+                "pages" :[1, 3],
                 "headerElementsToRepeat" : [1,2,3,4,5]
             },
             "Pattern2" : {
@@ -196,7 +243,7 @@ if __name__ == '__main__':
                 "headerElementsToRepeat" : [1,2,3]
             }
         },
-        "patterns" : {
+        "patternRepeat" : {
             "Pattern1" : {
                 "pages" : [1,2],
                 "elementIndex" : [4,5,6,7,8],
