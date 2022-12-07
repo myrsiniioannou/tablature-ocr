@@ -6,14 +6,12 @@ import numpy as np
 from scipy.ndimage import rotate
 
 
-def subpart_analysis(img, denoise, templateWindowSize = 15):
+def subpart_analysis(img, denoise, templateWindowSize = 4):
     new_image = img.copy()
     if denoise:
         print("Adding fast denoising...")
-        fast_denoise = cv2.fastNlMeansDenoisingColored(new_image,None,200,100,50,templateWindowSize)
-        gray = cv2.cvtColor(fast_denoise, cv2.COLOR_BGR2GRAY)
-    else:
-        gray = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
+        new_image = cv2.fastNlMeansDenoisingColored(new_image,None,100,0,0,templateWindowSize)
+    gray = cv2.cvtColor(new_image, cv2.COLOR_BGR2GRAY)
     ret, binary = cv2.threshold(gray, 80, 255, cv2.THRESH_OTSU)
     threshold = ~binary
     contours, hierarchy = cv2.findContours(threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -72,11 +70,7 @@ def templateWindowSizeInput():
 
 
 def sort_tablature_coordinates(tabCoordinates):
-    sorted_tablature_coords = sorted(tabCoordinates, key=lambda d: d['y'])
-    for i in range(0, len(sorted_tablature_coords), 2):
-        if sorted_tablature_coords[i]['x']>sorted_tablature_coords[i+1]['x']:
-            sorted_tablature_coords[i], sorted_tablature_coords[i+1]  = sorted_tablature_coords[i+1], sorted_tablature_coords[i]
-    return sorted_tablature_coords
+    return sorted(tabCoordinates, key=lambda x: (x["y"], x["x"]))
 
 
 def find_tablature_coordinates(img):
@@ -185,7 +179,6 @@ def skewMeasures(directory):
         path_to_img = os.path.join(directory, filename)
         image = cv2.imread(path_to_img)
         angle, rotated = correct_skew(image)
-        #print(f"Skew Correction: {angle} for file: {filename}")
         # Save rotated images to directory. Add a zero in case there's one integer in the file name, to sort bettter in the future
         if len(str(filename[:-4])) == 1:
             cv2.imwrite(f"{directory}/0{filename[:-4]}_rotated.jpg", rotated)
@@ -200,27 +193,31 @@ def skewMeasures(directory):
 def measureDetectionAndExtraction(directory):
     for root, dirs, files in os.walk(directory):
         for filename in files:
-            imagePath = os.path.join(root, filename)
-            image = cv2.imread(imagePath)
-            print(f"Analysing File: {imagePath}")
-            print("Are you satisfied with the detected contours? (y/n):")
-            tabCoords = find_tablature_coordinates(image)
-            tabsWithPotentialMargin = plot_the_tablature_coordinates_found_for_verification(tabCoords, image)
-            saveMeasures(image, tabsWithPotentialMargin, os.path.basename(os.path.normpath(directory)), root, filename[:-4])
             baseDirectory = Path(root).parents[3]
             exctractedImgsDirectory = "extracted_measures"
             bookDirectory = os.path.basename(os.path.normpath(directory))
             chapterDirectory = os.path.basename(os.path.normpath(Path(root).parents[0]))
             unitDirectory = os.path.basename(os.path.normpath(root))
             fileDirectory = filename[:-4]
-            measuresDirectoryPath = os.path.join(baseDirectory ,exctractedImgsDirectory, bookDirectory, chapterDirectory, unitDirectory,fileDirectory )
-            skewMeasures(measuresDirectoryPath)
-    print("Measure detection and extraction done!")
+            measuresDirectoryPath = os.path.join(baseDirectory ,exctractedImgsDirectory, bookDirectory, chapterDirectory, unitDirectory,fileDirectory)
+ 
+            if not os.path.exists(measuresDirectoryPath):
+                print(measuresDirectoryPath)
+    #             imagePath = os.path.join(root, filename)
+    #             image = cv2.imread(imagePath)
+    #             print(f"Analysing File: {imagePath}")
+    #             print("Are you satisfied with the detected contours? (y/n):")
+    #             tabCoords = find_tablature_coordinates(image)
+    #             tabsWithPotentialMargin = plot_the_tablature_coordinates_found_for_verification(tabCoords, image)
+    #             saveMeasures(image, tabsWithPotentialMargin, os.path.basename(os.path.normpath(directory)), root, filename[:-4])
+    #             skewMeasures(measuresDirectoryPath)
+            
+    # print("Measure detection and extraction done!")
 
 
 
 if __name__ == '__main__':
     dirname = os.path.dirname(__file__)
-    bookDirectory = os.path.join(dirname, '../../books_to_analyze/book1')
+    bookDirectory = os.path.join(dirname, '../../books_to_analyze/firstBook')
     measureDetectionAndExtraction(bookDirectory)
 

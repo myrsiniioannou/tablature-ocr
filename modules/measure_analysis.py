@@ -87,7 +87,7 @@ def findStringCentroids(stringNumber, df):
 
 
 def detectNotation(model, img):
-    thresh = 0
+    thresh = 0.1
     predictions = model.predict(img)
     labels, boxes, scores = predictions
     filtered_indices = np.where(scores > thresh)
@@ -198,8 +198,9 @@ def chordPositionDetection(mdf, chordNumber):
     centroid_df = mdf.copy()
     ## Reduce the X centroid of p because it's leaning to the right
     centroid_df.loc[centroid_df['Label'] == "p", 'Centroid x']= centroid_df["Centroid x"] - abs(centroid_df["x1"]-centroid_df["x2"])/4
+    chordClusters = len(mdf.index) if chordNumber >=len(mdf.index) else chordNumber
     X_chords = centroid_df[["Centroid x"]]
-    kmeans_chords = KMeans(n_clusters=chordNumber, random_state = 0).fit(X_chords)
+    kmeans_chords = KMeans(n_clusters=chordClusters, random_state = 0).fit(X_chords)
     centroids_chords = np.copy(kmeans_chords.cluster_centers_)
     sorted_centroids_chords = np.sort(centroids_chords, axis = 0)
     chord_positions = sorted_centroids_chords.flatten().tolist()

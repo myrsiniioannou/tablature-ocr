@@ -129,7 +129,6 @@ def headerRepeatingProcesses(directory, pageIdx, headerPages, measures, pageDime
 
 
 def headerRepeater(directory, headerPages, pageDimensions):
-    print("Header Repeating Process Starting...")
     list0fWholePageHeadersToRepeat =  wholePageDFlist()
     for root, dirs, measures in os.walk(directory):
         pageNumber = os.path.basename(Path(root))
@@ -142,7 +141,7 @@ def headerRepeater(directory, headerPages, pageDimensions):
 
 
 if __name__ == '__main__':
-    extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book2"
+    extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\bookTest"
     headerRepeaterValues = {
         "wholePageRepeat" : [1, 3 ], # Put the pages that we want to use as a template for the next ones. Ie if we want to copy page 1 to 2,3,4 then put [1] 
         "firstRowRepeat" : [1, 2, 3, 4],
