@@ -224,19 +224,19 @@ if __name__ == '__main__':
     model_path = r"../model/model5Merged.pth"
     trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
     extractedBookDirectory = os.path.join(r"../../extracted_measures/",  bookFile)
-    measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
+    #measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
 
     # 3rd Step - Header Repeater
     #print("Header Repeating Process Starting...")
-    headerRepeater(extractedBookDirectory, headerRepeaterValues, bookValues["measures"])
+    #headerRepeater(extractedBookDirectory, headerRepeaterValues, bookValues["measures"])
 
     # 4th Step - Parse Book
     bookDirectoryForParsing = os.path.join(r"../extracted_measures", bookFile)
-    parseBook(bookDirectoryForParsing, numberOfStrings, measureValues)
+    #parseBook(bookDirectoryForParsing, numberOfStrings, measureValues)
 
     # 5th Step - Render Book
     JSON_book_directory = os.path.join(r"../../JSON_book_outputs/",  bookFile)
-    renderBook(JSON_book_directory, bookValues, doubleBeamBreaks, singleBeamBreaks)
+    #renderBook(JSON_book_directory, bookValues, doubleBeamBreaks, singleBeamBreaks)
 
     
     print("Book Done!")
