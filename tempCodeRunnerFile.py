@@ -1,0 +1,1 @@
+ measureDetectionAndExtraction(bookDirectory)

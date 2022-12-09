@@ -179,20 +179,14 @@ def correct_skew(image, delta=0.2, limit=10):
     return best_angle, rotated
 
 
-def skewMeasures(directory):
-    for filename in os.listdir(directory):
-        path_to_img = os.path.join(directory, filename)
-        image = cv2.imread(path_to_img)
-        angle, rotated = correct_skew(image)
-        # Save rotated images to directory. Add a zero in case there's one integer in the file name, to sort bettter in the future
-        if len(str(filename[:-4])) == 1:
-            cv2.imwrite(f"{directory}/0{filename[:-4]}_rotated.jpg", rotated)
-        else:
-            cv2.imwrite(f"{directory}/{filename[:-4]}_rotated.jpg", rotated)
-    # Delete old measures that are not rotated  
-    for filename in os.listdir(directory):
-        if not filename.endswith('rotated.jpg'):
-            os.remove(os.path.join(directory, filename)) 
+def skewMeasures(pathToFile, filename):
+    image = cv2.imread(pathToFile)
+    angle, rotated = correct_skew(image)
+    # Save rotated images to directory. Add a zero in case there's one integer in the file name, for better future sorting.
+    if len(str(filename[:-4])) == 1:
+        cv2.imwrite(f"{Path(pathToFile).parent}/0{filename[:-4]}_rotated.jpg", rotated)
+    else:
+        cv2.imwrite(f"{Path(pathToFile).parent}/{filename[:-4]}_rotated.jpg", rotated)
 
 
 def findMeasureDirectory(root, directory, filename):
@@ -214,41 +208,50 @@ def calculatePercentageOfFiles(directory, dir_path):
     return totalNumberOfFiles, percentagesOfFiles
 
 
+def deleteOldNotRotatedMeasures(dir_path):
+    for root, dirs, files in os.walk(dir_path):
+        for index, filename in enumerate(files, 1):
+            path_to_img = os.path.join(root, filename)
+            if path_to_img.endswith('.jpg') and not path_to_img.endswith('rotated.jpg'):
+                os.remove(path_to_img)
+
+
 def startSkewingProcess(directory):
-    dir_path = os.path.join(Path(directory).parents[5], "extracted_measures", os.path.basename(directory))
+    print("Skewing process starting..")
+    dir_path = os.path.join("../extracted_measures", os.path.basename(directory))
     totalNumberOfFiles, percentagesOfFiles = calculatePercentageOfFiles(directory, dir_path)
     fileNumber = 1
     for root, dirs, files in os.walk(dir_path):
         for index, filename in enumerate(files, 1):
-            measureDirectory = findMeasureDirectory(root, directory, filename)
-            print(root, measureDirectory)
-            #skewMeasures(measureDirectory)
+            path_to_img = os.path.join(root, filename)
+            skewMeasures(path_to_img, filename)
             if fileNumber in percentagesOfFiles:
                 print("{0:.0%}".format(int(fileNumber/(totalNumberOfFiles/10))*0.1),'of files done..')
             fileNumber+=1
+    deleteOldNotRotatedMeasures(dir_path)
+
 
 
 def measureDetectionAndExtraction(directory):
-    # for root, dirs, files in os.walk(directory):
-    #     for filename in files:
-    #         baseDirectory = Path(root).parents[3]
-    #         exctractedImgsDirectory = "extracted_measures"
-    #         bookDirectory = os.path.basename(os.path.normpath(directory))
-    #         chapterDirectory = os.path.basename(os.path.normpath(Path(root).parents[0]))
-    #         unitDirectory = os.path.basename(os.path.normpath(root))
-    #         fileDirectory = filename[:-4]
-    #         measuresDirectoryPath = os.path.join(baseDirectory ,exctractedImgsDirectory, bookDirectory, chapterDirectory, unitDirectory,fileDirectory)
+    for root, dirs, files in os.walk(directory):
+        for filename in files:
+            baseDirectory = Path(root).parents[3]
+            exctractedImgsDirectory = "extracted_measures"
+            bookDirectory = os.path.basename(os.path.normpath(directory))
+            chapterDirectory = os.path.basename(os.path.normpath(Path(root).parents[0]))
+            unitDirectory = os.path.basename(os.path.normpath(root))
+            fileDirectory = filename[:-4]
+            measuresDirectoryPath = os.path.join(baseDirectory ,exctractedImgsDirectory, bookDirectory, chapterDirectory, unitDirectory,fileDirectory)
  
-    #         if not os.path.exists(measuresDirectoryPath):
-    #             imagePath = os.path.join(root, filename)
-    #             image = cv2.imread(imagePath)
-    #             print(f"Analysing File: {imagePath}")
-    #             print("Are you satisfied with the detected contours? (y/n):")
-    #             tabCoords = find_tablature_coordinates(image)
-    #             tabsWithPotentialMargin = plot_the_tablature_coordinates_found_for_verification(tabCoords, image)
-    #             saveMeasures(image, tabsWithPotentialMargin, os.path.basename(os.path.normpath(directory)), root, filename[:-4])
-    #             #skewMeasures(measuresDirectoryPath)
-    #print("Skew correction process starting..")
+            if not os.path.exists(measuresDirectoryPath):
+                imagePath = os.path.join(root, filename)
+                image = cv2.imread(imagePath)
+                print(f"Analysing File: {imagePath}")
+                print("Are you satisfied with the detected contours? (y/n):")
+                tabCoords = find_tablature_coordinates(image)
+                tabsWithPotentialMargin = plot_the_tablature_coordinates_found_for_verification(tabCoords, image)
+                saveMeasures(image, tabsWithPotentialMargin, os.path.basename(os.path.normpath(directory)), root, filename[:-4])
+    print("Skew correction process starting..")
     startSkewingProcess(directory)
     print("Measure detection and extraction done!")
 
