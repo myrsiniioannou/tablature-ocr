@@ -1,12 +1,14 @@
+import shutup; shutup.please()
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans,DBSCAN
 import pandas as pd
 from detecto import core
 from detecto.visualize import show_labeled_image
 from pathlib import Path
+from scipy import ndimage
 
 
 def measureDataFromInput(pageFolder, values):
@@ -23,10 +25,6 @@ def measureDataFromInput(pageFolder, values):
     return measureData
 
 
-def incorectResponse():
-    print("That's not a correct response, try again")
-
-
 def horizontalLineDetection(imgInit):
     # Load image, convert to grayscale, Otsu's threshold
     img = imgInit.copy()
@@ -39,9 +37,10 @@ def horizontalLineDetection(imgInit):
     horizontalContours = horizontalContours[0] if len(horizontalContours) == 2 else horizontalContours[1]
     for hc in horizontalContours:
         cv2.drawContours(img, [hc], -1, (36,255,12), 2)
-    plt.figure(figsize=(10, 10))
-    plt.imshow(img)
-    plt.show()
+    # Uncomment for Plotting
+    # plt.figure(figsize=(10, 10))
+    # plt.imshow(img)
+    # plt.show()
     return horizontalContours
 
 
@@ -49,6 +48,10 @@ def sortContoursAndCreateDF(horizontalContours):
     df = pd.DataFrame(np.vstack(np.concatenate(horizontalContours)), columns=['x', 'y'])
     sortedContoursdDF = df.sort_values('y',ignore_index=True)
     return sortedContoursdDF
+
+
+def incorectResponse():
+    print("That's not a correct response, try again")
 
 
 def removeExtraLines(df):
@@ -73,7 +76,7 @@ def removeExtraLines(df):
     return df
 
 
-def findStringCentroids(stringNumber, df):
+def findStringCentroidsWithKmeans(stringNumber, df):
     cluster_number = stringNumber + 2
     X = df[["y"]]
     kmeans = KMeans(n_clusters=cluster_number, random_state = 0).fit(X)
@@ -86,8 +89,49 @@ def findStringCentroids(stringNumber, df):
     return classes
 
 
+def eliminateExtraClasses(stringNumber, classes):
+    if len(classes) == stringNumber + 3:
+        classes.pop(0)
+        classes.pop()
+    elif len(classes) == stringNumber + 2:
+        differences = []
+        for idx,el in enumerate(classes[:-1]):
+            differences.append(abs(classes[idx+1]-classes[idx]))
+        if differences.index(sorted(differences)[-2]) == 0:
+            classes.pop(0)
+        elif differences.index(sorted(differences)[-2]) == 6:
+            classes.pop()
+    return classes
+
+
+def findStringCentroids(stringNumber, df):
+    X = df[["y"]]
+    clusters = DBSCAN(eps=10, min_samples=3).fit(X)
+    classNumber = np.unique(clusters.labels_)
+    classStringNumber = list(classNumber)
+    lengthOfEachClassInList = []
+    for classString in classStringNumber:
+        lengthOfEachClassInList.append(len(clusters.labels_[clusters.labels_==classString]))
+    listOfSameClassElements = []
+    for idx,i in enumerate(lengthOfEachClassInList):
+        sumOfSameCluster = 0
+        for j in range(idx+1):
+            sumOfSameCluster += lengthOfEachClassInList[j]
+        listOfSameClassElements.append(sumOfSameCluster)
+    listOfSameClassElementsStart = [0]
+    listOfSameClassElementsStart.extend(listOfSameClassElements[:-1])
+    listOfSameClassElementsEnd = [x-1 for idx, x in enumerate(listOfSameClassElements)]
+    list0fCentroids = []
+    for idx,i in enumerate(listOfSameClassElementsStart):
+        mean = ndimage.mean(clusters.components_[listOfSameClassElementsStart[idx]:listOfSameClassElementsEnd[idx]])
+        list0fCentroids.append(mean)
+    classes = sorted(list0fCentroids)
+    finalListOfClasses = eliminateExtraClasses(stringNumber, classes)
+    return finalListOfClasses
+
+
 def detectNotation(model, img):
-    thresh = 0.1
+    thresh = 0.2
     predictions = model.predict(img)
     labels, boxes, scores = predictions
     filtered_indices = np.where(scores > thresh)
@@ -95,7 +139,8 @@ def detectNotation(model, img):
     filtered_boxes = boxes[filtered_indices]
     num_list = filtered_indices[0].tolist()
     filtered_labels = [labels[i] for i in num_list]
-    show_labeled_image(img, filtered_boxes, filtered_labels)
+    # Uncomment to show detected letter in image
+    #show_labeled_image(img, filtered_boxes, filtered_labels)
     return filtered_boxes, filtered_labels, filtered_scores
 
     
@@ -167,11 +212,9 @@ def eliminateUnessescaryElementsAccordingToInput(mdf, stringNumber, noteNumber, 
             # Header notations includes only letters, therefore delete possible integers
             rows_with_int_at_header = mdf.index[(mdf['String'] == 0) & (mdf["Label"].astype(str).str.isdigit())].tolist()
             mdf = mdf.drop(mdf.index[rows_with_int_at_header]).reset_index(drop=True)
-            
             # Remove extra header notes based on the given header number
             header_notes_df = mdf[mdf["String"] == 0]
             mdf = remove_rows(mdf, header_notes_df, headerNumber)
-        
         # Remove extra notes
         notes_df = mdf[mdf["Label"].astype(str).str.isdigit()]
         mdf = remove_rows(mdf, notes_df, noteNumber)
@@ -213,41 +256,82 @@ def chordPositionDetection(mdf, chordNumber):
     return measureDF
 
 
+def checkIfResumed(measures):
+    listOfAnalyzedFiles = []
+    for measure in measures:
+        if measure.endswith(".csv"):
+            listOfAnalyzedFiles.append(measure[:-4])
+    return listOfAnalyzedFiles
+
+def findNumberOfFilesNotAnalyzed(path):
+    os.chdir(path)
+    JPGfiles = 0
+    CSVfiles = 0
+    for p,n,f in os.walk(os.getcwd()):
+        for a in f:
+            if a.endswith('.jpg'):
+                JPGfiles+=1
+            elif a.endswith('.csv'):
+                CSVfiles+=1
+    notAnalyzedFiles = abs(JPGfiles - CSVfiles)
+    return notAnalyzedFiles
+
+
+def calculatePercentageOfAnalyzedFiles(dir):
+    fileNumberToAnalyze = findNumberOfFilesNotAnalyzed(dir)
+    return [x for x in range(0, fileNumberToAnalyze, round(fileNumberToAnalyze/10))], fileNumberToAnalyze
+
+
 def measureAnalysis(directory, model, stringNum, pageValues):
-    headerMeasureCounter = 0   
-    for root, dirs, measures in os.walk(directory):       
+    print("Measure Analysis process starting..")
+    headerMeasureCounter = 0
+    fileNumber = 1
+    percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze = calculatePercentageOfAnalyzedFiles(directory)
+        
+    for root, dirs, measures in os.walk(directory):
+        listWithAlreadyAnalyzedFiles = checkIfResumed(measures)
         for measure in measures:
-            chapterDir = os.path.basename(Path(root).parents[1])
-            unitDir = os.path.basename(Path(root).parents[0])            
-            pageFolder = (os.path.basename(root))
-            path_to_img =os.path.join(directory, chapterDir, unitDir, pageFolder, measure)
-            image = cv2.imread(path_to_img)
-            print("Analyzing image:", path_to_img)
-            horizContours = horizontalLineDetection(image)
-            sortedContoursDF = sortContoursAndCreateDF(horizContours)
-            contourDF = removeExtraLines(sortedContoursDF)
-            centroidClasses = findStringCentroids(stringNum, contourDF)               
-            boxes, labels, scores = detectNotation(model, image)
-            measureInfoDF = dataframeCreation(boxes, labels, scores)
-            DFwithStringsDetected = detectStringsOrHeader(measureInfoDF, centroidClasses)
-            DFwithVeryCloseElementsEliminated = eliminateVeryCloseElements(DFwithStringsDetected)
-            measureData = measureDataFromInput(pageFolder, pageValues)
-            DFwithProperNumberOfElements = eliminateUnessescaryElementsAccordingToInput(DFwithVeryCloseElementsEliminated, **measureData)
-            measureDFcleared = chordPositionDetection(DFwithProperNumberOfElements, measureData["chordNumber"])
-            if measureData["headerExistence"] and headerMeasureCounter==0:
-                headerStoringArray = []
-            if measureData["headerExistence"]:
-                headerStoringArray.append(measureDFcleared[measureDFcleared["String"] == 0])
-            else:
-                try:
-                    measureDFcleared = pd.concat([measureDFcleared, headerStoringArray[headerMeasureCounter]])
-                    measureDFcleared = measureDFcleared.sort_values('Position',ignore_index=True)
-                except:
-                    pass
-            if headerMeasureCounter==(len(measures)-1):
-                headerMeasureCounter = -1
-            headerMeasureCounter+=1
-            measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
+            # If measure not analyzed # Made for resuming
+            if measure[:-4] not in listWithAlreadyAnalyzedFiles:
+                chapterDir = os.path.basename(Path(root).parents[1])
+                unitDir = os.path.basename(Path(root).parents[0])            
+                pageFolder = (os.path.basename(root))
+                path_to_img =os.path.join(directory, chapterDir, unitDir, pageFolder, measure)
+                image = cv2.imread(path_to_img)
+                #print("Analyzing image:", path_to_img)
+                horizContours = horizontalLineDetection(image)
+                sortedContoursDF = sortContoursAndCreateDF(horizContours)
+                # Uncomment for using K-MEANS instead of DBSCAN
+                #contourDF = removeExtraLines(sortedContoursDF)
+                #centroidClasses = findStringCentroids(stringNum, contourDF)
+                centroidClasses = findStringCentroids(stringNum, sortedContoursDF)
+                boxes, labels, scores = detectNotation(model, image)
+                measureInfoDF = dataframeCreation(boxes, labels, scores)
+                DFwithStringsDetected = detectStringsOrHeader(measureInfoDF, centroidClasses)
+                DFwithVeryCloseElementsEliminated = eliminateVeryCloseElements(DFwithStringsDetected)
+                measureData = measureDataFromInput(pageFolder, pageValues)
+                DFwithProperNumberOfElements = eliminateUnessescaryElementsAccordingToInput(DFwithVeryCloseElementsEliminated, **measureData)
+                measureDFcleared = chordPositionDetection(DFwithProperNumberOfElements, measureData["chordNumber"])
+                if measureData["headerExistence"] and headerMeasureCounter==0:
+                    headerStoringArray = []
+                if measureData["headerExistence"]:
+                    headerStoringArray.append(measureDFcleared[measureDFcleared["String"] == 0])
+                else:
+                    try:
+                        measureDFcleared = pd.concat([measureDFcleared, headerStoringArray[headerMeasureCounter]])
+                        measureDFcleared = measureDFcleared.sort_values('Position',ignore_index=True)
+                    except:
+                        pass
+                if headerMeasureCounter==(len(measures)-1):
+                    headerMeasureCounter = -1
+                headerMeasureCounter+=1
+                measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
+
+                if fileNumber in percentagesOfFilestoGetAnalyzed:
+                    print("{0:.0%}".format(int(fileNumber/(numberOfFilesToAnalyze/10))*0.1),'of files done..')
+                fileNumber+=1
+
+
     print("Measure Analysis done!")
 
 
@@ -265,7 +349,7 @@ if __name__ == '__main__':
                 "pages": [*range(3,4)],
             },
             "12" : {
-                "pages": [*range(4,6)],
+                "pages": [*range(4,150)]
             }
         },
         "fingeringNumber": {
@@ -276,7 +360,7 @@ if __name__ == '__main__':
                 "pages": [*range(3,4)],
             },
             "17" : {
-                "pages": [*range(4,6)],
+                "pages": [*range(4,150)]
             }
         },
         "chordNumber": {
@@ -287,7 +371,7 @@ if __name__ == '__main__':
                 "pages": [*range(3,4)],
             },
             "17" : {
-                "pages": [*range(4,6)],
+                "pages": [*range(4,150)]
             }
         },
         "headerNumber": {
@@ -298,7 +382,7 @@ if __name__ == '__main__':
                 "pages": [*range(3,4)],
             },
             "17" : {
-                "pages": [*range(4,6)],
+                "pages": [*range(4,150)]
             }
         },
         "headerExistence": {
@@ -306,7 +390,7 @@ if __name__ == '__main__':
                 "pages": [*range(1,3)],
             },
             False : {
-                "pages": [*range(3,6)],
+                "pages": [*range(4,150)]
             }
         },
         "noteStringExistence": {
@@ -314,7 +398,7 @@ if __name__ == '__main__':
                 "pages": [*range(1,3)],
             },
             False : {
-                "pages": [*range(3,6)],
+                "pages": [*range(4,150)],
             }
         },
         "noteStrings": {
@@ -322,14 +406,14 @@ if __name__ == '__main__':
                 "pages": [*range(1,3)],
             },
             "2" : {
-                "pages": [*range(3,6)],
+                "pages": [*range(4,150)],
             }
         }
     }
 
     dirname = os.path.dirname(__file__)
-    model_path = os.path.join(dirname, '../../model/model2.pth')
+    model_path = os.path.join(dirname, '../../model/model5Merged.pth')
     trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
-    extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\book1"
+    extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\firstBook"
     numberOfStrings = 6
     measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
