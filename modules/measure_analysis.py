@@ -18,9 +18,7 @@ def measureDataFromInput(pageFolder, values):
     "fingeringNumber" : int([key for key, value in values["fingeringNumber"].items() if (int(pageFolder) in value["pages"])][0]),
     "chordNumber" : int([key for key, value in values["chordNumber"].items() if (int(pageFolder) in value["pages"])][0]),
     "headerNumber" : int([key for key, value in values["headerNumber"].items() if (int(pageFolder) in value["pages"])][0]),
-    #"headerExistence" : bool([key for key, value in values["headerExistence"].items() if (int(pageFolder) in value["pages"])][0]),
-    "noteStringExistence" : bool([key for key, value in values["noteStringExistence"].items() if (int(pageFolder) in value["pages"])][0]),
-    "noteStrings" : [int(key) for key, value in values["noteStrings"].items() if (int(pageFolder) in value["pages"])],
+    "noteStrings" : [int(key) for key, value in values["noteStrings"].items() if (int(pageFolder) in value["pages"])]
     }
     return measureData
 
@@ -35,9 +33,10 @@ def horizontalLineDetection(imgInit):
     horizontalContours = horizontalContours[0] if len(horizontalContours) == 2 else horizontalContours[1]
     for hc in horizontalContours:
         cv2.drawContours(img, [hc], -1, (36,255,12), 2)
-    plt.figure(figsize=(10, 10))
-    plt.imshow(img)
-    plt.show()
+    # Uncomment to show Horizontal Line Detection
+    #plt.figure(figsize=(10, 10))
+    #plt.imshow(img)
+    #plt.show()
     return horizontalContours
 
 
@@ -45,8 +44,6 @@ def sortContoursAndCreateDF(horizontalContours):
     df = pd.DataFrame(np.vstack(np.concatenate(horizontalContours)), columns=['x', 'y'])
     sortedContoursdDF = df.sort_values('y',ignore_index=True)
     return sortedContoursdDF
-
-
 
 
 def eliminateExtraClasses(stringNumber, classes):
@@ -100,38 +97,46 @@ def detectNotation(model, img):
     num_list = filtered_indices[0].tolist()
     filtered_labels = [labels[i] for i in num_list]
     # Uncomment to show detected letter in image
-    show_labeled_image(img, filtered_boxes, filtered_labels)
+    #show_labeled_image(img, filtered_boxes, filtered_labels)
     return filtered_boxes, filtered_labels, filtered_scores
 
     
 def dataframeCreation(filtered_boxes, filtered_labels, filtered_scores):
-    mdf = pd.DataFrame(filtered_boxes.numpy(), columns = ["x1", "y1", "x2", "y2"])
-    mdf['Label'] = pd.Series(filtered_labels)
-    mdf['Score'] = pd.Series(filtered_scores)
-    col = mdf.pop("Label")
-    mdf.insert(0, col.name, col)
-    mdf['Centroid x'] = abs(mdf['x2'] - mdf['x1'])/2 + mdf['x1']
-    mdf['Centroid y'] = abs(mdf['y2'] - mdf['y1'])/2 + mdf['y1']
+    df = pd.DataFrame(filtered_boxes.numpy(), columns = ["x1", "y1", "x2", "y2"])
+    df['Label'] = pd.Series(filtered_labels)
+    df['Score'] = pd.Series(filtered_scores)
+    col = df.pop("Label")
+    df.insert(0, col.name, col)
+    df['Centroid x'] = abs(df['x2'] - df['x1'])/2 + df['x1']
+    df['Centroid y'] = abs(df['y2'] - df['y1'])/2 + df['y1']
     # If the label is p then the centroid of Y is higher to 2/3 of the main cetroid
-    mdf.loc[mdf['Label'] == "p", 'Centroid y'] = abs(mdf['y2'] - mdf['y1'])/3 + mdf['y1']    
-    return mdf
-
-    
-def detectStringClasses(mdf, classes):
-    for element, row in mdf.iterrows():
-        found = min(classes, key = lambda x:abs(x-mdf.loc[element, "Centroid y"]))    
-        mdf.loc[element, "String"] = int(classes.index(found))   
-    mdf["String"] = mdf["String"].astype(int)
-    return mdf
+    df.loc[df['Label'] == "p", 'Centroid y'] = abs(df['y2'] - df['y1'])/3 + df['y1']    
+    return df
 
 
-def eliminateVeryCloseElements(mdf, meanChordDistance):
-    mdf = mdf.sort_values(by='Centroid x', ascending=True).reset_index(drop=True)
-    Strings = mdf['String'].unique().tolist()
+def adjustPcentroids(df):
+    # Centroid Y of p is higher to 2/3 of the main cetroid
+    df.loc[df['Label'] == "p", 'Centroid y'] = abs(df['y2'] - df['y1'])/3 + df['y1']
+    ## Reduce the X centroid of p because it's leaning to the right
+    df.loc[df['Label'] == "p", 'Centroid x'] = df["Centroid x"] - abs(df["x1"]-df["x2"])/3
+    return df
+
+
+def detectAndAssignStringClasses(df, classes):
+    for element, row in df.iterrows():
+        found = min(classes, key = lambda x:abs(x-df.loc[element, "Centroid y"]))    
+        df.loc[element, "String"] = int(classes.index(found))   
+    df["String"] = df["String"].astype(int)
+    return df
+
+
+def eliminateVeryCloseElements(df, meanChordDistance):
+    df = df.sort_values(by='Centroid x', ascending=True).reset_index(drop=True)
+    Strings = df['String'].unique().tolist()
     Strings.sort()
     closeCentroidIdxToDelete = []
     for currentString in Strings:
-        currentDF = mdf[mdf["String"] == currentString]
+        currentDF = df[df["String"] == currentString]
         if len(currentDF) != 0:
             previousIdx = currentDF.iloc[0].name
             previousElement = currentDF.iloc[0]
@@ -146,72 +151,82 @@ def eliminateVeryCloseElements(mdf, meanChordDistance):
                 previousElement = row.copy()
     closeCentroidIdxToDelete = list(set(closeCentroidIdxToDelete))
     closeCentroidIdxToDelete.sort()
-    mdf.drop(closeCentroidIdxToDelete).reset_index(drop=True)
-    return mdf
+    df.drop(closeCentroidIdxToDelete).reset_index(drop=True)
+    return df
 
 
-def eliminateUnessescaryElementsAccordingToInput(mdf, noteNumber, fingeringNumber, headerNumber, noteStringExistence, noteStrings): 
-    def remove_rows(main_df, rows_to_keep, index_start):
-        delete_indexes = rows_to_keep.iloc[index_start:].index.tolist()
-        main_df = main_df.drop(delete_indexes).reset_index(drop=True) 
-        return main_df  
-    # sort values by score
-    mdf.sort_values(by='Score', ascending=False)
-    try:
-        # If no header, remove header items (string = 0)
-        if headerNumber==0:
-            mdf = mdf[mdf["String"] != 0].reset_index(drop=True)
-        else:
-            # If header exists:
-            # Header notations includes only letters, therefore delete possible integers
-            rows_with_int_at_header = mdf.index[(mdf['String'] == 0) & (mdf["Label"].astype(str).str.isdigit())].tolist()
-            mdf = mdf.drop(mdf.index[rows_with_int_at_header]).reset_index(drop=True)
-            # Remove extra header notes based on the given header number
-            header_notes_df = mdf[mdf["String"] == 0]
-            mdf = remove_rows(mdf, header_notes_df, headerNumber)
-        # Remove extra notes
-        notes_df = mdf[mdf["Label"].astype(str).str.isdigit()]
-        mdf = remove_rows(mdf, notes_df, noteNumber)
-        # FINGERING
-        ### If there's a note string(s), keep only the notes there and delete the fingering
-        if noteStringExistence:
-            for fs in noteStrings:
-                # Select the fingering string and all the labels that are not integers, meaning string symbols
-                strings_on_fingering = mdf[(mdf["String"]== fs) & (~mdf["Label"].astype(str).str.isdigit())].index.tolist()
-                # Drop them
-                mdf = mdf.drop(mdf.index[strings_on_fingering]).reset_index(drop=True)
-        # Remove extra fingering
-        fingering_df = mdf[~mdf["Label"].astype(str).str.isdigit() & (mdf['String'] != 0)]
-        mdf = remove_rows(mdf, fingering_df, fingeringNumber)
-    except:
-        pass
-    # Sort according to Centroid x
-    mdf = mdf.sort_values(by='Centroid x', ascending = True).reset_index(drop=True)
-    return mdf
-    
+def eliminateDuplicateElements(df):
+    Strings = df['String'].unique().tolist()
+    Strings.sort()
+    idxsToDelete = []
+    for currentString in Strings:
+        dfWithDuplicateHeaderPositions = df.loc[df["String"] == currentString]
+        dfDuplicateHeaderPositions = dfWithDuplicateHeaderPositions[dfWithDuplicateHeaderPositions['Position'].duplicated(keep=False)]
+        if len(dfDuplicateHeaderPositions.columns) != 0:
+            positionsWithDuplicates = dfDuplicateHeaderPositions["Position"].unique().tolist()
+            for position in positionsWithDuplicates:
+                subsetDF1 = dfDuplicateHeaderPositions[dfDuplicateHeaderPositions["Position"] == position]
+                idxOfMax = subsetDF1["Score"].idxmax().item()
+                dfOfDuplicatesWithoutTheMaxValue = subsetDF1.drop(idxOfMax)
+                idxsToDelete.extend(dfOfDuplicatesWithoutTheMaxValue.index.values.tolist())
+    if idxsToDelete:
+        df = df.drop(index=idxsToDelete).reset_index(drop=True).sort_values(by=['Position'])
+    return df
+
+
+def removeRowsByLowestScore(df, subsetToClear, IndexRangeToDelete):
+    # IndexRangeToDelete is basically the limit/number of elements of the measure
+    delete_indexes = subsetToClear.iloc[IndexRangeToDelete:].index.tolist()
+    if delete_indexes:
+        df.drop(delete_indexes).reset_index(drop=True) 
+    return df
+
+
+def eliminateRedundantElements(df, noteNumber, fingeringNumber, headerNumber, noteStrings): 
+    df.sort_values(by='Score', ascending=False)
+    # Clear Header
+    if headerNumber == 0:
+        df = df[df["String"] != 0].reset_index(drop=True)
+    else:
+        intInHeaderRows = df.index[(df['String'] == 0) & (df["Label"].astype(str).str.isdigit())].tolist()
+        if intInHeaderRows:
+            df = df.drop(df.index[intInHeaderRows]).reset_index(drop=True)   
+        header_notes_df = df[df["String"] == 0]
+        df = removeRowsByLowestScore(df, header_notes_df, headerNumber)
+    #Clear Notes (False Fingering on note strings)
+    if noteStrings:
+        for noteString in noteStrings:
+            fingeringOnNoteString = df[(df["String"]== 1) & (~df["Label"].astype(str).str.isdigit())].index.tolist()
+            if fingeringOnNoteString:
+                df.drop(index=fingeringOnNoteString, inplace = True)
+                df.reset_index(drop=True, inplace = True)
+    # Clear Notes
+    notes_df = df[df["Label"].astype(str).str.isdigit()]
+    df = removeRowsByLowestScore(df, notes_df, noteNumber)
+    # Clear Fingering
+    fingering_df = df[~df["Label"].astype(str).str.isdigit() & (df['String'] != 0)]
+    df = removeRowsByLowestScore(df, fingering_df, fingeringNumber)
+    df = df.sort_values(by='Centroid x', ascending = True).reset_index(drop=True)
+    return df
+
   
-def findChordCentroidsAndMeanDistance(mdf, chordNumber):
-    centroid_df = mdf.copy()
-    ## Reduce the X centroid of p because it's leaning to the right
-    centroid_df.loc[centroid_df['Label'] == "p", 'Centroid x']= centroid_df["Centroid x"] - abs(centroid_df["x1"]-centroid_df["x2"])/3
-    chordClusters = len(mdf.index) if chordNumber >=len(mdf.index) else chordNumber
-    X_chords = centroid_df[["Centroid x"]]
+def findChordCentroidsAndMeanDistance(df, chordNumber):
+    chordClusters = len(df.index) if chordNumber >=len(df.index) else chordNumber
+    X_chords = df[["Centroid x"]]
     kmeans_chords = KMeans(n_clusters=chordClusters, random_state = 0).fit(X_chords)
     centroids_chords = np.copy(kmeans_chords.cluster_centers_)
     sorted_centroids_chords = np.sort(centroids_chords, axis = 0)
     chord_positions = sorted_centroids_chords.flatten().tolist()
     meanChordDistance = np.mean(np.diff(np.array(chord_positions))).astype(float)
-    return centroid_df, chord_positions, meanChordDistance
+    return chord_positions, meanChordDistance
 
 
-def findChordPositions(mdf, chord_positions, centroid_df):
-    for item, row in centroid_df.iterrows():
-        item_found = min(chord_positions, key = lambda x:abs(x-centroid_df.loc[item, "Centroid x"]))
-        # Assign the position in the main df, not the temporary one
-        mdf.loc[item, "Position"] = int(chord_positions.index(item_found))
-    mdf["Position"] = mdf["Position"].astype(int)
-    measureDF = mdf[["Label", "String", "Position"]]
-    return measureDF
+def findChordPositions(df, chord_positions, centroid_df):
+    for item, row in df.iterrows():
+        item_found = min(chord_positions, key = lambda x:abs(x-df.loc[item, "Centroid x"]))
+        df.loc[item, "Position"] = int(chord_positions.index(item_found))
+    df["Position"] = df["Position"].astype(int)
+    return df
 
 
 def checkIfResumed(measures):
@@ -265,23 +280,16 @@ def analyzeMeasure(measure, root, directory, stringNum, model):
     centroidClasses = findStringCentroidsWithDBSCAN(stringNum, sortedContoursDF)
     boxes, labels, scores = detectNotation(model, image)
     measureInfoDF = dataframeCreation(boxes, labels, scores)
-    dfWithDetectedStrings = detectStringClasses(measureInfoDF, centroidClasses)
-
-
-    centroid_df, chord_positions, meanChordDistance = findChordCentroidsAndMeanDistance(dfWithDetectedStrings, measureData["chordNumber"])
-
-
-    dfwithVeryCloseElementsEliminated = eliminateVeryCloseElements(centroid_df, meanChordDistance)
-
-    measureDFcleared = findChordPositions(dfwithVeryCloseElementsEliminated, chord_positions, dfwithVeryCloseElementsEliminated)
-    #
-    # DFwithProperNumberOfElements = eliminateUnessescaryElementsAccordingToInput(dfwithVeryCloseElementsEliminated, **measureData)
-
-
-    # #############   REPEATED  ###########################measureDFcleared = findChordPositions(DFwithProperNumberOfElements, measureData["chordNumber"])
-
-
-    # measureDFcleared.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
+    measureWithAdjustedPcentroids = adjustPcentroids(measureInfoDF)
+    dfWithDetectedStrings = detectAndAssignStringClasses(measureWithAdjustedPcentroids, centroidClasses)
+    # Next line doesn't return a df - It's the only one
+    chord_positions, meanChordDistance = findChordCentroidsAndMeanDistance(dfWithDetectedStrings, measureData["chordNumber"])
+    dfwithVeryCloseElementsEliminated = eliminateVeryCloseElements(dfWithDetectedStrings, meanChordDistance)
+    measureDfWithPositions = findChordPositions(dfwithVeryCloseElementsEliminated, chord_positions, dfwithVeryCloseElementsEliminated)
+    dfWithoutDuplicateElements = eliminateDuplicateElements(measureDfWithPositions)
+    DFwithProperNumberOfElements = eliminateRedundantElements(dfWithoutDuplicateElements, measureData["noteNumber"], measureData["fingeringNumber"], measureData["headerNumber"], measureData["noteStrings"])
+    finalMeasureDF = DFwithProperNumberOfElements[["Label", "String", "Position"]]
+    finalMeasureDF.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
 
 
 def iterateOverMeasuresOfCurrentPage(root, measures, listWithAlreadyAnalyzedFiles, percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze, model, fileNumber, directory, stringNum):
@@ -293,21 +301,27 @@ def iterateOverMeasuresOfCurrentPage(root, measures, listWithAlreadyAnalyzedFile
     return fileNumber
 
 
-
-
 def measureAnalysis(directory, model, stringNum, pageValues):
     print("Measure Analysis process starting..")
     fileNumber = 1
     percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze = calculatePercentageOfAnalyzedFiles(directory)  
     for root, dirs, measures in os.walk(directory):
         listWithAlreadyAnalyzedFiles = checkIfResumed(measures)
-        fileNumber = iterateOverMeasuresOfCurrentPage(root, measures, listWithAlreadyAnalyzedFiles, percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze, model, fileNumber, directory, stringNum)
+        fileNumber = iterateOverMeasuresOfCurrentPage(
+                                            root,
+                                            measures,
+                                            listWithAlreadyAnalyzedFiles,
+                                            percentagesOfFilestoGetAnalyzed,
+                                            numberOfFilesToAnalyze,
+                                            model,
+                                            fileNumber,
+                                            directory,
+                                            stringNum
+                                            )
     print("Measure Analysis done!")
 
 
 
-
-            
 if __name__ == '__main__':
     pageValues = {
         "stringNumber" : 6, 
@@ -353,14 +367,6 @@ if __name__ == '__main__':
             },
             "17" : {
                 "pages": [*range(4,200)]
-            }
-        },
-        "noteStringExistence": {
-            True: {
-                "pages": [*range(1,3)],
-            },
-            False : {
-                "pages": [*range(4,200)],
             }
         },
         "noteStrings": {

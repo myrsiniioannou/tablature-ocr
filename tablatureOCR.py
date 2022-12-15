@@ -45,14 +45,6 @@ if __name__ == '__main__':
                 "pages": [*range(1,347)],
             }
         },
-        "noteStringExistence": {
-            True: {
-                "pages": [*range(1,347)],
-            }#,
-            #False : {
-                #"pages": [*range(3,6)],
-            #}
-        },
         "noteStrings": {
             "1": {
                 "pages": [*range(1,347)],
