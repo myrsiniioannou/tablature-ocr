@@ -163,7 +163,7 @@ if __name__ == '__main__':
             }
         },
         "headerLetter" : {
-            "VARIATION 1" : [1,2,3, 16, 17, 18, 31, 33, 45, 46, 47],
+            "VARIATION 1" : [1,2,3, 16, 17, 18, 31, 33, 45, 46, 47]
             #"VARIATION 2" : [],
             #"VARIATION 3" : [],
             #"VARIATION 4" : [],
@@ -172,13 +172,13 @@ if __name__ == '__main__':
     }
     doubleBeamBreaks  = {
         "pattern1" : {
-            "pages" : [*range(1,347)],
+            "pages" : [*range(1,345)],
             "beamBreaks" : [16]
-        }#,
-        # "pattern2" : {
-        #     "pages" : [range(2,3)],
-        #     "beamBreaks" : [16]
-        # },
+        },
+        "pattern2" : {
+            "pages" : [range(346,347)],
+            "beamBreaks" : [16]
+        },
         # "pattern3" : {
         #     "pages" : [range(3,200)],
         #     "beamBreaks" : [9]
@@ -201,26 +201,25 @@ if __name__ == '__main__':
 
 
     # 1st Step - Exctract Measures
-    bookDirectory = os.path.join(r"../books_to_analyze/",  bookFile)
+    #bookDirectory = os.path.join(r"../books_to_analyze/",  bookFile)
     #measureDetectionAndExtraction(bookDirectory)
 
     # 2nd Step - Analyze measures and create dfs for each one
-    model_path = r"../model/model5Merged.pth"
-    trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
-    extractedBookDirectory = os.path.join(r"../extracted_measures/",  bookFile)
-    measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
+    #model_path = r"../model/model5Merged.pth"
+    #trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
+    #extractedBookDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures",  bookFile)
+    #measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
 
     # 3rd Step - Header Repeater
-    #print("Header Repeating Process Starting...")
     #headerRepeater(extractedBookDirectory, headerRepeaterValues, bookValues["measures"])
 
     # 4th Step - Parse Book
-    bookDirectoryForParsing = os.path.join(r"../extracted_measures", bookFile)
+    #bookDirectoryForParsing = os.path.join(r"..\extracted_measures", bookFile)
     #parseBook(bookDirectoryForParsing, numberOfStrings, measureValues)
 
     # 5th Step - Render Book
-    JSON_book_directory = os.path.join(r"../../JSON_book_outputs/",  bookFile)
-    #renderBook(JSON_book_directory, bookValues, doubleBeamBreaks, singleBeamBreaks)
+    JSON_book_directory = os.path.join(r"..\JSON_book_outputs",  bookFile + ".json")
+    renderBook(JSON_book_directory, bookValues, doubleBeamBreaks, singleBeamBreaks)
 
     
     print("Book Done!")

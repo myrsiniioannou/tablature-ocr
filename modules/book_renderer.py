@@ -18,9 +18,8 @@ def loadValues(values, doubleBeamBreaks, singleBeamBreaks):
 def findPageBreaks(patterns):
     beamBreakRanges = dict()
     for pattern, vals in patterns.items():
-        for pageRange in vals["pages"]:
-            for page in pageRange:
-                beamBreakRanges[page] = vals["beamBreaks"]
+        for page in vals["pages"]:
+            beamBreakRanges[page] = vals["beamBreaks"]
     return beamBreakRanges
 
 
@@ -301,7 +300,7 @@ def renderBook(JSON, values, doubleBeamBreaks, singleBeamBreaks):
     output = finalizeBookRendering(environment, stringNumber, bookRendering)
     
     # Save the Musescore file
-    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\renderedBook1.mscx"
+    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\bookFile1.mscx"
     with open(f"{musescoreOutputFile}", "w") as f:
          f.write(output)
     print("Book Rendering Done!")
@@ -346,31 +345,31 @@ if __name__ == '__main__':
     }
     doubleBeamBreaks  = {
         "pattern1" : {
-            "pages" : [range(1,2)],
-            "beamBreaks" : [5,10]
-        },
-        "pattern2" : {
-            "pages" : [range(2,3)],
-            "beamBreaks" : [7,16]
-        },
-        "pattern3" : {
-            "pages" : [range(3,200)],
-            "beamBreaks" : [9]
-        }
+            "pages" : [*range(1,347)],
+            "beamBreaks" : [16]
+        }#,
+        # "pattern2" : {
+        #     "pages" : [range(2,3)],
+        #     "beamBreaks" : [16]
+        # },
+        # "pattern3" : {
+        #     "pages" : [range(3,200)],
+        #     "beamBreaks" : [9]
+        # }
     }
     singleBeamBreaks  = {
         "pattern1" : {
-            "pages" : [range(1,2)],
-            "beamBreaks" : [13]
-        },
-        "pattern2" : {
-            "pages" : [range(2,3)],
-            "beamBreaks" : [9,11]
-        },
-        "pattern3" : {
-            "pages" : [range(3,200)],
-            "beamBreaks" : [15]
-        }
+            "pages" : [*range(1,347)],
+            "beamBreaks" : [8, 24]
+        }# ,
+        # "pattern2" : {
+        #     "pages" : [range(2,3)],
+        #     "beamBreaks" : [9,11]
+        # },
+        # "pattern3" : {
+        #     "pages" : [range(3,200)],
+        #     "beamBreaks" : [15]
+        # }
     }
 
 

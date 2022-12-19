@@ -123,8 +123,8 @@ def plot_the_tablature_coordinates_found_for_verification(tabs, img):
         if marginConfirmation == "y":
             while True:
                 try:
-                    margin = int(input("Provide Margin (-20 to 20):"))
-                    if margin < -20 or margin > 20:
+                    margin = int(input("Provide Margin (-20 to 30):"))
+                    if margin < -20 or margin > 30:
                         raise ValueError
                     break
                 except ValueError:

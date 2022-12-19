@@ -10,6 +10,7 @@ from detecto.visualize import show_labeled_image
 from pathlib import Path
 from scipy import ndimage
 import copy
+import math
 
 def measureDataFromInput(pageFolder, values):
     measureData = {
@@ -23,11 +24,12 @@ def measureDataFromInput(pageFolder, values):
     return measureData
 
 
-def horizontalLineDetection(imgInit):
+def horizontalLineDetection(imgInit, stringNumber):
+    detectionVariable = 18 if int(stringNumber) == 6 else 50
     img = imgInit.copy()
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
-    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (18,1))
+    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (detectionVariable,1))
     detect_horizontal = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
     horizontalContours = cv2.findContours(detect_horizontal, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     horizontalContours = horizontalContours[0] if len(horizontalContours) == 2 else horizontalContours[1]
@@ -85,6 +87,17 @@ def findStringCentroidsWithDBSCAN(stringNumber, df):
     classes = sorted(list0fCentroids)
     finalListOfClasses = eliminateExtraClasses(stringNumber, classes)
     return finalListOfClasses
+
+
+def findStringCentroidsWithKMEANS(stringNumber, df):
+    cluster_number = stringNumber + 2 # BECAUSE OF THE TWO LINES DETECTED BELOW HEADER
+    X = df[["y"]]
+    kmeans = KMeans(n_clusters=cluster_number, random_state = 0).fit(X)
+    centroids = np.copy(kmeans.cluster_centers_)
+    sorted_centroids = np.sort(centroids, axis = 0)
+    classes = sorted_centroids.flatten().tolist()
+    classes.pop(1)
+    return classes
 
 
 def detectNotation(model, img):
@@ -268,16 +281,16 @@ def findPathtoIMGandPageFolder(root, directory, measure):
 
 def printPercentageOfAnalyzedFiles(fileNumber, percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze):
     if fileNumber in percentagesOfFilestoGetAnalyzed:
-        print("{0:.0%}".format(int(fileNumber/(numberOfFilesToAnalyze/10))*0.1),'of files done..')
+        print("{:.0%}".format(int(fileNumber*100/numberOfFilesToAnalyze)/100),'of files done..')
 
 
-def analyzeMeasure(measure, root, directory, stringNum, model):
+def analyzeMeasure(measure, root, directory, stringNum, model, pageValues):
     path_to_img, pageFolder = findPathtoIMGandPageFolder(root, directory, measure)
     measureData = measureDataFromInput(pageFolder, pageValues)
     image = cv2.imread(path_to_img)
-    horizContours = horizontalLineDetection(image)
+    horizContours = horizontalLineDetection(image, measureData["stringNumber"])
     sortedContoursDF = sortContoursAndCreateDF(horizContours)
-    centroidClasses = findStringCentroidsWithDBSCAN(stringNum, sortedContoursDF)
+    centroidClasses = findStringCentroidsWithKMEANS(stringNum, sortedContoursDF)
     boxes, labels, scores = detectNotation(model, image)
     measureInfoDF = dataframeCreation(boxes, labels, scores)
     measureWithAdjustedPcentroids = adjustPcentroids(measureInfoDF)
@@ -292,10 +305,10 @@ def analyzeMeasure(measure, root, directory, stringNum, model):
     finalMeasureDF.to_csv(f"{path_to_img[:-4]}.csv", encoding='utf-8', index=False)
 
 
-def iterateOverMeasuresOfCurrentPage(root, measures, listWithAlreadyAnalyzedFiles, percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze, model, fileNumber, directory, stringNum):
+def iterateOverMeasuresOfCurrentPage(root, measures, listWithAlreadyAnalyzedFiles, percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze, model, fileNumber, directory, stringNum, pageValues):
     for measure in measures:
         if measure[:-4] not in listWithAlreadyAnalyzedFiles:
-            analyzeMeasure(measure, root, directory, stringNum, model)
+            analyzeMeasure(measure, root, directory, stringNum, model, pageValues)
             printPercentageOfAnalyzedFiles(fileNumber, percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze)
             fileNumber+=1
     return fileNumber
@@ -304,7 +317,7 @@ def iterateOverMeasuresOfCurrentPage(root, measures, listWithAlreadyAnalyzedFile
 def measureAnalysis(directory, model, stringNum, pageValues):
     print("Measure Analysis process starting..")
     fileNumber = 1
-    percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze = calculatePercentageOfAnalyzedFiles(directory)  
+    percentagesOfFilestoGetAnalyzed, numberOfFilesToAnalyze = calculatePercentageOfAnalyzedFiles(directory)
     for root, dirs, measures in os.walk(directory):
         listWithAlreadyAnalyzedFiles = checkIfResumed(measures)
         fileNumber = iterateOverMeasuresOfCurrentPage(
@@ -316,7 +329,8 @@ def measureAnalysis(directory, model, stringNum, pageValues):
                                             model,
                                             fileNumber,
                                             directory,
-                                            stringNum
+                                            stringNum,
+                                            pageValues
                                             )
     print("Measure Analysis done!")
 
@@ -326,58 +340,42 @@ if __name__ == '__main__':
     pageValues = {
         "stringNumber" : 6, 
         "noteNumber": {
-            "12": {
-                "pages": [*range(1,3)],
-            },
-            "10" : {
-                "pages": [*range(3,4)],
-            },
-            "8" : {
-                "pages": [*range(4,200)]
+            "12" : {
+                "pages": [*range(1,347)],
             }
         },
         "fingeringNumber": {
-            "28": {
+            "20": {
                 "pages": [*range(1,3)],
             },
-            "16" : {
-                "pages": [*range(3,4)],
+            "32": {
+                "pages": [*range(1,150)],
             },
-            "17" : {
-                "pages": [*range(4,200)]
+            "40": {
+                "pages": [*range(150,180),*range(317347)],
+            },
+            "28": {
+                "pages": [*range(180,317)],
             }
         },
         "chordNumber": {
-            "15": {
-                "pages": [*range(4,6)],
-            },
-            "32" : {
-                "pages": [*range(1,4)],
-            },
-            "17" : {
-                "pages": [*range(6,200)]
+            "32": {
+                "pages": [*range(1,347)],
             }
         },
         "headerNumber": {
-            "0": {
-                "pages": [*range(1,3)],
-            },
-            "16" : {
-                "pages": [*range(3,4)],
-            },
-            "17" : {
-                "pages": [*range(4,200)]
+            "32": {
+                "pages": [*range(1,347)],
             }
         },
         "noteStrings": {
             "1": {
-                "pages": [*range(1,3)],
-            },
-            "2" : {
-                "pages": [*range(4,200)],
+                "pages": [*range(1,347)],
             }
         }
     }
+
+
 
     dirname = os.path.dirname(__file__)
     model_path = os.path.join(dirname, '../../model/model5Merged.pth')

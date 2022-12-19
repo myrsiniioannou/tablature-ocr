@@ -96,7 +96,7 @@ class wholePageDFlist:
 
 
 def wholePageRepeater(pageIdx, wholePageRepeatPages, measures, directory, list0fWholePageHeadersToRepeat):
-    if pageIdx in wholePageRepeatPages:
+    if wholePageRepeatPages and pageIdx in wholePageRepeatPages:
         list0fWholePageHeadersToRepeat.dfList = []
         for measureIdx, measure in enumerate(measures):
             measureDirectory = os.path.join(directory, measure)
@@ -104,7 +104,7 @@ def wholePageRepeater(pageIdx, wholePageRepeatPages, measures, directory, list0f
             headerToCopy = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
             headerToCopy.insert(1, 'String', int(0))
             list0fWholePageHeadersToRepeat.updateList(headerToCopy)
-    else:
+    elif wholePageRepeatPages and pageIdx not in wholePageRepeatPages:
         for measureIdx, measure in enumerate(measures):
             measureDirectory = os.path.join(directory, measure)
             measureDF = pd.read_csv(measureDirectory)
@@ -129,6 +129,7 @@ def headerRepeatingProcesses(directory, pageIdx, headerPages, measures, pageDime
 
 
 def headerRepeater(directory, headerPages, pageDimensions):
+    print("Header Repeating Process Starting..")
     list0fWholePageHeadersToRepeat =  wholePageDFlist()
     for root, dirs, measures in os.walk(directory):
         pageNumber = os.path.basename(Path(root))
@@ -141,37 +142,37 @@ def headerRepeater(directory, headerPages, pageDimensions):
 
 
 if __name__ == '__main__':
-    extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\bookTest"
+    extractedBookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\firstBook"
     headerRepeaterValues = {
-        "wholePageRepeat" : [1, 3 ], # Put the pages that we want to use as a template for the next ones. Ie if we want to copy page 1 to 2,3,4 then put [1] 
-        "firstRowRepeat" : [1, 2, 3, 4],
-        "columnRepeat" : [1, 2, 3, 4],
+        "wholePageRepeat" : [], # Put the pages that we want to use as a template for the next ones. Ie if we want to copy page 1 to 2,3,4 then put [1] 
+        "firstRowRepeat" : [*range(1,347)],
+        "columnRepeat" : [],
         "partialHeaderRepeat" : {
-            "Pattern1" : {
-                "pages" :[1, 3],
-                "headerElementsToRepeat" : [1,2,3,4,5]
-            },
-            "Pattern2" : {
-                "pages" :[3, 4],
-                "headerElementsToRepeat" : [1,2,3]
-            }
+            #"Pattern1" : {
+            #    "pages" : [*range(1,347)],
+            #    "headerElementsToRepeat" : [*range(4,9)],
+            #}#,
+            #"Pattern2" : {
+            #    "pages" :[3, 4],
+            #    "headerElementsToRepeat" : [1,2,3]
+            #}
         },
         "patternRepeat" : {
             "Pattern1" : {
-                "pages" : [1,2],
-                "elementIndex" : [4,5,6,7,8],
-                "fingeringPattern" : ["e", "e", "e", "e", "e"]
-            },
-            "Pattern2" : {
-                "pages" : [3],
-                "elementIndex" : [9,10,11,12,13],
-                "fingeringPattern" : ["t", "t", "t", "t", "t"]
-            },
-            "Pattern3" : {
-                "pages" : [4,5,6],
-                "elementIndex" : [14,15,16],
-                "fingeringPattern" : ["q", "q", "q", "q", "q"]
-            }
+                "pages" : [*range(1,347)],
+                "elementIndex" : [*range(4,9)],
+                "fingeringPattern" : ["p", "p", "p", "p", "p"]
+            }#,
+            #"Pattern2" : {
+            #    "pages" : [3],
+            #    "elementIndex" : [9,10,11,12,13],
+            #    "fingeringPattern" : ["t", "t", "t", "t", "t"]
+            #},
+            #"Pattern3" : {
+            #    "pages" : [4,5,6],
+            #    "elementIndex" : [14,15,16],
+            #    "fingeringPattern" : ["q", "q", "q", "q", "q"]
+            #}
         }
     }
     # Part of Rendering Values
