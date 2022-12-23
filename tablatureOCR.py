@@ -10,7 +10,7 @@ from book_renderer import *
 
 
 if __name__ == '__main__':
-    bookFile = "firstBook"
+    bookFile = "bookTest1"
     numberOfStrings = 6
     
     # 1. Measure Analysis Values
@@ -73,8 +73,8 @@ if __name__ == '__main__':
         "patternRepeat" : {
             "Pattern1" : {
                 "pages" : [*range(1,347)],
-                "elementIndex" : [*range(4,9)],
-                "fingeringPattern" : ["p", "p", "p", "p", "p"]
+                "elementIndex" : [4,5,6,7,8,12,13,14,15,16,20,21,22,23,24,28,29,30,31,32],
+                "fingeringPattern" : ["p", "p", "p", "p", "p","p", "p", "p", "p", "p","p", "p", "p", "p", "p","p", "p", "p", "p", "p"]
             }#,
             #"Pattern2" : {
             #    "pages" : [3],
@@ -174,11 +174,12 @@ if __name__ == '__main__':
         "pattern1" : {
             "pages" : [*range(1,345)],
             "beamBreaks" : [16]
-        },
-        "pattern2" : {
-            "pages" : [range(346,347)],
-            "beamBreaks" : [16]
-        },
+        }
+        # ,
+        # "pattern2" : {
+        #     "pages" : [range(346,347)],
+        #     "beamBreaks" : [16]
+        # },
         # "pattern3" : {
         #     "pages" : [range(3,200)],
         #     "beamBreaks" : [9]
@@ -201,21 +202,22 @@ if __name__ == '__main__':
 
 
     # 1st Step - Exctract Measures
-    #bookDirectory = os.path.join(r"../books_to_analyze/",  bookFile)
-    #measureDetectionAndExtraction(bookDirectory)
+    bookDirectory = os.path.join(r"../books_to_analyze/",  bookFile)
+    measureDetectionAndExtraction(bookDirectory)
+
 
     # 2nd Step - Analyze measures and create dfs for each one
-    #model_path = r"../model/model5Merged.pth"
-    #trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
-    #extractedBookDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures",  bookFile)
-    #measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
+    model_path = r"../model/model5Merged.pth"
+    trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
+    extractedBookDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures",  bookFile)
+    measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
 
     # 3rd Step - Header Repeater
-    #headerRepeater(extractedBookDirectory, headerRepeaterValues, bookValues["measures"])
+    headerRepeater(extractedBookDirectory, headerRepeaterValues, bookValues["measures"], pageValues["headerNumber"])
 
     # 4th Step - Parse Book
-    #bookDirectoryForParsing = os.path.join(r"..\extracted_measures", bookFile)
-    #parseBook(bookDirectoryForParsing, numberOfStrings, measureValues)
+    bookDirectoryForParsing = os.path.join(r"..\extracted_measures", bookFile)
+    parseBook(bookDirectoryForParsing, numberOfStrings, measureValues)
 
     # 5th Step - Render Book
     JSON_book_directory = os.path.join(r"..\JSON_book_outputs",  bookFile + ".json")

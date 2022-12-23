@@ -6,7 +6,7 @@ from domain_model import *
 import json
 import copy
 from jinja2 import Environment, FileSystemLoader
-import math
+import os
 
 
 def loadValues(values, doubleBeamBreaks, singleBeamBreaks):
@@ -161,6 +161,7 @@ def findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues):
 
 def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, timeSignNumerator, timeSignDenominator):
     renderedChords = ""
+    
     # Measures contain multiple chords that should be rendered first.
     for chordIndex, chord in enumerate(measure["chords"], start = 1):
         # if this is the first note of the triplet and the third one exist then return the string of the third one
@@ -171,6 +172,7 @@ def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, tim
         else:
             stringOfThirdTriplet = None
         renderedChords += renderChords(env, chord, chordIndex, notationPageIndex, userValues, stringOfThirdTriplet)
+
     
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
@@ -283,6 +285,7 @@ def finalizeBookRendering(env, stringNumber, bookRenderedContent):
 
 
 def renderBook(JSON, values, doubleBeamBreaks, singleBeamBreaks):
+    print("Rendering Process Starting..")
     # Load the Set Values of the book.
     setValues = loadValues(values, doubleBeamBreaks, singleBeamBreaks)
 
@@ -300,7 +303,9 @@ def renderBook(JSON, values, doubleBeamBreaks, singleBeamBreaks):
     output = finalizeBookRendering(environment, stringNumber, bookRendering)
     
     # Save the Musescore file
-    musescoreOutputFile = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs\bookFile1.mscx"
+    pathForExports = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs"
+    bookTitleFromPath = os.path.basename(JSON_book_directory)[:-5]
+    musescoreOutputFile = os.path.join(pathForExports, bookTitleFromPath, ".mscx")
     with open(f"{musescoreOutputFile}", "w") as f:
          f.write(output)
     print("Book Rendering Done!")
@@ -312,10 +317,15 @@ if __name__ == '__main__':
 
     values = {
         "timeSignature" : {
-            "fourFour": {       
-                "pages": [*range(1,6)],
-                "numerator": 4,
-                "denominator": 4
+            #"fourFour": {       
+            #    "pages": [*range(1,6)],
+            #    "numerator": 4,
+            #    "denominator": 4
+            #}
+            "twelveEighths": {       
+               "pages": [*range(1,347)],
+               "numerator": 12,
+               "denominator": 8
             }
         },
         "measures" : {
@@ -323,33 +333,45 @@ if __name__ == '__main__':
             "Vertical" : 6
         },
         "paragraphs" : {
-            "IA": [1, 8],
-            "IB": [5, 6]
+            "IA": [1,31, 60, 90, 120, 150, 180, 209, 235, 263, 290, 317],
+            "IIA": [4, 63, 93, 123, 153, 183, 212, 238, 266, 293, 320],
+            "IIIA": [7, 37, 66, 96, 126, 156, 213, 241, 269, 296, 323],
+            "IVA": [10, 39, 69, 99, 129, 159, 216, 243, 273, 299, 326],
+            "VA": [1, 42, 72, 102, 132, 162, 192, 219, 246, 302, 329],
+            "IB": [16, 45, 75, 105, 135, 165, 195, 222, 249, 276, 305, 332],
+            "IIB": [19, 48, 78, 108, 137, 168, 197, 225, 251, 279, 308, 335],
+            "IIIB": [22, 51, 81, 111, 141, 171, 200, 226, 255, 282, 310, 338],
+            "IVB": [25, 54, 84, 114, 144, 173, 203, 229, 257, 313, 341],
+            "VB": [28, 57, 87, 117, 147, 177, 206, 232, 260, 287, 316, 344],
         },
         "headings" : {
-            "singleHeading": [],
-            "doubleHeading": [*range(1,8)]
+            "singleHeading": [*range(1,347)],
+            "doubleHeading": []
         },
         "sideFrameTextExistence" : {
-            "sideFrameTextExistencePages" : [],
+            "sideFrameTextExistencePages" : [*range(1,347)],
             "sameFrameTextInMultiMeasuredRow" : [],
             "sideFrameLetter" : {
-                "A" : [1,2],
-                "B" : [3,4,5,6,7]
+                "F" : [*range(1,347)]
+                #"B" : [3,4,5,6,7]
             }
         },
         "headerLetter" : {
-            "F" : [1,2],
-            "E" : [3,4,5,6,7],
+            "VARIATION 1" : [1,2,3, 16, 17, 18, 31, 33, 45, 46, 47]
+            #"VARIATION 2" : [],
+            #"VARIATION 3" : [],
+            #"VARIATION 4" : [],
+            #"VARIATION 5" : [],
         }
     }
     doubleBeamBreaks  = {
         "pattern1" : {
             "pages" : [*range(1,347)],
             "beamBreaks" : [16]
-        }#,
+        }
+        # ,
         # "pattern2" : {
-        #     "pages" : [range(2,3)],
+        #     "pages" : [range(346,347)],
         #     "beamBreaks" : [16]
         # },
         # "pattern3" : {
@@ -373,5 +395,5 @@ if __name__ == '__main__':
     }
 
 
-    JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\book1.json"
+    JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\firstBook.json"
     renderBook(JSON_book_directory, values, doubleBeamBreaks, singleBeamBreaks)
