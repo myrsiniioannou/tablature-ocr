@@ -38,31 +38,21 @@ def patternRepeater(directory, pageIndex, patterns, measures):
 
 
 def assignValues(headerElementsToRepeat, measures, repeatingTimes, directory):
-
-#ARXIKA DIAGRAFO OTI HEADER YPARXEI meta apo to sygkekrimeno psifio toy telous tou range
-# copiaro analoga me tis fores
-# save
-    for measureIdx, measure in enumerate(measures):
+    for measure in measures:
         measureDirectory = os.path.join(directory, measure)
         measureDF = pd.read_csv(measureDirectory)
-        print("header Elements to repeat:", headerElementsToRepeat)
-        print("measureIdx:", measureIdx)
-        #print(measureDF[measureDF['Position'].isin(headerElementsToRepeat)])
-        #print(measureDF[measureDF['Position'].isin(headerElementsToRepeat)])
-        print(measureDF.loc[(measureDF['String'] == 0)])
-        print(measureDF['Position'].isin(headerElementsToRepeat).index.tolist())
-        
-
-
-
-    # for elementIdx, element in enumerate(headerElementsToRepeatIndexAdjustment):
-    #     dfToAssign = measureDF.loc[(measureDF['Position'] == elementIdx) & (measureDF['String'] == 0), "Label"].values
-    #     valueToAssign = dfToAssign[0] if dfToAssign.any() else None
-    #     if valueToAssign:
-    #         for iteration in range(1, repeatingTimes):
-    #             repeatedIndex = iteration*len(headerElementsToRepeatIndexAdjustment)+elementIdx
-    #             measureDF.loc[(measureDF['Position'] == repeatedIndex) & (measureDF['String'] == 0), "Label"] = valueToAssign
-
+        headerDF = measureDF.loc[(measureDF['String'] == 0)]
+        headerElementsToRepeatIdxList = headerDF.loc[headerDF['Position'].isin(headerElementsToRepeat)==True].index.tolist()
+        repeatedHeaderFingeringList = measureDF.iloc[headerElementsToRepeatIdxList]["Label"].tolist() * repeatingTimes
+        lengthOfRepeatedHeader = len(measureDF.iloc[headerElementsToRepeatIdxList]["Position"].tolist()) * repeatingTimes
+        listOfRepeatedHeaderPositions = [*range(lengthOfRepeatedHeader)]
+        listOfZerosToFillStringColumn = [0]*lengthOfRepeatedHeader
+        headerIDXstoDrop = measureDF.loc[(measureDF['String'] == 0)].index.tolist()
+        measureDF = measureDF.drop(headerIDXstoDrop)
+        newHeaderDf = pd.DataFrame(list(zip(repeatedHeaderFingeringList, listOfZerosToFillStringColumn, listOfRepeatedHeaderPositions)), columns = ['Label', 'String', 'Position'])
+        measureDF = pd.concat([measureDF, newHeaderDf], ignore_index=True).sort_values('Position').reset_index(drop=True)
+        measureDF.to_csv(measureDirectory, index = False, encoding='utf-8')
+     
 
 def repeatParts(pages, headerElementsToRepeat, pageIdx, measures, directory, pagesToRepeatHeader):
     if pageIdx in pages:
@@ -121,36 +111,36 @@ class wholePageDFlist:
 
 
 def wholePageRepeater(pageIdx, wholePageRepeatPages, measures, directory, list0fWholePageHeadersToRepeat):
-    if wholePageRepeatPages and pageIdx in wholePageRepeatPages:
+    if pageIdx in wholePageRepeatPages and wholePageRepeatPages:
         list0fWholePageHeadersToRepeat.dfList = []
         for measureIdx, measure in enumerate(measures):
             measureDirectory = os.path.join(directory, measure)
             measureDF = pd.read_csv(measureDirectory)
-            headerToCopy = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
-            headerToCopy.insert(1, 'String', int(0))
+            headerToCopy = measureDF.loc[measureDF['String'] == 0]
             list0fWholePageHeadersToRepeat.updateList(headerToCopy)
-    elif wholePageRepeatPages and pageIdx not in wholePageRepeatPages:
+    elif (pageIdx not in wholePageRepeatPages) and wholePageRepeatPages:
         for measureIdx, measure in enumerate(measures):
             measureDirectory = os.path.join(directory, measure)
             measureDF = pd.read_csv(measureDirectory)
-            currentHeader = measureDF.loc[measureDF['String'] == 0, ["Label", "Position"]]
-            measureDF = measureDF.drop(currentHeader.index)
+            currentHeader = measureDF.loc[measureDF['String'] == 0].index.tolist()
+            measureDF = measureDF.drop(currentHeader)
             measureDF = pd.concat([measureDF, list0fWholePageHeadersToRepeat.dfList[measureIdx]] , ignore_index=True).sort_values('Position').reset_index(drop=True)
             measureDF.to_csv(measureDirectory, index = False, encoding='utf-8')
+
 
 
 def headerRepeatingProcesses(directory, pageIdx, headerPages, measures, pageDimensions, list0fWholePageHeadersToRepeat, headerNumberOfPages):
     horizontalNumberOfMeasures = int(pageDimensions["Horizontal"])
     #1 pattern repeater
-    #patternRepeater(directory, pageIdx, headerPages["patternRepeat"], measures)
+    patternRepeater(directory, pageIdx, headerPages["patternRepeat"], measures)
     #2 partial header repeater
     partialHeaderRepeater(pageIdx, headerPages["partialHeaderRepeat"], measures, directory, headerNumberOfPages)
     #3 column repeater
-    #columnRepeater(pageIdx, headerPages["columnRepeat"], pageDimensions, measures, directory, horizontalNumberOfMeasures)
+    columnRepeater(pageIdx, headerPages["columnRepeat"], pageDimensions, measures, directory, horizontalNumberOfMeasures)
     #4 first row repeater
-    #firstRowRepeater(pageIdx, headerPages["firstRowRepeat"], measures, directory, horizontalNumberOfMeasures)
+    firstRowRepeater(pageIdx, headerPages["firstRowRepeat"], measures, directory, horizontalNumberOfMeasures)
     #5 whole page repeater
-    ##wholePageRepeater(pageIdx, headerPages["wholePageRepeat"], measures, directory, list0fWholePageHeadersToRepeat)
+    wholePageRepeater(pageIdx, headerPages["wholePageRepeat"], measures, directory, list0fWholePageHeadersToRepeat)
 
 
 def headerRepeater(directory, headerPages, pageDimensions, headerNumberOfPages):
@@ -162,7 +152,6 @@ def headerRepeater(directory, headerPages, pageDimensions, headerNumberOfPages):
         CSVmeasures = list(filter(lambda measure: measure.endswith('.csv'), measures))
         if CSVmeasures:
             headerRepeatingProcesses(root, int(pageNumber), headerPages, CSVmeasures, pageDimensions, list0fWholePageHeadersToRepeat, headerNumberOfPages)
-            break
     print("Header Repeating Process Done!")
 
 
@@ -174,14 +163,14 @@ if __name__ == '__main__':
         "firstRowRepeat" : [*range(1,347)],
         "columnRepeat" : [],
         "partialHeaderRepeat" : {
-            "Pattern1" : {
-               "pages" : [*range(1,2)],
-               "headerElementsToRepeat" : [*range(1,5)],
-            },
-            "Pattern2" : {
-               "pages" : [*range(2,3)],
-               "headerElementsToRepeat" : [*range(1,7)],
-            }
+            # "Pattern1" : {
+            #    "pages" : [*range(1,2)],
+            #    "headerElementsToRepeat" : [*range(1,5)],
+            # },
+            # "Pattern2" : {
+            #    "pages" : [*range(2,3)],
+            #    "headerElementsToRepeat" : [*range(1,7)],
+            # }
         },
         "patternRepeat" : {
             "Pattern1" : {

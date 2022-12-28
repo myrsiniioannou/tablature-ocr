@@ -10,7 +10,7 @@ from book_renderer import *
 
 
 if __name__ == '__main__':
-    bookFile = "bookTest1"
+    bookFile = "firstBook"
     numberOfStrings = 6
     
     # 1. Measure Analysis Values
@@ -202,15 +202,15 @@ if __name__ == '__main__':
 
 
     # 1st Step - Exctract Measures
-    bookDirectory = os.path.join(r"../books_to_analyze/",  bookFile)
-    measureDetectionAndExtraction(bookDirectory)
+    # bookDirectory = os.path.join(r"../books_to_analyze/",  bookFile)
+    # measureDetectionAndExtraction(bookDirectory)
 
 
     # 2nd Step - Analyze measures and create dfs for each one
-    model_path = r"../model/model5Merged.pth"
-    trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
+    # model_path = r"../model/model5Merged.pth"
+    # trainedModel = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
     extractedBookDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures",  bookFile)
-    measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
+    # measureAnalysis(extractedBookDirectory, trainedModel, numberOfStrings, pageValues)
 
     # 3rd Step - Header Repeater
     headerRepeater(extractedBookDirectory, headerRepeaterValues, bookValues["measures"], pageValues["headerNumber"])
@@ -220,10 +220,8 @@ if __name__ == '__main__':
     parseBook(bookDirectoryForParsing, numberOfStrings, measureValues)
 
     # 5th Step - Render Book
-    JSON_book_directory = os.path.join(r"..\JSON_book_outputs",  bookFile + ".json")
+    #JSON_book_directory = os.path.join(r"..\JSON_book_outputs",  bookFile + ".json")
+    JSON_book_directory = os.path.join(r"..\JSON_book_outputs",  bookFile)
     renderBook(JSON_book_directory, bookValues, doubleBeamBreaks, singleBeamBreaks)
 
-    
     print("Book Done!")
-    
-    

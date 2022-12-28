@@ -68,7 +68,6 @@ def fingeringDecoding(mdf,idx, headerOrNot):
     else:
         fingeringList = mdf[(mdf["Position"]==idx) & (mdf["String"]!=0) & (~mdf["Label"].str.isdigit())]["Label"]
     fingeringList = fingeringList.to_numpy()
-    fingering = None
     if fingeringList.size != 0:
         if fingeringList[0]=="p":
             fingering = FingeringType.P
@@ -80,6 +79,8 @@ def fingeringDecoding(mdf,idx, headerOrNot):
             fingering = FingeringType.A
         elif fingeringList[0]=="dot":
             fingering = FingeringType.DOT
+    else:
+        fingering = None
     return fingering
 
 
@@ -155,55 +156,31 @@ def parseNotationPage(directory, root, measures, notationPageNumber, measureValu
     return notationPageContent
 
 
-def findLimitPageForUnit(root):
-    directoryBaseName = os.path.basename(root)
-    if directoryBaseName.startswith('unit'):
-        intFiles = [int(i) for i in os.listdir(root)]
-        lastItem = max(intFiles)
-        return lastItem
-
-
-def saveOutputToJson(directory, root, stringNumber, unitPages):
-    JSONbookDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs", os.path.basename(Path(directory)))
-    if not os.path.exists(JSONbookDirectory):
-        os.makedirs(JSONbookDirectory)
-    JSONchapterDirectory = os.path.join(JSONbookDirectory, os.path.basename(Path(root).parents[1]))
-    if not os.path.exists(JSONchapterDirectory):
-        os.makedirs(JSONchapterDirectory)
-    jsonFileName = os.path.basename(Path(root).parents[0]) +'.json'
-    outputDirectory = os.path.join(JSONchapterDirectory, jsonFileName)
-    book = Book(numberofstrings = stringNumber, pages = unitPages)
-    bookDict = vars(book)
-    with open(outputDirectory, 'w', encoding='utf-8') as f:
-        json.dump(bookDict, f, indent=3, default=vars, ensure_ascii=False)
-
-
 def parseBook(directory, stringNumber, measureValues):
     print("Starting the parsing process..")
-    unitPages = []
+    bookPages = []
     notationPageNumber = 1
-    limitPageForUnit = None
     for root, dirs, measures in os.walk(directory):
-        # Check when to render Json (per Unit)
-        NoneOrPageNumber = findLimitPageForUnit(root)
-        if NoneOrPageNumber:
-            limitPageForUnit = copy.deepcopy(NoneOrPageNumber)
         # Section Page
         sectionPageTitle = parseSectionPage(root)
         if sectionPageTitle:
             sectionPage = SectionPage(sectionpagetitle = sectionPageTitle)
             page = Page(sectionpage = sectionPage)
-            unitPages.append(page)
+            bookPages.append(page)
         # Notation Page
         notationPageContent = parseNotationPage(directory, root, measures, notationPageNumber, measureValues)
         if notationPageContent:
             notationPage = NotationPage(measures = notationPageContent)
             page = Page(notationpage = notationPage)
-            unitPages.append(page)
-            if int(notationPageNumber) == int(limitPageForUnit):
-                saveOutputToJson(directory, root, stringNumber, unitPages)
-                unitPages = []
+            bookPages.append(page)
             notationPageNumber += 1
+
+    book = Book(numberofstrings = stringNumber, pages = bookPages)
+    bookDict = vars(book)
+    jsonFileName = os.path.basename(Path(directory)) +'.json'
+    outputDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs", jsonFileName)
+    with open(outputDirectory, 'w', encoding='utf-8') as f:
+        json.dump(bookDict, f, indent=3, default=vars, ensure_ascii=False)
     print("Parsing Done!")
 
               
@@ -212,36 +189,36 @@ if __name__ == '__main__':
 
     measureValues = {
         "valueSet1" : {
-            "pages": [*range(1,150), *range(180, 317)],
-            'chordDurationInteger': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'triplet': [1, 2, 3, 1, 2, 3, 0, 0, 1, 2, 3, 1, 2, 3, 0, 0, 1, 2, 3, 1, 2, 3, 0, 0, 1, 2, 3, 1, 2, 3, 0, 0],
-            'articulation': [None, None, None, None, None, None, "up", "down", None, None, None, None, None, None, "up", "down", None, None, None, None, None, None, "up", "down", None, None, None, None, None, None, "up", "down"],
-            'slur': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'hasBox': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'hasAccent': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            "pages": [*range(1,3)],
+            'chordDurationInteger': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'triplet': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'articulation': ["up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up", "up"],
+            'slur': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            'hasBox': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            'hasAccent': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         },
         "valueSet2" : {
-            "pages": [*range(150,180),*range(317,347)],
-            'chordDurationInteger': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'triplet': [1, 2, 3, 1, 2, 3, 0, 0, 1, 2, 3, 1, 2, 3, 0, 0, 1, 2, 3, 1, 2, 3, 0, 0, 1, 2, 3, 1, 2, 3, 0, 0],
-            'articulation': [None, None, None, "up", "down", "up", "up", "down", None, None, None, "up", "down", "up", "up", "down", None, None, None, "up", "down", "up", "up", "down", None, None, None, "up", "down", "up", "up", "down"],
-            'slur': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'hasBox': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'hasAccent': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            "pages": [*range(3,4)],
+            'chordDurationInteger': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            'triplet': [1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0],
+            'articulation': ["down", None, None, "down", None, None, None, "down", None, None, None, None, "down", None, None, "down", None, "down", None, None],
+            'slur': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'hasBox': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'hasAccent': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        },
+        "valueSet3" : {
+            "pages": [*range(4,6)],
+            'chordDurationInteger': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+            'triplet': [1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0],
+            'articulation': ["up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down"],
+            'slur': [0, 1, 2, 0, 0, 0, 1, 0, 2, 0, 0, 0, 1, 2, 0, 0, 1, 0, 2, 0],
+            'hasBox': [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+            'hasAccent': [0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
         }
-        # "valueSet3" : {
-        #     "pages": [*range(4,6)],
-        #     'chordDurationInteger': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2],
-        #     'triplet': [1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0, 1, 2, 3, 0, 0],
-        #     'articulation': ["up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down", "up", "down"],
-        #     'slur': [0, 1, 2, 0, 0, 0, 1, 0, 2, 0, 0, 0, 1, 2, 0, 0, 1, 0, 2, 0],
-        #     'hasBox': [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-        #     'hasAccent': [0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]
-        # }
     } 
 
 
-    bookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\bookTest5"
+    bookDirectory = r"C:\Users\merse\Desktop\Tablature OCR\extracted_measures\bookTest"
     numberOfStrings = 6
     parseBook(bookDirectory, numberOfStrings, measureValues)
 

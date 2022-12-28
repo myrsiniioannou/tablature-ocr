@@ -7,7 +7,6 @@ import json
 import copy
 from jinja2 import Environment, FileSystemLoader
 import os
-from pathlib import Path
 
 
 def loadValues(values, doubleBeamBreaks, singleBeamBreaks):
@@ -285,47 +284,30 @@ def finalizeBookRendering(env, stringNumber, bookRenderedContent):
     return book
 
 
-def createJSONdirectory(chapterDirectory):
-    museScoreBookDirectory = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\musescore_outputs", os.path.basename(Path(chapterDirectory).parents[0]))
-    if not os.path.exists(museScoreBookDirectory):
-        os.makedirs(museScoreBookDirectory)
-    museScoreChapterDirectory = os.path.join(museScoreBookDirectory, os.path.basename(Path(chapterDirectory)))
-    if not os.path.exists(museScoreChapterDirectory):
-        os.makedirs(museScoreChapterDirectory)
-    return museScoreChapterDirectory
-
-
-def renderJSON(chapterDirectory, JSONfiles, setValues, environment):
-    for JSONfile in JSONfiles:
-        JSONFiledirectory = os.path.join(chapterDirectory, JSONfile)
-
-        # Load JSON Book File
-        bookInJsonFormat = loadJSON(JSONFiledirectory)
-
-        # Iterate over every page (section or notation) and render its content
-        bookRendering = iterateOverPagesAndRenderTheirContent(environment, bookInJsonFormat, setValues)
-
-        #Finalize the book by adding the book template XML-info
-        stringNumber = bookInJsonFormat["numberofstrings"]
-        output = finalizeBookRendering(environment, stringNumber, bookRendering)
-
-        # Save the Musescore file
-        pathForExport = createJSONdirectory(chapterDirectory)
-        bookTitleFromPath = os.path.basename(JSONFiledirectory)[:-5]
-        musescoreOutputFile = os.path.join(pathForExport, bookTitleFromPath +".mscx")
-        with open(f"{musescoreOutputFile}", "w") as f:
-             f.write(output)
-
-
-def renderBook(JSONdirectory, values, doubleBeamBreaks, singleBeamBreaks):
+def renderBook(JSON, values, doubleBeamBreaks, singleBeamBreaks):
     print("Rendering Process Starting..")
     # Load the Set Values of the book.
     setValues = loadValues(values, doubleBeamBreaks, singleBeamBreaks)
+
+    # Load JSON Book File
+    bookInJsonFormat = loadJSON(JSON)
+
     # Template Loading
     environment = templateLoading()
-    for root, dirs, JSONfiles in os.walk(JSONdirectory):
-        if JSONfiles:
-            renderJSON(root, JSONfiles, setValues, environment)
+
+    # Iterate over every page (section or notation) and render its content
+    bookRendering = iterateOverPagesAndRenderTheirContent(environment, bookInJsonFormat, setValues)
+
+    #Finalize the book by adding the book template XML-info
+    stringNumber = bookInJsonFormat["numberofstrings"]
+    output = finalizeBookRendering(environment, stringNumber, bookRendering)
+    
+    # Save the Musescore file
+    pathForExports = r"C:\Users\merse\Desktop\Tablature OCR\final_musescore_outputs"
+    bookTitleFromPath = os.path.basename(JSON_book_directory)[:-5]
+    musescoreOutputFile = os.path.join(pathForExports, bookTitleFromPath, ".mscx")
+    with open(f"{musescoreOutputFile}", "w") as f:
+         f.write(output)
     print("Book Rendering Done!")
 
 
@@ -413,5 +395,5 @@ if __name__ == '__main__':
     }
 
 
-    JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\bookTest5"
+    JSON_book_directory = r"C:\Users\merse\Desktop\Tablature OCR\JSON_book_outputs\firstBook.json"
     renderBook(JSON_book_directory, values, doubleBeamBreaks, singleBeamBreaks)
