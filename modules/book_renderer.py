@@ -20,7 +20,8 @@ def findPageBreaks(patterns):
     beamBreakRanges = dict()
     for pattern, vals in patterns.items():
         for page in vals["pages"]:
-            beamBreakRanges[page] = vals["beamBreaks"]
+            # Indexing starts at 0 so we add 1 to match the pattern of the "real" pages.
+            beamBreakRanges[page] = [x+1 for x in vals["beamBreaks"] if x != 1]
     return beamBreakRanges
 
 
@@ -101,7 +102,6 @@ def findArticulationOffset(chord):
 def findTripletYoffset(stringOfCurrentNoteInChord, stringOfThirdTripletOfCurrentChord):
     stringOfCurrentNoteInChord = stringOfCurrentNoteInChord - 1 if stringOfCurrentNoteInChord else 0
     stringOfThirdTripletOfCurrentChord = stringOfThirdTripletOfCurrentChord - 1 if stringOfThirdTripletOfCurrentChord else 0
-    stringDifference = stringOfCurrentNoteInChord - stringOfThirdTripletOfCurrentChord
     firstTripletoffset = -5.5 - stringOfCurrentNoteInChord*1.5
     thirdTripletOffset = 0 + (stringOfCurrentNoteInChord - stringOfThirdTripletOfCurrentChord)*1.5
     return '{:.2f}'.format(firstTripletoffset), '{:.2f}'.format(thirdTripletOffset)
@@ -111,6 +111,8 @@ def findTripletYoffset(stringOfCurrentNoteInChord, stringOfThirdTripletOfCurrent
 def renderChords(env, chord, chordIdx, notationPageIdx, userInputtedValues, stringOfThirdTripletOfCurrentChord):
     stemYOffsetStemLengthFingeringOffset = findStemOffsetLengthFingeringOffset(chord["stringFingering"]["string"]) 
     firstTripletYoffset, thirdTripletYoffset = findTripletYoffset(chord["note"]["string"], stringOfThirdTripletOfCurrentChord)
+    # print("CHORD INDEX: ",chordIdx)
+    # print("--------------------------------")
     chordRendering = env.get_template("chord.mscx").render(
         duration = chord["duration"],
         hasBox = chord["hasBox"],
@@ -173,8 +175,6 @@ def renderMeasure(env, measureIndex, measure, notationPageIndex, userValues, tim
         else:
             stringOfThirdTriplet = None
         renderedChords += renderChords(env, chord, chordIndex, notationPageIndex, userValues, stringOfThirdTriplet)
-
-    
     measureRendering = env.get_template("measure.mscx").render(
         chordContent = renderedChords,
         sideFrameText = findSideFrameTextOfMeasure(measureIndex, notationPageIndex, userValues),
@@ -313,8 +313,9 @@ def renderJSON(chapterDirectory, JSONfiles, setValues, environment):
         pathForExport = createJSONdirectory(chapterDirectory)
         bookTitleFromPath = os.path.basename(JSONFiledirectory)[:-5]
         musescoreOutputFile = os.path.join(pathForExport, bookTitleFromPath +".mscx")
+        
         with open(f"{musescoreOutputFile}", "w") as f:
-             f.write(output)
+            f.write(output)
 
 
 def renderBook(JSONdirectory, values, doubleBeamBreaks, singleBeamBreaks):
@@ -400,7 +401,7 @@ if __name__ == '__main__':
     singleBeamBreaks  = {
         "pattern1" : {
             "pages" : [*range(1,347)],
-            "beamBreaks" : [8, 24]
+            "beamBreaks" : [3, 6, 8, 11, 14, 16, 19, 22, 24, 27, 30]
         }# ,
         # "pattern2" : {
         #     "pages" : [range(2,3)],
