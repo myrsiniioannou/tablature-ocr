@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
-from sklearn.cluster import KMeans,DBSCAN
+from sklearn.cluster import KMeans, DBSCAN
 import pandas as pd
 from detecto import core
 from detecto.visualize import show_labeled_image
@@ -11,6 +11,7 @@ from pathlib import Path
 from scipy import ndimage
 import copy
 import math
+import itertools
 
 def measureDataFromInput(pageFolder, values):
     measureData = {
@@ -143,6 +144,64 @@ def detectAndAssignStringClasses(df, classes):
     return df
 
 
+def findCentroidClasses(X, centroidName):
+    minSamples = 3 if str(centroidName[-1]) == "y" else 1
+    clusters = DBSCAN(eps=10, min_samples=minSamples).fit(X)
+    classNumber = np.unique(clusters.labels_)
+    classStringNumber = list(classNumber)
+    lengthOfEachClassInList = []
+    for classString in classStringNumber:
+        lengthOfEachClassInList.append(len(clusters.labels_[clusters.labels_==classString]))
+    listOfSameClassElements = []
+    for idx,i in enumerate(lengthOfEachClassInList):
+        sumOfSameCluster = 0
+        for j in range(idx+1):
+            sumOfSameCluster += lengthOfEachClassInList[j]
+        listOfSameClassElements.append(sumOfSameCluster)
+    listOfSameClassElementsStart = [0]
+    listOfSameClassElementsStart.extend(listOfSameClassElements[:-1])
+    listOfSameClassElementsEnd = [x-1 for idx, x in enumerate(listOfSameClassElements)]
+    list0fCentroids = []
+    for idx,i in enumerate(listOfSameClassElementsStart):
+        mean = ndimage.mean(clusters.components_[listOfSameClassElementsStart[idx]:listOfSameClassElementsEnd[idx]])
+        list0fCentroids.append(mean)
+    classes = sorted(list0fCentroids)
+    return classes
+
+
+def deleteElementsOutsideTheBounds(df, meanDistance, initialCentroidDF, classes, centroidName):
+    X = initialCentroidDF.copy()
+    minClass, maxClass = classes[0], classes[-1]
+    lowerThanMinCentroids = X[X[centroidName]<=minClass]
+    differenceForMin = lowerThanMinCentroids.sub(meanDistance, axis = 0)
+    negativeValuesForMin = differenceForMin.index[differenceForMin[centroidName] < 0].values
+    higherThanMinCentroids = X[X[centroidName]>=maxClass]
+    differenceForMax = higherThanMinCentroids.sub(meanDistance, axis = 0)
+    negativeValuesForMax = differenceForMax.index[differenceForMax[centroidName] > maxClass].values
+    totalValuesToDrop = list(negativeValuesForMin) + list(negativeValuesForMax)
+    X = X.drop(index=totalValuesToDrop).reset_index(drop=True)
+    df_diff = pd.concat([initialCentroidDF,X]).drop_duplicates(keep=False).values.tolist()
+    df_diff = list(itertools.chain(*df_diff))
+    if df_diff:
+        df = df[~df[centroidName].isin(df_diff)].reset_index(drop=True)
+    return df
+
+
+def findMeanLetterLengthOrWidth(df, centroidName):
+    return abs(df[str(centroidName[-1]+"1")].sub(df[str(centroidName[-1]+"2")], axis = 0)).mean()
+    
+
+def deleteElementsForEveryAxis(df):
+    centroidsXY = ["Centroid y", "Centroid x"]
+    for centroid in centroidsXY:
+        initialCentroidDF = df[[centroid]].sort_values(by=[centroid]).reset_index(drop=True)
+        classes = findCentroidClasses(initialCentroidDF, centroid)
+        cleanedClasses = [x for x in classes if str(x) != 'nan']
+        meanLetterLengthOrWidth = findMeanLetterLengthOrWidth(df, centroid)    
+        df = deleteElementsOutsideTheBounds(df, meanLetterLengthOrWidth, initialCentroidDF, cleanedClasses, centroid)
+    return df
+
+
 def eliminateVeryCloseElements(df, meanChordDistance):
     df = df.sort_values(by='Centroid x', ascending=True).reset_index(drop=True)
     Strings = df['String'].unique().tolist()
@@ -234,7 +293,7 @@ def findChordCentroidsAndMeanDistance(df, chordNumber):
     return chord_positions, meanChordDistance
 
 
-def findChordPositions(df, chord_positions, centroid_df):
+def findChordPositions(df, chord_positions):
     for item, row in df.iterrows():
         item_found = min(chord_positions, key = lambda x:abs(x-df.loc[item, "Centroid x"]))
         df.loc[item, "Position"] = int(chord_positions.index(item_found))
@@ -295,10 +354,11 @@ def analyzeMeasure(measure, root, directory, stringNum, model, pageValues):
     measureInfoDF = dataframeCreation(boxes, labels, scores)
     measureWithAdjustedPcentroids = adjustPcentroids(measureInfoDF)
     dfWithDetectedStrings = detectAndAssignStringClasses(measureWithAdjustedPcentroids, centroidClasses)
+    dfWithElementsInsideOfTheBoundaries = deleteElementsForEveryAxis(dfWithDetectedStrings)
     # Next line doesn't return a df - It's the only one
-    chord_positions, meanChordDistance = findChordCentroidsAndMeanDistance(dfWithDetectedStrings, measureData["chordNumber"])
-    dfwithVeryCloseElementsEliminated = eliminateVeryCloseElements(dfWithDetectedStrings, meanChordDistance)
-    measureDfWithPositions = findChordPositions(dfwithVeryCloseElementsEliminated, chord_positions, dfwithVeryCloseElementsEliminated)
+    chord_positions, meanChordDistance = findChordCentroidsAndMeanDistance(dfWithElementsInsideOfTheBoundaries, measureData["chordNumber"])
+    dfwithVeryCloseElementsEliminated = eliminateVeryCloseElements(dfWithElementsInsideOfTheBoundaries, meanChordDistance)
+    measureDfWithPositions = findChordPositions(dfwithVeryCloseElementsEliminated, chord_positions)
     dfWithoutDuplicateElements = eliminateDuplicateElements(measureDfWithPositions)
     DFwithProperNumberOfElements = eliminateRedundantElements(dfWithoutDuplicateElements, measureData["noteNumber"], measureData["fingeringNumber"], measureData["headerNumber"], measureData["noteStrings"])
     finalMeasureDF = DFwithProperNumberOfElements[["Label", "String", "Position"]]
