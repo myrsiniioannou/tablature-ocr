@@ -25,13 +25,7 @@
       <systemFrameDistance>0.5</systemFrameDistance>
       <frameSystemDistance>0</frameSystemDistance>
       <doubleBarWidth>0.1</doubleBarWidth>
-      <startBarlineSingle>1</startBarlineSingle>  
-      <minMeasureWidth>2</minMeasureWidth>
-      <clefLeftMargin>0.5</clefLeftMargin>
-      <systemHeaderDistance>1.5</systemHeaderDistance>
-      <minNoteDistance>0</minNoteDistance>
-      <measureSpacing>1</measureSpacing>
-      <beamWidth>0.2</beamWidth>
+      <startBarlineSingle>1</startBarlineSingle>
       <beamWidth>0.3</beamWidth>
       <beamDistance>1</beamDistance>
       <propertyDistance>1.38778e-16</propertyDistance>
@@ -75,7 +69,6 @@
         <StaffType group="tablature">
           <name>tab6StrCommon</name>
           <lines>{{NumberOfStrings}}</lines>
-          <mag>0.92</mag>
           <lineDistance>1.5</lineDistance>
           <clef>0</clef>
           <timesig>0</timesig>
