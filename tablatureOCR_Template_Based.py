@@ -2,23 +2,21 @@ import shutup; shutup.please()
 import sys
 import os
 sys.path.append('modules')
-from PIL import Image
 import os
-from pdf2image import convert_from_path
-import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import pandas as pd
 from scipy.ndimage import rotate
-import tqdm as notebook_tqdm
-from detecto import core, utils, visualize
-from detecto.visualize import show_labeled_image, plot_prediction_grid
-from torchvision import transforms
-import copy
+from detecto import core
 from pathlib import Path
 import pickle
+from jinja2 import Environment, FileSystemLoader
+from dataclasses import dataclass, field, InitVar
+from typing import List
+from itertools import cycle
 
 
+# 1. Analysis ###########################################################################################
 def detectSubparts(path_to_img):
     image = cv2.imread(path_to_img)
     new_image = image.copy()
@@ -177,7 +175,7 @@ def checkAndNotifyOnPercentageOfAnalyzedFiles(root, percentagesOfFilesDone):
 
 
 
-def iterateOverBookPages(root, files, elementNumberPerMeasure, percentagesOfFilesDone):
+def iterateOverBookPages(root, files, elementNumberPerMeasure, percentagesOfFilesDone, model):
     for filename in files:
         imagePath = os.path.join(Path(root), filename)
         if not checkIfFileIsAnalyzedAlready(imagePath):
@@ -192,28 +190,313 @@ def iterateOverBookPages(root, files, elementNumberPerMeasure, percentagesOfFile
             exportFileForPageMeasures(finalPageMeasureElementsAsList, imagePath)
         
 
-def analysis(elementNumberPerMeasure, bookDirectory, model):
+def analysis(elementNumberPerMeasure, bookDirectory):
+    model_path = r"C:\Users\merse\Desktop\Tablature OCR\model\model5Merged.pth"
+    model = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
     print("Starting Template-Based Tablature OCR...")
     percentagesOfFilesDone = findNumberOfJPGsInPercentages(bookDirectory)
     for root, dirs, files in os.walk(bookDirectory):
-        iterateOverBookPages(root, files, elementNumberPerMeasure, percentagesOfFilesDone)
-    print("Book Done!")
-
-
-def rendering(directory):
-
-    return None
+        iterateOverBookPages(root, files, elementNumberPerMeasure, percentagesOfFilesDone, model)
+    print("Analysis Done!")
 
 
 
-# 3 ama teleionei to vlivio na diagrafei ola ta pickle file kai na ta kanei save se ena arxeio vivliou (mallon ana selida?)
+# 2. Rendering ###########################################################################################
+@dataclass
+class Chapter:
+    number : int
+    cover : bool = False
+    def increment(self):
+        self.number += 1
+        return self.number
+
+@dataclass
+class Unit:
+    number : int    
+    def increment(self):
+        self.number += 1
+        return self.number
+    def reset(self):
+        self.number = 0
+        return self.number
+
+
+def templateLoading(bookName):
+    templatesPath = r"..\book_musescore_templates"
+    environmentPath = os.path.join(templatesPath, os.path.basename(bookName))
+    file_loader = FileSystemLoader(environmentPath)
+    env = Environment(loader = file_loader)
+    return env
+
+
+def renderBookBase(env, bookContent):
+    book = env.get_template("bookBase.mscx").render(
+    content = bookContent)
+    return book
+
+
+def findPagesInUnitDirectories(root):
+    for files in os.walk(root):
+        return list(sorted(set([os.path.splitext(x)[0] for x in files[2]])))
+
+
+def renderChapterCover(env, currentChapterNumber):
+    chapterCover = env.get_template("chapter.mscx").render(
+        number = currentChapterNumber)
+    return chapterCover
+
+
+def renderUnitCover(env, currentUnitNumber):
+    unitCover = env.get_template("unit.mscx").render(
+        number = currentUnitNumber)
+    return unitCover
+
+
+
+
+
+def renderPageHeader(env, pageNumber, currentParagraph):
+
+  
+    #{{paragraph}}    calculate IA, IIA, IB, IIB ...
+    #{{title}}  -- variation
+    #{{titleNumber}} -- number
+    print("-------------------------------------")
+
+
+    # RENDER
+
+    return #pageHeader
+
+def renderPage(env, pageDirectory, pageNumber, currentParagraph):
+    print("pageDirectory:", pageDirectory)
+    print("pageNumber:", pageNumber)
+
+
+    renderPageHeader(env, int(pageNumber), currentParagraph)
+    # page header
+
+    # boxes whatever
+    # measure
+    # page breaks
+
+
+
+    return ""
+
+
+# page:
+    # page header
+    # {{paragraph}}
+    # {{title}} 
+    # {{titleNumber}}
+
+    # X 6
+    # horizontal box (WITH text)
+    # measure
+        #header
+        #pickle
+        #if THERE IS file + ".pkl":
+        #    pageAllMeasureNotes = pd.read_pickle(os.path.join(root, file))
+        #    print(pageAllMeasureNotes)
+        #    print("----------------")
+
+
+    # horizontal box (NO text)
+    # measure
+        #header
+        #pickle
+
+    # section break
+
+# page break (STO TELEUTAIO MEASURE) 
+
+
+
+def exportMCSXFile(render):
+    pass
+
+
+def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, currentParagraph):
+    # Render the Chapter Cover
+    if currentChapter.cover:
+        chapterCoverContent = renderChapterCover(env, currentChapter.number)
+        currentChapter.cover = False
+    else:
+        chapterCoverContent = ""
+    # Render the Unit Cover
+    currentUnit.increment()
+    unitCoverContent = renderUnitCover(env, currentUnit.number)
+    
+    # Render All Pages in Unit
+    pagesContent = ""
+    for page in pages:
+        pagesContent += renderPage(env, pageDirectory, page, currentParagraph)
+
+    # Join the all the content
+    unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
+    unitOutputRender = renderBookBase(env, unitContentReadyToRenderInsideBookBase)
+
+
+
+
+
+
+
+    # Export the musescore file
+    exportMCSXFile(unitOutputRender)
+
+
+
+
+
+
+
+
+
+
+def renderBook(env, bookDirectory):
+    currentChapter = Chapter(0)
+    currentUnit = Unit(0)
+    for root, dirs, files in os.walk(bookDirectory):
+        if os.path.basename(root).startswith("chapter"):
+            currentChapter.increment()
+            currentUnit.reset()
+            currentChapter.cover = True
+        if os.path.basename(root).startswith("unit"):
+            pagesInUnitDirectories = findPagesInUnitDirectories(root)
+            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, currentParagraph, userInput)
+        print("---------------------------------------------------------------------")
+            
+
+
+def findParagraphPages(bookDirectory, userInput):
+    
+    for paragraph in userInput["paragraphs"]:
+        for key, value in userInput["paragraphs"][paragraph].items():
+            if key == "letters":
+                finalParagraphs = [v+paragraph for v in value]
+                print(finalParagraphs)
+            elif key == "pageFrequency":
+                print("frequency:", value)
+
+
+    # totalNumberOfBookPages = sum([len(files) for r, d, files in os.walk(bookDirectory)])
+    # print("totalNumberOfBookPages:", totalNumberOfBookPages)
+
+    # for page in range(1, totalNumberOfBookPages+1):
+    #     print("page:", page)
+    #     print("modulo 3:", page%3)
+        
+    #     print("----------------------------------")
+    # #return paragraphPages
+    # pass
+
+
+
+def rendering(bookDirectory, userInput):
+    environment = templateLoading(bookDirectory)
+    paragraphPages = findParagraphPages(bookDirectory, userInput)
+
+    #renderBook(environment, bookDirectory)
+
+
+
+
+def runApp():
+    pass
+
 
 
 if __name__ == '__main__':
-    bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST'
-    model_path = r"C:\Users\merse\Desktop\Tablature OCR\model\model5Merged.pth"
-    model = core.Model.load(model_path, ["p", "i", "m", "a", "1", "2", "3", "4"])
-    elementsOnMeasure = 12
-    analysis(elementsOnMeasure, bookFolder, model)
 
-    rendering(bookFolder)
+    bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBook'
+
+    input = {
+        "elementsOnMeasure" : 12,
+        "headers" : {
+            1:  ["i", "m", "i"],
+            2:  ["m", "i", "m"],
+            3:  ["m", "a", "m"],
+            4:  ["a", "m", "a"],
+            5:  ["i", "a", "i"],
+            6:  ["a", "i", "a"],
+            7:  ["i", "m", "a"],
+            8:  ["i", "a", "m"],
+            9:  ["m", "i", "a"],
+            10: ["m", "a", "i"],
+            11: ["a", "m", "i"],
+            12: ["a", "i", "m"],
+        },
+
+
+# 5 GUROUS TO 1-6 OPOY EXOUME IA, IIA, IIIA... SE KATHE GYRO KAI VARIATION SE KATH SELIDA
+# META EXOUME
+# 5 G GYROUS 7-12 ME IB, IIB SE KATHE GYRO KAI VARIATION SE KATH SELIDA
+
+
+        "headerPaterns": {
+            "pattern1" : {
+                "sequence" : [1,2,3,4,5,6],
+                "repetition" : 5,
+                "measuresPerPage" : 2
+            },
+            "pattern2" : {
+                "sequence" : [7,8,9,10,11,12],
+                "repetition" : 5,
+                "measuresPerPage" : 2
+            }
+        },
+
+        "paragraphs": {
+            "A" : {
+                "letters" : ["I", "II", "III", "IV", "V"],
+                "pageFrequency" : 3
+            },
+            "B" : {
+                "letters" : ["I", "II", "III", "IV", "V"],
+                "pageFrequency" : 3
+            }
+        },
+
+        # HEADINGS - TITLES (VARIATION - F)
+        "headings" : { 
+            "leftRight" : None,
+            "middle": {
+                "pages" : "all",
+                "title" : "VARIATION ",
+                "numbers" : True,
+                "repetitionPages" : 3, #IF NOT PUT NONE
+            }
+        },
+
+        # CAPTIONS - F on the sides
+        "captions" : {
+            "left": {
+                "pages" : "all",
+                "symbol" : "F"
+            },
+            "leftRightSameNumber" : None,
+            "leftRightDifferentNumber" : None
+        }
+    }
+
+    
+
+
+
+    #analysis(input["elementsOnMeasure"], bookFolder)
+    rendering(bookFolder, input)
+
+
+
+    #detectInBetweenChapterInstructions()
+
+
+    # diorthosh kai meta
+
+    # auto extract pdf apo to musescore
+
+
+
+
