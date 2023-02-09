@@ -13,7 +13,7 @@ import pickle
 from jinja2 import Environment, FileSystemLoader
 from dataclasses import dataclass, field, InitVar
 from typing import List
-from itertools import cycle
+from itertools import accumulate, cycle
 
 
 # 1. Analysis ###########################################################################################
@@ -255,25 +255,24 @@ def renderUnitCover(env, currentUnitNumber):
 
 
 
-def renderPageHeader(env, pageNumber, currentParagraph):
+def renderPageHeader(env, pageNumber, paragraphPages):
 
-  
+   if pageNumber in paragraphPages:
+        print(paragraphPages[pageNumber])
     #{{paragraph}}    calculate IA, IIA, IB, IIB ...
     #{{title}}  -- variation
     #{{titleNumber}} -- number
-    print("-------------------------------------")
-
 
     # RENDER
 
-    return #pageHeader
+    #return #pageHeader
 
-def renderPage(env, pageDirectory, pageNumber, currentParagraph):
+def renderPage(env, pageDirectory, pageNumber, paragraphPages):
     print("pageDirectory:", pageDirectory)
     print("pageNumber:", pageNumber)
 
 
-    renderPageHeader(env, int(pageNumber), currentParagraph)
+    renderPageHeader(env, int(pageNumber), paragraphPages)
     # page header
 
     # boxes whatever
@@ -317,7 +316,7 @@ def exportMCSXFile(render):
     pass
 
 
-def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, currentParagraph):
+def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages):
     # Render the Chapter Cover
     if currentChapter.cover:
         chapterCoverContent = renderChapterCover(env, currentChapter.number)
@@ -331,11 +330,11 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, currentP
     # Render All Pages in Unit
     pagesContent = ""
     for page in pages:
-        pagesContent += renderPage(env, pageDirectory, page, currentParagraph)
+        pagesContent += renderPage(env, pageDirectory, page, paragraphPages)
 
     # Join the all the content
-    unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
-    unitOutputRender = renderBookBase(env, unitContentReadyToRenderInsideBookBase)
+    #unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
+    #unitOutputRender = renderBookBase(env, unitContentReadyToRenderInsideBookBase)
 
 
 
@@ -344,7 +343,7 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, currentP
 
 
     # Export the musescore file
-    exportMCSXFile(unitOutputRender)
+    #exportMCSXFile(unitOutputRender)
 
 
 
@@ -355,7 +354,7 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, currentP
 
 
 
-def renderBook(env, bookDirectory):
+def renderBook(env, bookDirectory, paragraphPages):
     currentChapter = Chapter(0)
     currentUnit = Unit(0)
     for root, dirs, files in os.walk(bookDirectory):
@@ -365,40 +364,43 @@ def renderBook(env, bookDirectory):
             currentChapter.cover = True
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
-            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, currentParagraph, userInput)
+            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages)
         print("---------------------------------------------------------------------")
             
 
 
 def findParagraphPages(bookDirectory, userInput):
-    
-    for paragraph in userInput["paragraphs"]:
-        for key, value in userInput["paragraphs"][paragraph].items():
-            if key == "letters":
-                finalParagraphs = [v+paragraph for v in value]
-                print(finalParagraphs)
-            elif key == "pageFrequency":
-                print("frequency:", value)
-
-
-    # totalNumberOfBookPages = sum([len(files) for r, d, files in os.walk(bookDirectory)])
-    # print("totalNumberOfBookPages:", totalNumberOfBookPages)
-
-    # for page in range(1, totalNumberOfBookPages+1):
-    #     print("page:", page)
-    #     print("modulo 3:", page%3)
-        
-    #     print("----------------------------------")
-    # #return paragraphPages
-    # pass
+    totalNumberOfBookPages = sum([len(files) for r, d, files in os.walk(bookDirectory)])
+    pageCounter = 0
+    paragraphPages = {}
+    while pageCounter <= totalNumberOfBookPages:
+        for paragraph in userInput["paragraphs"]:
+            paragraphNumberOfPages = len(userInput["paragraphs"][paragraph]["letters"])* userInput["paragraphs"][paragraph]["pageFrequency"]
+            letterIncrement = 0
+            for page in range(1, paragraphNumberOfPages+1):
+                if page % userInput["paragraphs"][paragraph]["pageFrequency"] == 1 or userInput["paragraphs"][paragraph]["pageFrequency"] == 1:
+                    paragraphPages[page+pageCounter] = userInput["paragraphs"][paragraph]["letters"][letterIncrement] + paragraph
+                    letterIncrement += 1
+                if page+pageCounter>=totalNumberOfBookPages:
+                    break
+            pageCounter+= paragraphNumberOfPages
+            if pageCounter>=totalNumberOfBookPages:
+                break
+    keysToRemove = []
+    for key in paragraphPages.keys():
+        if key > totalNumberOfBookPages:
+            keysToRemove.append(key)
+    if keysToRemove:
+        for key in keysToRemove:
+            del paragraphPages[key]
+    return paragraphPages
 
 
 
 def rendering(bookDirectory, userInput):
     environment = templateLoading(bookDirectory)
     paragraphPages = findParagraphPages(bookDirectory, userInput)
-
-    #renderBook(environment, bookDirectory)
+    renderBook(environment, bookDirectory, paragraphPages)
 
 
 

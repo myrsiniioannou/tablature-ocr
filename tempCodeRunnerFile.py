@@ -1,5 +1,4 @@
-,
-            "B" : {
-                "letters" : ["I", "II", "III", "IV", "V"],
-                "pageFrequency" : 3
-            }
+
+    # if paragraphPages[pageNumber]:
+    #     print("Exists")
+    #     print(paragraphPages[pageNumber])
