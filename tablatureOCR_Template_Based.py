@@ -13,7 +13,7 @@ import pickle
 from jinja2 import Environment, FileSystemLoader
 from dataclasses import dataclass, field, InitVar
 from typing import List
-from itertools import accumulate, cycle
+import copy
 
 
 # 1. Analysis ###########################################################################################
@@ -255,24 +255,25 @@ def renderUnitCover(env, currentUnitNumber):
 
 
 
-def renderPageHeader(env, pageNumber, paragraphPages):
+def renderPageHeader(env, pageNumber, paragraphPages, headingPages):
+    paragraph = paragraphPages[pageNumber] if pageNumber in paragraphPages else None
+    heading1 = headingPages[pageNumber]["heading1"] if headingPages[pageNumber]["heading1"] else None
+    subHeading1 = headingPages[pageNumber]["subHeading1"] if headingPages[pageNumber]["subHeading1"] else None
+    # heading2 = headingPages[pageNumber]["heading2"] if headingPages[pageNumber]["heading2"] else None
+    # subHeading2 = headingPages[pageNumber]["subHeading2"] if headingPages[pageNumber]["subHeading2"] else None
+    # pageHeader = env.get_template("pageHeader.mscx").render(
+    #     paragraph = paragraph,
+    #     heading1 = heading1,
+    #     subHeading1 = subHeading1,
+    #     heading2 = heading2,
+    #     subHeading2 = subHeading2
+    # )
+    # return pageHeader
 
-   if pageNumber in paragraphPages:
-        print(paragraphPages[pageNumber])
-    #{{paragraph}}    calculate IA, IIA, IB, IIB ...
-    #{{title}}  -- variation
-    #{{titleNumber}} -- number
 
-    # RENDER
-
-    #return #pageHeader
-
-def renderPage(env, pageDirectory, pageNumber, paragraphPages):
-    print("pageDirectory:", pageDirectory)
-    print("pageNumber:", pageNumber)
-
-
-    renderPageHeader(env, int(pageNumber), paragraphPages)
+def renderPage(env, pageDirectory, pageNumber, paragraphPages, headingPages):
+    pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
+    print(pageHeader)
     # page header
 
     # boxes whatever
@@ -316,7 +317,7 @@ def exportMCSXFile(render):
     pass
 
 
-def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages):
+def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages):
     # Render the Chapter Cover
     if currentChapter.cover:
         chapterCoverContent = renderChapterCover(env, currentChapter.number)
@@ -330,7 +331,9 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
     # Render All Pages in Unit
     pagesContent = ""
     for page in pages:
-        pagesContent += renderPage(env, pageDirectory, page, paragraphPages)
+        print("page:", page)
+        pagesContent += renderPage(env, pageDirectory, page, paragraphPages, headingPages)
+        print("--------------")
 
     # Join the all the content
     #unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
@@ -354,7 +357,7 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
 
 
 
-def renderBook(env, bookDirectory, paragraphPages):
+def renderBook(env, bookDirectory, paragraphPages, headingPages):
     currentChapter = Chapter(0)
     currentUnit = Unit(0)
     for root, dirs, files in os.walk(bookDirectory):
@@ -364,31 +367,29 @@ def renderBook(env, bookDirectory, paragraphPages):
             currentChapter.cover = True
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
-            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages)
+            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages)
         print("---------------------------------------------------------------------")
             
 
-
-def findParagraphPages(bookDirectory, userInput):
-    totalNumberOfBookPages = sum([len(files) for r, d, files in os.walk(bookDirectory)])
+def findParagraphPages(bookDirectory, userInput, numberOfPagesInBook):
     pageCounter = 0
     paragraphPages = {}
-    while pageCounter <= totalNumberOfBookPages:
+    while pageCounter <= numberOfPagesInBook:
         for paragraph in userInput["paragraphs"]:
-            paragraphNumberOfPages = len(userInput["paragraphs"][paragraph]["letters"])* userInput["paragraphs"][paragraph]["pageFrequency"]
+            numberOfParagraphPages = len(userInput["paragraphs"][paragraph]["letters"])* userInput["paragraphs"][paragraph]["pageFrequency"]
             letterIncrement = 0
-            for page in range(1, paragraphNumberOfPages+1):
+            for page in range(1, numberOfParagraphPages+1):
                 if page % userInput["paragraphs"][paragraph]["pageFrequency"] == 1 or userInput["paragraphs"][paragraph]["pageFrequency"] == 1:
                     paragraphPages[page+pageCounter] = userInput["paragraphs"][paragraph]["letters"][letterIncrement] + paragraph
                     letterIncrement += 1
-                if page+pageCounter>=totalNumberOfBookPages:
+                if page+pageCounter>=numberOfPagesInBook:
                     break
-            pageCounter+= paragraphNumberOfPages
-            if pageCounter>=totalNumberOfBookPages:
+            pageCounter += numberOfParagraphPages
+            if pageCounter>=numberOfPagesInBook:
                 break
     keysToRemove = []
     for key in paragraphPages.keys():
-        if key > totalNumberOfBookPages:
+        if key > numberOfPagesInBook:
             keysToRemove.append(key)
     if keysToRemove:
         for key in keysToRemove:
@@ -396,11 +397,61 @@ def findParagraphPages(bookDirectory, userInput):
     return paragraphPages
 
 
+def addThePageToHeadingDirectory(heading, headingPageCurrentNumber, singleHeading, subheading):
+    heading1 = copy.copy(heading)
+    heading2 = copy.copy(heading) if not singleHeading else None
+    subHeading1 = copy.copy(subheading)
+    subHeading2 = None
+    if subheading:
+        if headingPageCurrentNumber and singleHeading:
+            subHeading1 = str(headingPageCurrentNumber)+ str(subheading)
+        elif headingPageCurrentNumber and not singleHeading:
+            subHeading1 = str(headingPageCurrentNumber*2-1)+ str(subheading)
+            subHeading2 = str(headingPageCurrentNumber*2)+ str(subheading)
+    else:
+        if headingPageCurrentNumber:
+            if len(heading1)>3:
+                heading1 +=" " + str(headingPageCurrentNumber)
+            else:
+                heading1 +="" + str(headingPageCurrentNumber)
+    heading = {
+        "heading1": heading1,
+        "subHeading1" : subHeading1,
+        "heading2": heading2,
+        "subHeading2" : subHeading2,
+    }
+    return heading
+
+
+def findHeadingPages(userInput):
+    headingPages = {}
+    for heading in userInput["headings"].keys():
+        headingPageRepetition = userInput["headings"][heading]["headingPageRepetition"]
+        singleHeading = userInput["headings"][heading]["singleHeading"]
+        subheading = userInput["headings"][heading]["subheading"]
+        headingPageRepetitionCounter = 1
+        if headingPageRepetition:
+            headingPageCurrentNumber = 1
+        for page in userInput["headings"][heading]["pages"]:
+            if headingPageRepetition and headingPageRepetitionCounter < headingPageRepetition:
+                headingPages[page] = addThePageToHeadingDirectory(heading, headingPageCurrentNumber, singleHeading, subheading)
+                headingPageRepetitionCounter += 1
+            elif headingPageRepetitionCounter == headingPageRepetition:
+                headingPages[page] = addThePageToHeadingDirectory(heading, headingPageCurrentNumber, singleHeading, subheading)
+                headingPageRepetitionCounter = 1
+                headingPageCurrentNumber += 1
+            else:
+                headingPages[page] = addThePageToHeadingDirectory(heading, None, singleHeading, subheading)
+    return headingPages
+
 
 def rendering(bookDirectory, userInput):
     environment = templateLoading(bookDirectory)
-    paragraphPages = findParagraphPages(bookDirectory, userInput)
-    renderBook(environment, bookDirectory, paragraphPages)
+    numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
+    paragraphPages = findParagraphPages(bookDirectory, userInput, numberOfPagesInBook)
+    headingPages = findHeadingPages(userInput)
+    renderBook(environment, bookDirectory, paragraphPages, headingPages)
+
 
 
 
@@ -450,7 +501,16 @@ if __name__ == '__main__':
             }
         },
 
-        "paragraphs": {
+
+
+
+
+
+
+
+
+        ############  DONE #############
+        "paragraphs": { # Paragraphs are always in sequence.
             "A" : {
                 "letters" : ["I", "II", "III", "IV", "V"],
                 "pageFrequency" : 3
@@ -460,17 +520,49 @@ if __name__ == '__main__':
                 "pageFrequency" : 3
             }
         },
+        ############  DONE #############
+
+
 
         # HEADINGS - TITLES (VARIATION - F)
-        "headings" : { 
-            "leftRight" : None,
-            "middle": {
-                "pages" : "all",
-                "title" : "VARIATION ",
-                "numbers" : True,
-                "repetitionPages" : 3, #IF NOT PUT NONE
+        "headings" : {
+            "VARIATION" : {
+                "pages" : range(1,16),
+                "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
+                "headingPageRepetition" : 3, # or None # 1 otan theloume na emfanizontai ta noumera mia fora
+                "subheading" : None
+            },
+            "F" : {
+                "pages" : [16,17,18,19],
+                "singleHeading" : False, #1 ή 2 ΣΤΗΛΕΣ
+                "headingPageRepetition" : 1, 
+                "subheading" : "A"
+            },
+            "A" : {
+                "pages" : [20,21,22,23,24],
+                "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
+                "headingPageRepetition" : None, 
+                "subheading" : "B"
+            },
+            "B" : {
+                "pages" : [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43],
+                "singleHeading" : False, #1 ή 2 ΣΤΗΛΕΣ
+                "headingPageRepetition" : 1, 
+                "subheading" : "C"
             }
+
         },
+
+
+
+
+
+
+
+
+
+
+
 
         # CAPTIONS - F on the sides
         "captions" : {
