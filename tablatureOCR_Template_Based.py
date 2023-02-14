@@ -110,7 +110,7 @@ def dataframeCreationForEachMeasure(totalBoxes, totalLabels, totalScores):
     return allMeasureDFs
 
 
-def DFresultOptimization(allDFs, elementsOnMeasure):
+def DFresultOptimization(allDFs, numberOfMeasuresPerPage):
     optimizedDFs = []
     for df in allDFs:
         #Eliminate very close elements
@@ -126,7 +126,7 @@ def DFresultOptimization(allDFs, elementsOnMeasure):
         if indexesToDrop:
             df = df.drop(indexesToDrop, axis=0).reset_index(drop=True)
         # If there are extra elements as rows, delete the ones with the lowest score
-        extraElements = len(df) - elementsOnMeasure
+        extraElements = len(df) - numberOfMeasuresPerPage
         if extraElements>0:
             df = df.sort_values(by=['Score'], ascending=False).reset_index(drop=True)
             df.drop(df.tail(extraElements).index, inplace=True)
@@ -252,64 +252,69 @@ def renderUnitCover(env, currentUnitNumber):
     return unitCover
 
 
-
-
-
 def renderPageHeader(env, pageNumber, paragraphPages, headingPages):
     paragraph = paragraphPages[pageNumber] if pageNumber in paragraphPages else None
-    heading1 = headingPages[pageNumber]["heading1"] if headingPages[pageNumber]["heading1"] else None
-    subHeading1 = headingPages[pageNumber]["subHeading1"] if headingPages[pageNumber]["subHeading1"] else None
-    # heading2 = headingPages[pageNumber]["heading2"] if headingPages[pageNumber]["heading2"] else None
-    # subHeading2 = headingPages[pageNumber]["subHeading2"] if headingPages[pageNumber]["subHeading2"] else None
-    # pageHeader = env.get_template("pageHeader.mscx").render(
-    #     paragraph = paragraph,
-    #     heading1 = heading1,
-    #     subHeading1 = subHeading1,
-    #     heading2 = heading2,
-    #     subHeading2 = subHeading2
-    # )
-    # return pageHeader
+    heading1 = headingPages[pageNumber]["heading1"] if pageNumber in headingPages else None
+    subHeading1 = headingPages[pageNumber]["subHeading1"] if pageNumber in headingPages else None
+    heading2 = headingPages[pageNumber]["heading2"] if pageNumber in headingPages else None
+    subHeading2 = headingPages[pageNumber]["subHeading2"] if pageNumber in headingPages else None
+    pageHeader = env.get_template("pageHeader.mscx").render(
+        paragraph = paragraph,
+        heading1 = heading1,
+        subHeading1 = subHeading1,
+        heading2 = heading2,
+        subHeading2 = subHeading2
+    )
+    return pageHeader
 
 
-def renderPage(env, pageDirectory, pageNumber, paragraphPages, headingPages):
+def findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow):
+    measureCaption = None
+    for caption in captions:
+        if (captions[caption] and ((type(captions[caption]["pages"]) == list and pageNumber in captions[caption]["pages"]) or captions[caption]["pages"] == "all") and captions[caption]["number"]):
+            if (caption == "left" and (measure%numberOfMeasuresPerRow == 1) 
+                or (caption == "leftRight" and captions[caption]["sameNumberInRow"]
+                and measure%numberOfMeasuresPerRow == 1)):
+                measureCaption = captions[caption]["symbol"] + str((measure+1)//2)
+            if (caption == "leftRight" and captions[caption]["sameNumberInRow"] and measure%numberOfMeasuresPerRow == 0):
+                measureCaption = captions[caption]["symbol"] + str((measure)//2)
+            if caption == "leftRight" and not captions[caption]["sameNumberInRow"]:
+                measureCaption = captions[caption]["symbol"] + str(measure)
+        if (captions[caption] and ((type(captions[caption]["pages"]) == list and pageNumber in captions[caption]["pages"]) or captions[caption]["pages"] == "all") and not captions[caption]["number"]):
+            measureCaption = captions[caption]["symbol"]
+    return measureCaption
+
+
+def renderHorizontalBox(env, caption):
+    horizontalBox = env.get_template("horizontalBox.mscx").render(
+        caption = caption)
+    return horizontalBox
+
+
+def renderPage(env, pageNumber, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions):
+    renderedPage = ""
     pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
-    print(pageHeader)
-    # page header
+    renderedPage += pageHeader
+    for measure in range(1, numberOfMeasuresPerPage+1):
+        caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
+        horizontalBox = renderHorizontalBox(env, caption)
 
-    # boxes whatever
-    # measure
-    # page breaks
+        print("measure:", measure)
+        # measure
+            #header
+            #pickle
+                #if THERE IS file + ".pkl":
+                #    pageAllMeasureNotes = pd.read_pickle(os.path.join(root, file))
+                #    print(pageAllMeasureNotes)
+                #    print("----------------")
 
 
+
+        # section break or page break (sto last measure ths selidas)
+        # RENDERARE TA MESA STO MESAURE BASE
+        #renderedPage += horizontalBox + measure
 
     return ""
-
-
-# page:
-    # page header
-    # {{paragraph}}
-    # {{title}} 
-    # {{titleNumber}}
-
-    # X 6
-    # horizontal box (WITH text)
-    # measure
-        #header
-        #pickle
-        #if THERE IS file + ".pkl":
-        #    pageAllMeasureNotes = pd.read_pickle(os.path.join(root, file))
-        #    print(pageAllMeasureNotes)
-        #    print("----------------")
-
-
-    # horizontal box (NO text)
-    # measure
-        #header
-        #pickle
-
-    # section break
-
-# page break (STO TELEUTAIO MEASURE) 
 
 
 
@@ -317,7 +322,7 @@ def exportMCSXFile(render):
     pass
 
 
-def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages):
+def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions):
     # Render the Chapter Cover
     if currentChapter.cover:
         chapterCoverContent = renderChapterCover(env, currentChapter.number)
@@ -331,19 +336,13 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
     # Render All Pages in Unit
     pagesContent = ""
     for page in pages:
-        print("page:", page)
-        pagesContent += renderPage(env, pageDirectory, page, paragraphPages, headingPages)
-        print("--------------")
+        print("page:", int(page))
+        pagesContent += renderPage(env, int(page), paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions)
+        print("-------------------------------------------------------")
 
     # Join the all the content
     #unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
     #unitOutputRender = renderBookBase(env, unitContentReadyToRenderInsideBookBase)
-
-
-
-
-
-
 
     # Export the musescore file
     #exportMCSXFile(unitOutputRender)
@@ -353,11 +352,7 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
 
 
 
-
-
-
-
-def renderBook(env, bookDirectory, paragraphPages, headingPages):
+def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions):
     currentChapter = Chapter(0)
     currentUnit = Unit(0)
     for root, dirs, files in os.walk(bookDirectory):
@@ -367,9 +362,11 @@ def renderBook(env, bookDirectory, paragraphPages, headingPages):
             currentChapter.cover = True
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
-            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages)
-        print("---------------------------------------------------------------------")
-            
+            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions)
+        print("*********************************************************************************")
+
+
+
 
 def findParagraphPages(bookDirectory, userInput, numberOfPagesInBook):
     pageCounter = 0
@@ -450,7 +447,7 @@ def rendering(bookDirectory, userInput):
     numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
     paragraphPages = findParagraphPages(bookDirectory, userInput, numberOfPagesInBook)
     headingPages = findHeadingPages(userInput)
-    renderBook(environment, bookDirectory, paragraphPages, headingPages)
+    renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"])
 
 
 
@@ -463,10 +460,11 @@ def runApp():
 
 if __name__ == '__main__':
 
-    bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBook'
+    bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST'
 
     input = {
-        "elementsOnMeasure" : 12,
+        "numberOfMeasuresPerPage" : 12,
+        "numberOfMeasuresPerRow" : 2,
         "headers" : {
             1:  ["i", "m", "i"],
             2:  ["m", "i", "m"],
@@ -481,23 +479,16 @@ if __name__ == '__main__':
             11: ["a", "m", "i"],
             12: ["a", "i", "m"],
         },
-
-
-# 5 GUROUS TO 1-6 OPOY EXOUME IA, IIA, IIIA... SE KATHE GYRO KAI VARIATION SE KATH SELIDA
-# META EXOUME
-# 5 G GYROUS 7-12 ME IB, IIB SE KATHE GYRO KAI VARIATION SE KATH SELIDA
-
-
         "headerPaterns": {
             "pattern1" : {
-                "sequence" : [1,2,3,4,5,6],
-                "repetition" : 5,
-                "measuresPerPage" : 2
+                "sequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]],
+                "sequenceRepetition" : 5,
+                "headerRepetition" : "vertical" # or horizontal or none
             },
             "pattern2" : {
-                "sequence" : [7,8,9,10,11,12],
-                "repetition" : 5,
-                "measuresPerPage" : 2
+                "sequence" : [[7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
+                "sequenceRepetition" : 5,
+                "headerRepetition" : "vertical" # or horizontal or none
             }
         },
 
@@ -507,10 +498,8 @@ if __name__ == '__main__':
 
 
 
-
-
-        ############  DONE #############
-        "paragraphs": { # Paragraphs are always in sequence.
+        # Paragraphs are always in sequence.
+        "paragraphs": {
             "A" : {
                 "letters" : ["I", "II", "III", "IV", "V"],
                 "pageFrequency" : 3
@@ -520,14 +509,10 @@ if __name__ == '__main__':
                 "pageFrequency" : 3
             }
         },
-        ############  DONE #############
-
-
-
         # HEADINGS - TITLES (VARIATION - F)
         "headings" : {
             "VARIATION" : {
-                "pages" : range(1,16),
+                "pages" : range(1,16), #[*range(0,350)]
                 "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
                 "headingPageRepetition" : 3, # or None # 1 otan theloume na emfanizontai ta noumera mia fora
                 "subheading" : None
@@ -550,36 +535,28 @@ if __name__ == '__main__':
                 "headingPageRepetition" : 1, 
                 "subheading" : "C"
             }
-
         },
-
-
-
-
-
-
-
-
-
-
-
-
         # CAPTIONS - F on the sides
         "captions" : {
+            # IF THERE ARE NO CAPTIONS, DELETE EVERYTHING ABOVE 
+            # AND LEAVE THE CAPTIONS DICT EMPTY
             "left": {
-                "pages" : "all",
-                "symbol" : "F"
+                "pages" : [1,2,3,4,5], #or "all"
+                "symbol" : "F",
+                "number" : True,
+                "sameNumberInRow" : False # peritto alla what ever
             },
-            "leftRightSameNumber" : None,
-            "leftRightDifferentNumber" : None
-        }
+            "leftRight" : {
+                "pages" : [*range(6,17)],
+                "symbol" : "Z",
+                "number" : False,
+                "sameNumberInRow" : False # peritto alla what ever
+            }
+        }   
     }
 
     
-
-
-
-    #analysis(input["elementsOnMeasure"], bookFolder)
+    #analysis(input["numberOfMeasuresPerPage"], bookFolder)
     rendering(bookFolder, input)
 
 
