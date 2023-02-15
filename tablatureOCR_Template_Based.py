@@ -291,15 +291,49 @@ def renderHorizontalBox(env, caption):
     return horizontalBox
 
 
-def renderPage(env, pageNumber, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions):
+def findtemplatePattern(templatePatterns, pageDirectory, currentChapter, currentUnit):
+    currentPattern = None
+    for pattern in templatePatterns:
+        if currentChapter in templatePatterns[pattern]["chapters"] and currentUnit in templatePatterns[pattern]["units"]:
+            currentPattern = copy.copy(pattern)
+            break       
+    return currentPattern
+ 
+    
+
+
+
+
+
+def renderPage(env, 
+                pageDirectory, 
+                pageNumber, 
+                paragraphPages, 
+                headingPages, 
+                numberOfMeasuresPerPage, 
+                numberOfMeasuresPerRow, 
+                captions, 
+                templatePattern,
+                currentChapter,
+                currentUnit):
+
     renderedPage = ""
     pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
     renderedPage += pageHeader
-    for measure in range(1, numberOfMeasuresPerPage+1):
-        caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
-        horizontalBox = renderHorizontalBox(env, caption)
 
-        print("measure:", measure)
+
+
+    print("templatePattern", templatePattern)
+
+
+
+
+    # for measure in range(1, numberOfMeasuresPerPage+1):
+    #     caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
+    #     horizontalBox = renderHorizontalBox(env, caption)
+        
+
+
         # measure
             #header
             #pickle
@@ -317,28 +351,58 @@ def renderPage(env, pageNumber, paragraphPages, headingPages, numberOfMeasuresPe
     return ""
 
 
-
 def exportMCSXFile(render):
     pass
 
 
-def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions):
-    # Render the Chapter Cover
+
+
+def findTemplateListForCurrentPage(pattern, batch, templatePatterns, partOfSequence):
+    print("pattern", "batch", "templatePatterns", "partOfSequence")
+    print(pattern, batch, partOfSequence)
+
+
+
+
+
+def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, templatePatterns):
+    chapterCoverContent = ""
     if currentChapter.cover:
         chapterCoverContent = renderChapterCover(env, currentChapter.number)
         currentChapter.cover = False
-    else:
-        chapterCoverContent = ""
-    # Render the Unit Cover
     currentUnit.increment()
     unitCoverContent = renderUnitCover(env, currentUnit.number)
     
+    print("current chapter:", currentChapter.number)
+    print("current unit:", currentUnit.number)
+
+    unitTemplatePattern = findtemplatePattern(templatePatterns, pageDirectory, currentChapter.number, currentUnit.number)
+    unitTemplateBatch = templatePatterns[unitTemplatePattern]["templateBatch"]
+    partOfSequence = 1 if "sequence" in templatePatterns[unitTemplatePattern].keys() else None
+    batchCounter = 1
+    
+
+    print("PART OF SEQUENCE:", partOfSequence)
     # Render All Pages in Unit
     pagesContent = ""
     for page in pages:
         print("page:", int(page))
-        pagesContent += renderPage(env, int(page), paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions)
-        print("-------------------------------------------------------")
+        pageTemplates = findTemplateListForCurrentPage(unitTemplatePattern, unitTemplateBatch, templatePatterns, partOfSequence)
+        #batchCounter += "????"
+
+
+    #     pagesContent += renderPage(env, 
+    #                             pageDirectory, 
+    #                             int(page), 
+    #                             paragraphPages, 
+    #                             headingPages, 
+    #                             numberOfMeasuresPerPage, 
+    #                             numberOfMeasuresPerRow, 
+    #                             captions, 
+    #                             unitTemplatePattern, 
+    #                             currentChapter.number,
+    #                             currentUnit.number)
+    #    print("-------------------------------------------------------------------------------------")
 
     # Join the all the content
     #unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
@@ -352,7 +416,7 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
 
 
 
-def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions):
+def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, templatePatterns):
     currentChapter = Chapter(0)
     currentUnit = Unit(0)
     for root, dirs, files in os.walk(bookDirectory):
@@ -362,7 +426,7 @@ def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasure
             currentChapter.cover = True
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
-            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions)
+            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, templatePatterns)
         print("*********************************************************************************")
 
 
@@ -447,7 +511,7 @@ def rendering(bookDirectory, userInput):
     numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
     paragraphPages = findParagraphPages(bookDirectory, userInput, numberOfPagesInBook)
     headingPages = findHeadingPages(userInput)
-    renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"])
+    renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], userInput["templatePatterns"])
 
 
 
@@ -497,7 +561,52 @@ if __name__ == '__main__':
 
 
 
+        # DONE ----------------------------------------------------------
 
+
+###################################################
+#               MEASURE PATTERNS
+###################################################
+#   HORIZONTAL       VERTICAL         PAGE
+#   [ 1   1 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 2   2 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 3   3 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 4   4 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 5   5 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 6   6 ]       [ 1   2 ]       [ 1   1 ]
+
+        "templatePatterns": {
+            1 : {
+                "chapters" : [1],
+                "units" : [1],
+                "templateBatch" : 10,
+###############################################
+                "sequence" : { # MEANING THE SAME TEMPLATES (BATCH)
+                    1  : {
+                        "measureRepetitionInPage" : "vertical", # horizontal, vertical, page
+                        "pageRepetitionInUnit" : False # False
+                    },
+                    2  : {
+                        "measureRepetitionInPage" : "page", # horizontal, vertical, page
+                        "pageRepetitionInUnit" : False # False
+                    }
+                }
+            },
+            2 : {
+                "chapters" : [1],
+                "units" : [2,3,4,5,6],
+                "templateBatch" : 6,
+                "measureRepetitionInPage" : "horizontal", # horizontal, vertical, page
+                "pageRepetitionInUnit" : True # False
+            },
+            3 : {
+                "chapters" : [2],
+                "units" : [1,2,3,4,5,6],
+                "templateBatch" : 6,
+                "measureRepetitionInPage" : "page", # horizontal, vertical, page
+                "pageRepetitionInUnit" : True # False
+            },
+        },
         # Paragraphs are always in sequence.
         "paragraphs": {
             "A" : {
@@ -556,17 +665,29 @@ if __name__ == '__main__':
     }
 
     
+
+
+
+
     #analysis(input["numberOfMeasuresPerPage"], bookFolder)
+
+
+    # 1 rendering
     rendering(bookFolder, input)
 
 
-
+    # 2 detect text
     #detectInBetweenChapterInstructions()
 
+    # 3 pause
+    # diorthosh - an ginetai pause
 
-    # diorthosh kai meta
-
+    # 4 autoextract pdf
     # auto extract pdf apo to musescore
+
+
+    # 5 auto commented
+    # final pdf merge
 
 
 
