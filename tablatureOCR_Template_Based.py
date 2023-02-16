@@ -473,32 +473,49 @@ def findHeadingPages(userInput):
                 headingPages[page] = addThePageToHeadingDirectory(heading, None, singleHeading, subheading)
     return headingPages
 
-def appendTemplateOnList(times, templateList, template):
-    for t in range(0, times):
-        templateList.append(template)
-    return templateList
 
 def findPageMeasureTemplates(templatePatterns, numberOfMeasuresPerPage, numberOfMeasuresPerRow):
+    def appendTemplateOnList(times, templateList, template):
+        for t in range(0, times):
+            templateList.append(template)
+        return templateList
+
+    pageMeasureTemplates = {}
     for pattern in templatePatterns.keys():
         pages = templatePatterns[pattern]["pages"]
         templates = templatePatterns[pattern]["templates"]
-        print("pages:", pages)
-
         templateList = []
-    
+        measuresInUnit = len(pages) * numberOfMeasuresPerPage
+        rows = numberOfMeasuresPerPage//numberOfMeasuresPerRow
         if templatePatterns[pattern]["measurePageRepetition"] == "horizontal":
-            # POLLAPLASIASE TON ARITHMO TON PAGES ME TO TEMPLATE LIST 
-            # KAI AFAIRESE OTI PERISSEUEI H PROSTHESE OTI LEIPEI
-            for template in templates:
-                templateList = appendTemplateOnList(numberOfMeasuresPerRow, templateList, template)
+            while len(templateList) <= measuresInUnit:
+                for template in templates:
+                    templateList = appendTemplateOnList(numberOfMeasuresPerRow, templateList, template)
         elif templatePatterns[pattern]["measurePageRepetition"] == "vertical":
-            print("elements in row")
-            rows = numberOfMeasuresPerPage//numberOfMeasuresPerRow
-            print(templates[:numberOfMeasuresPerRow]*rows)
-                
-        
-        print("templateList: ", templateList)
-        print("-------------------------------")
+            while len(templateList) <= measuresInUnit:
+                templateStart = 0
+                templateEnd = copy.copy(numberOfMeasuresPerRow)
+                for page in pages:
+                    templateList.extend(rows * templates[templateStart:templateEnd])
+                    templateStart += numberOfMeasuresPerRow
+                    templateEnd += numberOfMeasuresPerRow
+        elif templatePatterns[pattern]["measurePageRepetition"] == "page":
+            currentTemplate = 0
+            for page in pages:
+                templateList = appendTemplateOnList(numberOfMeasuresPerPage, templateList, templates[currentTemplate])
+                currentTemplate += 1
+        elif templatePatterns[pattern]["measurePageRepetition"] == None:
+            while len(templateList) <= measuresInUnit:
+                for template in templates:
+                    templateList.append(template)
+        templateList = templateList[:measuresInUnit]        
+        currentPageMeasuresStart = 0
+        currentPageMeasuresEnd = copy.copy(numberOfMeasuresPerPage)
+        for page in pages:
+            pageMeasureTemplates[page] = templateList[currentPageMeasuresStart:currentPageMeasuresEnd]
+            currentPageMeasuresStart += numberOfMeasuresPerPage
+            currentPageMeasuresEnd += numberOfMeasuresPerPage
+    return pageMeasureTemplates
 
 
 
@@ -579,7 +596,7 @@ if __name__ == '__main__':
         "templatePatterns": {
             1 : {
                 "pages" : [*range(1,4)],
-                "templates" : [1,2,3,4],
+                "templates" : [1,2,3,4,5,6],
                 "measurePageRepetition" : "horizontal", # vertical, page, None
             },
             2 : {
@@ -594,7 +611,7 @@ if __name__ == '__main__':
             },
             4 : {
                 "pages" : [*range(10,15)],
-                "templates" : [18,19,20,21,22,23,24,25,26,27,28,29],
+                "templates" : [18,19,20,21,22,23,24,25,26],
                 "measurePageRepetition" : None, # vertical, page, None
             }
 
