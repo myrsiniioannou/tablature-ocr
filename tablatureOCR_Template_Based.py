@@ -303,7 +303,8 @@ def renderPage(env,
                 numberOfMeasuresPerRow, 
                 captions,
                 currentChapter,
-                currentUnit):
+                currentUnit,
+                currentPageMeasureTemplates):
 
     renderedPage = ""
     pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
@@ -314,13 +315,16 @@ def renderPage(env,
 
 
 
-    # for measure in range(1, numberOfMeasuresPerPage+1):
-    #     caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
-    #     horizontalBox = renderHorizontalBox(env, caption)
+    for measure in range(1, numberOfMeasuresPerPage+1):
+        caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
+        horizontalBox = renderHorizontalBox(env, caption)
         
-
+        print("measure:", measure)
+        template = currentPageMeasureTemplates[measure-1]
+        print("template:", template)
 
         # measure
+            # measure template ----DONE BITCH  ✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓
             #header
             #pickle
                 #if THERE IS file + ".pkl":
@@ -350,30 +354,27 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
         currentChapter.cover = False
     currentUnit.increment()
     unitCoverContent = renderUnitCover(env, currentUnit.number)
-    
-
     # Render All Pages in Unit
     pagesContent = ""
     for page in pages:
-        print("page:", int(page))
-
-        #, pageMeasureTemplates[page]
+        print("-------------------------------------------------------------------------------------")
+        print("page:", page)
+        print("-------------------------------------------------------------------------------------")
+        pagesContent += renderPage(env, 
+                                pageDirectory, 
+                                int(page), 
+                                paragraphPages, 
+                                headingPages, 
+                                numberOfMeasuresPerPage, 
+                                numberOfMeasuresPerRow, 
+                                captions,
+                                currentChapter.number,
+                                currentUnit.number,
+                                pageMeasureTemplates[int(page)])
         
 
-    #     pagesContent += renderPage(env, 
-    #                             pageDirectory, 
-    #                             int(page), 
-    #                             paragraphPages, 
-    #                             headingPages, 
-    #                             numberOfMeasuresPerPage, 
-    #                             numberOfMeasuresPerRow, 
-    #                             captions,
-    #                             currentChapter.number,
-    #                             currentUnit.number)
-    #    print("-------------------------------------------------------------------------------------")
-
     # Join the all the content
-    #unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
+    unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
     #unitOutputRender = renderBookBase(env, unitContentReadyToRenderInsideBookBase)
 
     # Export the musescore file
@@ -474,12 +475,13 @@ def findHeadingPages(userInput):
     return headingPages
 
 
-def findPageMeasureTemplates(templatePatterns, numberOfMeasuresPerPage, numberOfMeasuresPerRow):
-    def appendTemplateOnList(times, templateList, template):
-        for t in range(0, times):
-            templateList.append(template)
-        return templateList
+def appendTemplateOnList(times, templateList, template):
+    for t in range(0, times):
+        templateList.append(template)
+    return templateList
 
+
+def findPageMeasureTemplates(templatePatterns, numberOfMeasuresPerPage, numberOfMeasuresPerRow):
     pageMeasureTemplates = {}
     for pattern in templatePatterns.keys():
         pages = templatePatterns[pattern]["pages"]
@@ -487,27 +489,25 @@ def findPageMeasureTemplates(templatePatterns, numberOfMeasuresPerPage, numberOf
         templateList = []
         measuresInUnit = len(pages) * numberOfMeasuresPerPage
         rows = numberOfMeasuresPerPage//numberOfMeasuresPerRow
-        if templatePatterns[pattern]["measurePageRepetition"] == "horizontal":
-            while len(templateList) <= measuresInUnit:
-                for template in templates:
-                    templateList = appendTemplateOnList(numberOfMeasuresPerRow, templateList, template)
-        elif templatePatterns[pattern]["measurePageRepetition"] == "vertical":
-            while len(templateList) <= measuresInUnit:
-                templateStart = 0
-                templateEnd = copy.copy(numberOfMeasuresPerRow)
-                for page in pages:
-                    templateList.extend(rows * templates[templateStart:templateEnd])
-                    templateStart += numberOfMeasuresPerRow
-                    templateEnd += numberOfMeasuresPerRow
-        elif templatePatterns[pattern]["measurePageRepetition"] == "page":
-            currentTemplate = 0
-            for page in pages:
-                templateList = appendTemplateOnList(numberOfMeasuresPerPage, templateList, templates[currentTemplate])
-                currentTemplate += 1
-        elif templatePatterns[pattern]["measurePageRepetition"] == None:
-            while len(templateList) <= measuresInUnit:
-                for template in templates:
-                    templateList.append(template)
+        while len(templateList) <= measuresInUnit:
+            if templatePatterns[pattern]["measurePageRepetition"] == "horizontal":
+                    for template in templates:
+                        templateList = appendTemplateOnList(numberOfMeasuresPerRow, templateList, template)
+            elif templatePatterns[pattern]["measurePageRepetition"] == "vertical":
+                    templateStart = 0
+                    templateEnd = copy.copy(numberOfMeasuresPerRow)
+                    for page in pages:
+                        templateList.extend(rows * templates[templateStart:templateEnd])
+                        templateStart += numberOfMeasuresPerRow
+                        templateEnd += numberOfMeasuresPerRow
+            elif templatePatterns[pattern]["measurePageRepetition"] == "page":
+                    currentTemplate = 0
+                    for page in pages:
+                        templateList = appendTemplateOnList(numberOfMeasuresPerPage, templateList, templates[currentTemplate])
+                        currentTemplate += 1
+            elif templatePatterns[pattern]["measurePageRepetition"] == None:
+                    for template in templates:
+                        templateList.append(template)
         templateList = templateList[:measuresInUnit]        
         currentPageMeasuresStart = 0
         currentPageMeasuresEnd = copy.copy(numberOfMeasuresPerPage)
@@ -518,14 +518,68 @@ def findPageMeasureTemplates(templatePatterns, numberOfMeasuresPerPage, numberOf
     return pageMeasureTemplates
 
 
+def extendHeaderList(times, headerList, template):
+    for t in range(0, times):
+        headerList.extend(template)
+    return headerList
+
+
+def findHeaders(userInput ):
+    for pattern in userInput["headerPaterns"].keys():
+        pages = userInput["headerPaterns"][pattern]["pages"]
+        headers = userInput["headers"]
+        headerRepetition = userInput["headerPaterns"][pattern]["headerPageRepetition"]
+        pageMeasureHeaderSequence = userInput["headerPaterns"][pattern]["pageMeasureHeaderSequence"]
+        numberOfMeasuresPerPage = userInput["numberOfMeasuresPerPage"]
+        numberOfMeasuresPerRow = userInput["numberOfMeasuresPerRow"]
+        rows = numberOfMeasuresPerPage//numberOfMeasuresPerRow
+        headerStart = 0
+        headerEnd = copy.copy(numberOfMeasuresPerRow)
+        for page in pages:
+            headerList = []
+            print("---------------------------------------------------")
+            print("page: ", page)
+            print("---------------------------------------------------")
+            if headerRepetition == "horizontal":
+                while len(headerList) <= numberOfMeasuresPerPage:
+                    for headerSeq in pageMeasureHeaderSequence:
+                        headerList = appendTemplateOnList(numberOfMeasuresPerRow, headerList, headerSeq)
+            elif headerRepetition == "vertical":
+                headerList.extend(rows * pageMeasureHeaderSequence[headerStart:headerEnd])
+                headerStart += numberOfMeasuresPerRow
+                headerEnd += numberOfMeasuresPerRow
+                if headerEnd>len(pageMeasureHeaderSequence):
+                    headerStart = 0
+                    headerEnd = copy.copy(numberOfMeasuresPerRow)
+            elif headerRepetition == None:
+                while len(headerList) <= numberOfMeasuresPerPage:
+                    for headerSeq in pageMeasureHeaderSequence:
+                        headerList.append(headerSeq)
+                
+            
+            headerList = headerList[:numberOfMeasuresPerPage] 
+            print("headerList: ", headerList)
+            print("len(headerList): ", len(headerList))
+
+
+            # 1. POLLAPLASIASE ME TA HEADER PATTERnS
+
+
+            
+            # 2. FTISE SELIDES me measures kai headers
+            
+
+
+
 
 def rendering(bookDirectory, userInput):
     # environment = templateLoading(bookDirectory)
     # numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
     # paragraphPages = findParagraphPages(bookDirectory, userInput, numberOfPagesInBook)
-    # headingPages = findHeadingPages(userInput)
-    pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
-    #renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], pageMeasureTemplates)
+    #headingPages = findHeadingPages(userInput)
+    #pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
+    headers = findHeaders(userInput)
+    # renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], pageMeasureTemplates)
 
 
 
@@ -540,14 +594,21 @@ if __name__ == '__main__':
 
     bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST'
 
+
+###################################################
+#               PATTERNS
+###################################################
+#   HORIZONTAL       VERTICAL         PAGE
+#   [ 1   1 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 2   2 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 3   3 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 4   4 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 5   5 ]       [ 1   2 ]       [ 1   1 ]
+#   [ 6   6 ]       [ 1   2 ]       [ 1   1 ]
+
     input = {
         "numberOfMeasuresPerPage" : 12,
         "numberOfMeasuresPerRow" : 2,
-
-
-
-
-        ######## HEADERS LEFT --------------------------------
         "headers" : {
             1:  ["i", "m", "i"],
             2:  ["m", "i", "m"],
@@ -564,40 +625,29 @@ if __name__ == '__main__':
         },
         "headerPaterns": {
             "pattern1" : {
-                "sequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]],
+                "pages": [*range(1,10)],
                 "sequenceRepetition" : 5,
-                "headerRepetition" : "vertical" # or horizontal or none
+                "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4]],
+                "headerPageRepetition" : "horizontal" # horizontal vertical or none
             },
             "pattern2" : {
-                "sequence" : [[7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
+                "pages": [*range(10,15)],
                 "sequenceRepetition" : 5,
-                "headerRepetition" : "vertical" # or horizontal or none
+                "pageMeasureHeaderSequence" : [[7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
+                "headerPageRepetition" : "vertical" # horizontal vertical or none
+            },
+            "pattern3" : {
+                "pages": [*range(15,18)],
+                "sequenceRepetition" : 2,
+                "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4], [5,5,5,5], [6,6,6,6], [7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
+                "headerPageRepetition" : None # or horizontal or none
             }
         },
-
-
-
-
-######## MEASURES LEFT --------------------------------
-
-
-
-###################################################
-#               MEASURE PATTERNS
-###################################################
-#   HORIZONTAL       VERTICAL         PAGE
-#   [ 1   1 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 2   2 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 3   3 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 4   4 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 5   5 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 6   6 ]       [ 1   2 ]       [ 1   1 ]
-
         "templatePatterns": {
             1 : {
                 "pages" : [*range(1,4)],
-                "templates" : [1,2,3,4,5,6],
-                "measurePageRepetition" : "horizontal", # vertical, page, None
+                "templates" : [1]*4, # if there is only 1 template for every measure of every page of unit then put the number of it as many times as the number of pages in the unit
+                "measurePageRepetition" : "page", # vertical, page, None
             },
             2 : {
                 "pages" : [*range(4,8)],
@@ -614,16 +664,7 @@ if __name__ == '__main__':
                 "templates" : [18,19,20,21,22,23,24,25,26],
                 "measurePageRepetition" : None, # vertical, page, None
             }
-
-
         },
-
-
-
-
-        # DONE ----------------------------------------------------------
-
-
         # Paragraphs are always in sequence.
         "paragraphs": {
             "A" : {

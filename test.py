@@ -1,10 +1,5 @@
+diction = {1 :[1,2,3,4],
+            2: [5,6,7,8],
+            3: [9,10,11,12]}
 
-
-word = "chapter08"
-
-integer = str(int("".join([ch for ch in word if ch.isdigit()])))
-print()
-
-        
-
-print(integer)
+print(diction[1])
