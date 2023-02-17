@@ -291,7 +291,33 @@ def renderHorizontalBox(env, caption):
     return horizontalBox
 
 
+def readPagePiklFiles(pageDirectory, pageNumber):
+    pagePiklFiles = None
+    for root, dirs, files in os.walk(pageDirectory):
+        for file in files:
+            if file.endswith(".pkl") and int(pageNumber) == int(file[:-4]):
+                pagePiklFiles = pd.read_pickle(os.path.join(root, file))
+                break                
+    return pagePiklFiles
 
+
+def checkAndFixTheLengthOfPklFiles(pklFiles, numberOfMeasuresPerPage):
+    if not pklFiles:
+        pklFiles = None
+    elif len(pklFiles) != 0:
+        while len(pklFiles) < numberOfMeasuresPerPage:
+            pklFiles.extend(pklFiles[:-1])
+    return pklFiles
+
+
+def findTemplateMSCXname(templateNumber):
+    if len(str(templateNumber)) == 1:
+        templateMSCXname = "00" + str(templateNumber) + ".mscx"
+    elif len(str(templateNumber)) == 2:
+        templateMSCXname = "0" + str(templateNumber) + ".mscx"
+    else:
+        templateMSCXname = str(templateNumber) + ".mscx"
+    return templateMSCXname
 
 
 def renderPage(env, 
@@ -304,37 +330,44 @@ def renderPage(env,
                 captions,
                 currentChapter,
                 currentUnit,
-                currentPageMeasureTemplates):
+                currentPageMeasureTemplates, 
+                headers):
 
     renderedPage = ""
     pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
     renderedPage += pageHeader
+    pklFiles = readPagePiklFiles(pageDirectory, pageNumber)
+    pklFiles = checkAndFixTheLengthOfPklFiles(pklFiles, numberOfMeasuresPerPage)
 
 
-
-
-
-
-    for measure in range(1, numberOfMeasuresPerPage+1):
+    for measure in range(0, numberOfMeasuresPerPage):
         caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
         horizontalBox = renderHorizontalBox(env, caption)
-        
-        print("measure:", measure)
-        template = currentPageMeasureTemplates[measure-1]
-        print("template:", template)
+        header = headers[pageNumber][measure]
+        templateNumber = currentPageMeasureTemplates[measure]
+        print("measure:", measure+1)
+        print("template number:", templateNumber)
+        print("header:", headers[pageNumber][measure])
+        print("pklFile:", pklFiles[measure])
+        print("----------------------------")
+
+
+        templateMSCXname = findTemplateMSCXname(templateNumber)
+
+        page = env.get_template(templateMSCXname).render(
+                content = )
+
+        # section break or page break (sto last measure ths selidas)
 
         # measure
             # measure template ----DONE BITCH  ✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓
-            #header
-            #pickle
-                #if THERE IS file + ".pkl":
-                #    pageAllMeasureNotes = pd.read_pickle(os.path.join(root, file))
-                #    print(pageAllMeasureNotes)
-                #    print("----------------")
+            # header           ----DONE BITCH  ✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓
+            # pickle           ----DONE BITCH  ✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓
 
 
 
-        # section break or page break (sto last measure ths selidas)
+
+        
         # RENDERARE TA MESA STO MESAURE BASE
         #renderedPage += horizontalBox + measure
 
@@ -347,7 +380,7 @@ def exportMCSXFile(render):
 
 
 
-def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates):
+def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
     chapterCoverContent = ""
     if currentChapter.cover:
         chapterCoverContent = renderChapterCover(env, currentChapter.number)
@@ -370,7 +403,8 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
                                 captions,
                                 currentChapter.number,
                                 currentUnit.number,
-                                pageMeasureTemplates[int(page)])
+                                pageMeasureTemplates[int(page)],
+                                headers)
         
 
     # Join the all the content
@@ -385,7 +419,7 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
 
 
 
-def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates):
+def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
     currentChapter = Chapter(0)
     currentUnit = Unit(0)
     for root, dirs, files in os.walk(bookDirectory):
@@ -395,8 +429,10 @@ def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasure
             currentChapter.cover = True
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
-            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates)
+            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers)
         print("*********************************************************************************")
+
+
 
 
 
@@ -525,6 +561,7 @@ def extendHeaderList(times, headerList, template):
 
 
 def findHeaders(userInput ):
+    bookHeaders = {}
     for pattern in userInput["headerPaterns"].keys():
         pages = userInput["headerPaterns"][pattern]["pages"]
         headers = userInput["headers"]
@@ -537,9 +574,6 @@ def findHeaders(userInput ):
         headerEnd = copy.copy(numberOfMeasuresPerRow)
         for page in pages:
             headerList = []
-            print("---------------------------------------------------")
-            print("page: ", page)
-            print("---------------------------------------------------")
             if headerRepetition == "horizontal":
                 while len(headerList) <= numberOfMeasuresPerPage:
                     for headerSeq in pageMeasureHeaderSequence:
@@ -555,31 +589,25 @@ def findHeaders(userInput ):
                 while len(headerList) <= numberOfMeasuresPerPage:
                     for headerSeq in pageMeasureHeaderSequence:
                         headerList.append(headerSeq)
-                
-            
             headerList = headerList[:numberOfMeasuresPerPage] 
-            print("headerList: ", headerList)
-            print("len(headerList): ", len(headerList))
-
-
-            # 1. POLLAPLASIASE ME TA HEADER PATTERnS
-
-
-            
-            # 2. FTISE SELIDES me measures kai headers
-            
-
-
+            fingeringHeaderList = []
+            for headerMeasure in headerList:
+                measureHeaderList = []
+                for headerNumber in headerMeasure:
+                    measureHeaderList.extend(headers[headerNumber])
+                fingeringHeaderList.append(measureHeaderList)
+            bookHeaders[page] = fingeringHeaderList
+    return bookHeaders
 
 
 def rendering(bookDirectory, userInput):
-    # environment = templateLoading(bookDirectory)
-    # numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
-    # paragraphPages = findParagraphPages(bookDirectory, userInput, numberOfPagesInBook)
-    #headingPages = findHeadingPages(userInput)
-    #pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
+    environment = templateLoading(bookDirectory)
+    numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
+    paragraphPages = findParagraphPages(bookDirectory, userInput, numberOfPagesInBook)
+    headingPages = findHeadingPages(userInput)
+    pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
     headers = findHeaders(userInput)
-    # renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], pageMeasureTemplates)
+    renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], pageMeasureTemplates, headers)
 
 
 
