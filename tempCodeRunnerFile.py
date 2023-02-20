@@ -1,1 +1,5 @@
-headerList = []
+        # print("measure:", measure+1)
+        # print("template number:", templateNumber)
+        # print("header:", headers[pageNumber][measure])
+        # print("pklFile:", pklFiles[measure])
+        # print("----------------------------")

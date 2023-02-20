@@ -174,7 +174,6 @@ def checkAndNotifyOnPercentageOfAnalyzedFiles(root, percentagesOfFilesDone):
         print(f"{(idx+1)*10}% of Pages Analyzed.")
 
 
-
 def iterateOverBookPages(root, files, elementNumberPerMeasure, percentagesOfFilesDone, model):
     for filename in files:
         imagePath = os.path.join(Path(root), filename)
@@ -209,6 +208,7 @@ class Chapter:
     def increment(self):
         self.number += 1
         return self.number
+
 
 @dataclass
 class Unit:
@@ -320,6 +320,14 @@ def findTemplateMSCXname(templateNumber):
     return templateMSCXname
 
 
+def findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow):
+    moduloMeasureRow =   (measure + 1) % numberOfMeasuresPerRow
+    layoutBreak = "Section" if moduloMeasureRow == 0 else None
+    if (measure + 1) == numberOfMeasuresPerPage:
+        layoutBreak = "Page"
+    return layoutBreak
+
+
 def renderPage(env, 
                 pageDirectory, 
                 pageNumber, 
@@ -339,61 +347,41 @@ def renderPage(env,
     pklFiles = readPagePiklFiles(pageDirectory, pageNumber)
     pklFiles = checkAndFixTheLengthOfPklFiles(pklFiles, numberOfMeasuresPerPage)
 
-
     for measure in range(0, numberOfMeasuresPerPage):
         caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
         horizontalBox = renderHorizontalBox(env, caption)
         header = headers[pageNumber][measure]
         templateNumber = currentPageMeasureTemplates[measure]
-        print("measure:", measure+1)
-        print("template number:", templateNumber)
-        print("header:", headers[pageNumber][measure])
-        print("pklFile:", pklFiles[measure])
-        print("----------------------------")
-
-
         templateMSCXname = findTemplateMSCXname(templateNumber)
-
-        page = env.get_template(templateMSCXname).render(
-                content = )
-
-        # section break or page break (sto last measure ths selidas)
-
-        # measure
-            # measure template ----DONE BITCH  ✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓
-            # header           ----DONE BITCH  ✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓
-            # pickle           ----DONE BITCH  ✓✓✓✓✓✓✓✓✓✓✓✓✓✓✓
-
+        layoutBreak = findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow)
+        measureWithouBase = env.get_template(templateMSCXname).render(
+            header = header,
+            fretNumber =  pklFiles[measure])
+        finalMeasure = env.get_template("measureBase.mscx").render(
+            layoutBreak = layoutBreak,
+            measureContent = measureWithouBase)
+        renderedPage += (horizontalBox + finalMeasure)
+    return renderedPage
 
 
-
-        
-        # RENDERARE TA MESA STO MESAURE BASE
-        #renderedPage += horizontalBox + measure
-
-    return ""
-
-
-def exportMCSXFile(render):
-    pass
-
-
+def exportMCSXFile(pageDirectory, fileToExport):
+    fileName = os.path.basename(pageDirectory)
+    musescoreOutputFile = os.path.join(pageDirectory,  fileName +".mscx")
+    with open(f"{musescoreOutputFile}", "w") as f:
+        f.write(fileToExport)
 
 
 def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
-    chapterCoverContent = ""
+    chapterCover = ""
     if currentChapter.cover:
-        chapterCoverContent = renderChapterCover(env, currentChapter.number)
+        chapterCover = renderChapterCover(env, currentChapter.number)
         currentChapter.cover = False
     currentUnit.increment()
-    unitCoverContent = renderUnitCover(env, currentUnit.number)
-    # Render All Pages in Unit
-    pagesContent = ""
+    unitCover = renderUnitCover(env, currentUnit.number)
+    # Render All Pages in each unit
+    unitContent = ""
     for page in pages:
-        print("-------------------------------------------------------------------------------------")
-        print("page:", page)
-        print("-------------------------------------------------------------------------------------")
-        pagesContent += renderPage(env, 
+        unitContent += renderPage(env, 
                                 pageDirectory, 
                                 int(page), 
                                 paragraphPages, 
@@ -406,17 +394,10 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
                                 pageMeasureTemplates[int(page)],
                                 headers)
         
-
-    # Join the all the content
-    unitContentReadyToRenderInsideBookBase = " ".join([chapterCoverContent, unitCoverContent, pagesContent])
-    #unitOutputRender = renderBookBase(env, unitContentReadyToRenderInsideBookBase)
-
-    # Export the musescore file
-    #exportMCSXFile(unitOutputRender)
-
-
-
-
+    # Join all, covers and content
+    unitWithoutBase = " ".join([chapterCover, unitCover, unitContent])
+    finalUnitOutput = renderBookBase(env, unitWithoutBase)
+    exportMCSXFile(pageDirectory, finalUnitOutput)
 
 
 def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
@@ -430,14 +411,9 @@ def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasure
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
             renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers)
-        print("*********************************************************************************")
 
 
-
-
-
-
-def findParagraphPages(bookDirectory, userInput, numberOfPagesInBook):
+def findParagraphPages(userInput, numberOfPagesInBook):
     pageCounter = 0
     paragraphPages = {}
     while pageCounter <= numberOfPagesInBook:
@@ -603,38 +579,50 @@ def findHeaders(userInput ):
 def rendering(bookDirectory, userInput):
     environment = templateLoading(bookDirectory)
     numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
-    paragraphPages = findParagraphPages(bookDirectory, userInput, numberOfPagesInBook)
+    paragraphPages = findParagraphPages(userInput, numberOfPagesInBook)
     headingPages = findHeadingPages(userInput)
     pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
     headers = findHeaders(userInput)
     renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], pageMeasureTemplates, headers)
 
 
+def runApp(bookFolder, userInput):
+    #analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
+    rendering(bookFolder, userInput)
 
 
+    # 2 detect text
+    #detectInBetweenChapterInstructions()
 
-def runApp():
-    pass
+    # 3 pause
+    # diorthosh - an ginetai pause
+
+    # 4 autoextract pdf
+    # auto extract pdf apo to musescore
+
+
+    # 5 auto commented
+    # final pdf merge
 
 
 
 if __name__ == '__main__':
 
+
     bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST'
 
+    ###################################################
+    #               PATTERNS
+    ###################################################
+    #   HORIZONTAL       VERTICAL         PAGE
+    #   [ 1   1 ]       [ 1   2 ]       [ 1   1 ]
+    #   [ 2   2 ]       [ 1   2 ]       [ 1   1 ]
+    #   [ 3   3 ]       [ 1   2 ]       [ 1   1 ]
+    #   [ 4   4 ]       [ 1   2 ]       [ 1   1 ]
+    #   [ 5   5 ]       [ 1   2 ]       [ 1   1 ]
+    #   [ 6   6 ]       [ 1   2 ]       [ 1   1 ]
 
-###################################################
-#               PATTERNS
-###################################################
-#   HORIZONTAL       VERTICAL         PAGE
-#   [ 1   1 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 2   2 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 3   3 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 4   4 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 5   5 ]       [ 1   2 ]       [ 1   1 ]
-#   [ 6   6 ]       [ 1   2 ]       [ 1   1 ]
-
-    input = {
+    userInput = {
         "numberOfMeasuresPerPage" : 12,
         "numberOfMeasuresPerRow" : 2,
         "headers" : {
@@ -653,45 +641,47 @@ if __name__ == '__main__':
         },
         "headerPaterns": {
             "pattern1" : {
-                "pages": [*range(1,10)],
+                "pages": [*range(1,20)],
                 "sequenceRepetition" : 5,
                 "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4]],
                 "headerPageRepetition" : "horizontal" # horizontal vertical or none
-            },
-            "pattern2" : {
-                "pages": [*range(10,15)],
-                "sequenceRepetition" : 5,
-                "pageMeasureHeaderSequence" : [[7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
-                "headerPageRepetition" : "vertical" # horizontal vertical or none
-            },
-            "pattern3" : {
-                "pages": [*range(15,18)],
-                "sequenceRepetition" : 2,
-                "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4], [5,5,5,5], [6,6,6,6], [7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
-                "headerPageRepetition" : None # or horizontal or none
-            }
+            } # ,
+            # "pattern2" : {
+            #     "pages": [*range(10,15)],
+            #     "sequenceRepetition" : 5,
+            #     "pageMeasureHeaderSequence" : [[7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
+            #     "headerPageRepetition" : "vertical" # horizontal vertical or none
+            # },
+            # "pattern3" : {
+            #     "pages": [*range(15,18)],
+            #     "sequenceRepetition" : 2,
+            #     "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4], [5,5,5,5], [6,6,6,6], [7,7,7,7], [8,8,8,8],[9,9,9,9],[10,10,10,10],[11,11,11,11],[12,12,12,12]],
+            #     "headerPageRepetition" : None # or horizontal or none
+            # }
         },
         "templatePatterns": {
             1 : {
-                "pages" : [*range(1,4)],
-                "templates" : [1]*4, # if there is only 1 template for every measure of every page of unit then put the number of it as many times as the number of pages in the unit
-                "measurePageRepetition" : "page", # vertical, page, None
-            },
-            2 : {
-                "pages" : [*range(4,8)],
-                "templates" : [8,9,10,11,12,13],
-                "measurePageRepetition" : "vertical", # vertical, page, None
-            },
-            3 : {
-                "pages" : [*range(8,10)],
-                "templates" : [15,16,17],
-                "measurePageRepetition" : "page", # vertical, page, None
-            },
-            4 : {
-                "pages" : [*range(10,15)],
-                "templates" : [18,19,20,21,22,23,24,25,26],
-                "measurePageRepetition" : None, # vertical, page, None
-            }
+                "pages" : [*range(1,40)],
+                "templates" : [1], # if there is only 1 template for every measure of every page of each unit,
+                #then put the number of the template as many times as the number of pages in the unit
+                # for example [1]*10,
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            } # ,
+            # 2 : {
+            #     "pages" : [*range(4,8)],
+            #     "templates" : [8,9,10,11,12,13],
+            #     "measurePageRepetition" : "vertical", # horizontal, vertical, page, None
+            # },
+            # 3 : {
+            #     "pages" : [*range(8,10)],
+            #     "templates" : [15,16,17],
+            #     "measurePageRepetition" : "page", # horizontal, vertical, page, None
+            # },
+            # 4 : {
+            #     "pages" : [*range(10,15)],
+            #     "templates" : [18,19,20,21,22,23,24,25,26],
+            #     "measurePageRepetition" : None, # horizontal, vertical, page, None
+            # }
         },
         # Paragraphs are always in sequence.
         "paragraphs": {
@@ -750,30 +740,8 @@ if __name__ == '__main__':
         }   
     }
 
-    
 
-
-
-
-    #analysis(input["numberOfMeasuresPerPage"], bookFolder)
-
-
-    # 1 rendering
-    rendering(bookFolder, input)
-
-
-    # 2 detect text
-    #detectInBetweenChapterInstructions()
-
-    # 3 pause
-    # diorthosh - an ginetai pause
-
-    # 4 autoextract pdf
-    # auto extract pdf apo to musescore
-
-
-    # 5 auto commented
-    # final pdf merge
+    runApp(bookFolder, userInput)
 
 
 
