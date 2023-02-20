@@ -1,9 +1,8 @@
 import pandas as pd
-import os
-a =[['1', '4', '4', '3', '1', '1', '2', '3', '3', '1', '4', '4'], ['2', '4', '4', '1', '2', '2', '3', '1', '1', '4', '3', '3'], ['3', '4', '4', '1', '3', '3', '2', '1', '1', '4', '2', '2'], ['4', '4', '3', '2', '2', '4', '3', '3', '4', '2', '4', '4'], ['4', '2', '2', '3', '4', '4', '2', '3', '3', '4', '1', '1'], ['2', '4', '4', '3', '2', '2', '3', '1', '1', '4', '3', '3'], ['3', '4', '4', '1', '3', '3', '2', '3', '3', '4', '2', '2'], ['1', '4', '4', '3', '1', '1', '2', '3', '3', '4', '3', '3'], ['3', '4', '4', '3', '2', '2', '1', '3', '3', '4', '1', '1'], ['2', '4', '4', '3', '1', '1', '4', '2', '2', '1', '3', '3'], ['3', '1', '1', '2', '4', '4', '1', '3', '3', '4', '2', '2']]
+import pickle
 
 
-pagePiklFiles = pd.read_pickle(os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST\chapter01\unit01", "06.pkl"))
-
-print(pagePiklFiles)
-print(len(pagePiklFiles))
+pkl = pd.read_pickle(r"C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST\chapter01\unit01\01.pkl")
+pkl2 = pd.read_pickle(r"C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST\chapter01\unit01\02.pkl")
+print(pkl)
+print(pkl2)

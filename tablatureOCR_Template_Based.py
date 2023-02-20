@@ -269,25 +269,33 @@ def renderPageHeader(env, pageNumber, paragraphPages, headingPages):
 
 
 def findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow):
-    measureCaption = None
     for caption in captions:
-        if (captions[caption] and ((type(captions[caption]["pages"]) == list and pageNumber in captions[caption]["pages"]) or captions[caption]["pages"] == "all") and captions[caption]["number"]):
-            if (caption == "left" and (measure%numberOfMeasuresPerRow == 1) 
-                or (caption == "leftRight" and captions[caption]["sameNumberInRow"]
-                and measure%numberOfMeasuresPerRow == 1)):
-                measureCaption = captions[caption]["symbol"] + str((measure+1)//2)
-            if (caption == "leftRight" and captions[caption]["sameNumberInRow"] and measure%numberOfMeasuresPerRow == 0):
-                measureCaption = captions[caption]["symbol"] + str((measure)//2)
-            if caption == "leftRight" and not captions[caption]["sameNumberInRow"]:
-                measureCaption = captions[caption]["symbol"] + str(measure)
-        if (captions[caption] and ((type(captions[caption]["pages"]) == list and pageNumber in captions[caption]["pages"]) or captions[caption]["pages"] == "all") and not captions[caption]["number"]):
-            measureCaption = captions[caption]["symbol"]
-    return measureCaption
+        measureCaption = None
+        alignment = None
+        if pageNumber in captions[caption]["pages"]:
+            if captions[caption]["number"]:
+                if caption == "onlyLeft" and measure % numberOfMeasuresPerRow == 0:
+                    measureCaption = captions[caption]["symbol"] + str((measure//numberOfMeasuresPerRow)+1)
+                    alignment = "left"
+                    break
+                if caption == "everywhere":
+                    if captions[caption]["sameNumberInRow"]:
+                        measureCaption = captions[caption]["symbol"] + str((measure//numberOfMeasuresPerRow)+1)
+                    else:
+                        measureCaption = captions[caption]["symbol"] + str(measure+1)
+                    alignment = "left" if measure % numberOfMeasuresPerRow == 0 else "center"
+                    break
+            else:
+                if measure % numberOfMeasuresPerRow == 0:
+                    measureCaption = captions[caption]["symbol"]
+                    break
+    return measureCaption, alignment
 
 
-def renderHorizontalBox(env, caption):
+def renderHorizontalBox(env, caption, alignment):
     horizontalBox = env.get_template("horizontalBox.mscx").render(
-        caption = caption)
+        caption = caption,
+        alignment = alignment)
     return horizontalBox
 
 
@@ -328,6 +336,18 @@ def findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow):
     return layoutBreak
 
 
+def exportMCSXFile(pageDirectory, fileToExport, bookDirectory):
+    dirPath = os.path.join(r'C:\Users\merse\Desktop\Tablature OCR\musescore_outputs', os.path.basename(bookDirectory))
+    if not os.path.exists(dirPath):
+        os.mkdir(dirPath)
+    chapter = os.path.basename(Path(pageDirectory).parents[0])
+    unit = os.path.basename(pageDirectory)
+    name = chapter + unit + ".mscx"
+    museScoreOutputFile = os.path.join(dirPath, name)
+    with open(f"{museScoreOutputFile}", "w") as f:
+        f.write(fileToExport)
+
+
 def renderPage(env, 
                 pageDirectory, 
                 pageNumber, 
@@ -345,33 +365,37 @@ def renderPage(env,
     pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
     renderedPage += pageHeader
     pklFiles = readPagePiklFiles(pageDirectory, pageNumber)
-    pklFiles = checkAndFixTheLengthOfPklFiles(pklFiles, numberOfMeasuresPerPage)
+    finalPklFiles = checkAndFixTheLengthOfPklFiles(pklFiles, numberOfMeasuresPerPage)
+
+    print("--------------------------------------------------------------")
+    print("pageNumber:", pageNumber)
+    print("--------------------------------------------------------------")
 
     for measure in range(0, numberOfMeasuresPerPage):
-        caption = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
-        horizontalBox = renderHorizontalBox(env, caption)
-        header = headers[pageNumber][measure]
-        templateNumber = currentPageMeasureTemplates[measure]
-        templateMSCXname = findTemplateMSCXname(templateNumber)
-        layoutBreak = findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow)
-        measureWithouBase = env.get_template(templateMSCXname).render(
-            header = header,
-            fretNumber =  pklFiles[measure])
-        finalMeasure = env.get_template("measureBase.mscx").render(
-            layoutBreak = layoutBreak,
-            measureContent = measureWithouBase)
-        renderedPage += (horizontalBox + finalMeasure)
-    return renderedPage
+        caption, alignment = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
+        horizontalBox = renderHorizontalBox(env, caption, alignment)
+    #     header = headers[pageNumber][measure]
+    #     templateNumber = currentPageMeasureTemplates[measure]
+    #     templateMSCXname = findTemplateMSCXname(templateNumber)
+    #     layoutBreak = findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow)
+    #     fretNumber = finalPklFiles[measure]
+
+    #     print("header     :", header)
+    #     print("FRET NUMBER:", fretNumber)
+    #     print("----------------")
+
+    #     measureWithouBase = env.get_template(templateMSCXname).render(
+    #         header = header,
+    #         fretNumber =  fretNumber)
+    #     finalMeasure = env.get_template("measureBase.mscx").render(
+    #         layoutBreak = layoutBreak,
+    #         measureContent = measureWithouBase)
+    #     renderedPage += (horizontalBox + finalMeasure)
+    # return renderedPage
+    return ""
 
 
-def exportMCSXFile(pageDirectory, fileToExport):
-    fileName = os.path.basename(pageDirectory)
-    musescoreOutputFile = os.path.join(pageDirectory,  fileName +".mscx")
-    with open(f"{musescoreOutputFile}", "w") as f:
-        f.write(fileToExport)
-
-
-def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
+def renderUnits(env, bookDirectory, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
     chapterCover = ""
     if currentChapter.cover:
         chapterCover = renderChapterCover(env, currentChapter.number)
@@ -397,7 +421,7 @@ def renderUnits(env, pageDirectory, pages, currentChapter, currentUnit, paragrap
     # Join all, covers and content
     unitWithoutBase = " ".join([chapterCover, unitCover, unitContent])
     finalUnitOutput = renderBookBase(env, unitWithoutBase)
-    exportMCSXFile(pageDirectory, finalUnitOutput)
+    exportMCSXFile(pageDirectory, finalUnitOutput, bookDirectory)
 
 
 def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
@@ -410,9 +434,11 @@ def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasure
             currentChapter.cover = True
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
-            renderUnits(env, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers)
+            renderUnits(env, bookDirectory, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers)
 
 
+
+# 3. Find Values for each Page ###########################################################################################
 def findParagraphPages(userInput, numberOfPagesInBook):
     pageCounter = 0
     paragraphPages = {}
@@ -584,20 +610,22 @@ def rendering(bookDirectory, userInput):
     pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
     headers = findHeaders(userInput)
     renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], pageMeasureTemplates, headers)
+    print("Rendering Done!")
 
 
 def runApp(bookFolder, userInput):
+
     #analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
     rendering(bookFolder, userInput)
 
 
-    # 2 detect text
+    # 1 detect text
     #detectInBetweenChapterInstructions()
 
-    # 3 pause
+    # 2 pause
     # diorthosh - an ginetai pause
 
-    # 4 autoextract pdf
+    # 3 autoextract pdf
     # auto extract pdf apo to musescore
 
 
@@ -608,12 +636,11 @@ def runApp(bookFolder, userInput):
 
 if __name__ == '__main__':
 
-
     bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST'
 
-    ###################################################
-    #               PATTERNS
-    ###################################################
+    ##############################################
+    #                 PATTERNS
+    ##############################################
     #   HORIZONTAL       VERTICAL         PAGE
     #   [ 1   1 ]       [ 1   2 ]       [ 1   1 ]
     #   [ 2   2 ]       [ 1   2 ]       [ 1   1 ]
@@ -644,7 +671,7 @@ if __name__ == '__main__':
                 "pages": [*range(1,20)],
                 "sequenceRepetition" : 5,
                 "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4]],
-                "headerPageRepetition" : "horizontal" # horizontal vertical or none
+                "headerPageRepetition" : "vertical" # horizontal vertical or none
             } # ,
             # "pattern2" : {
             #     "pages": [*range(10,15)],
@@ -697,7 +724,7 @@ if __name__ == '__main__':
         # HEADINGS - TITLES (VARIATION - F)
         "headings" : {
             "VARIATION" : {
-                "pages" : range(1,16), #[*range(0,350)]
+                "pages" : [*range(1,16)], #[*range(0,350)]
                 "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
                 "headingPageRepetition" : 3, # or None # 1 otan theloume na emfanizontai ta noumera mia fora
                 "subheading" : None
@@ -707,42 +734,39 @@ if __name__ == '__main__':
                 "singleHeading" : False, #1 ή 2 ΣΤΗΛΕΣ
                 "headingPageRepetition" : 1, 
                 "subheading" : "A"
-            },
-            "A" : {
-                "pages" : [20,21,22,23,24],
-                "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
-                "headingPageRepetition" : None, 
-                "subheading" : "B"
-            },
-            "B" : {
-                "pages" : [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43],
-                "singleHeading" : False, #1 ή 2 ΣΤΗΛΕΣ
-                "headingPageRepetition" : 1, 
-                "subheading" : "C"
-            }
+            }# ,
+            # "A" : {
+            #     "pages" : [20,21,22,23,24],
+            #     "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
+            #     "headingPageRepetition" : None, 
+            #     "subheading" : "B"
+            # },
+            # "B" : {
+            #     "pages" : [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43],
+            #     "singleHeading" : False, #1 ή 2 ΣΤΗΛΕΣ
+            #     "headingPageRepetition" : 1, 
+            #     "subheading" : "C"
+            # }
         },
         # CAPTIONS - F on the sides
         "captions" : {
             # IF THERE ARE NO CAPTIONS, DELETE EVERYTHING ABOVE 
             # AND LEAVE THE CAPTIONS DICT EMPTY
-            "left": {
+            "onlyLeft": {
                 "pages" : [1,2,3,4,5], #or "all"
                 "symbol" : "F",
-                "number" : True,
-                "sameNumberInRow" : False # peritto alla what ever
+                "number" : True # peritto alla what ever
             },
-            "leftRight" : {
+            "everywhere" : {
                 "pages" : [*range(6,17)],
                 "symbol" : "Z",
-                "number" : False,
+                "number" : True,
                 "sameNumberInRow" : False # peritto alla what ever
             }
         }   
     }
 
 
+
+
     runApp(bookFolder, userInput)
-
-
-
-
