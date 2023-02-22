@@ -14,6 +14,9 @@ from jinja2 import Environment, FileSystemLoader
 from dataclasses import dataclass, field, InitVar
 from typing import List
 import copy
+from PyPDF2 import PdfFileMerger
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
 
 
 # 1. Analysis ###########################################################################################
@@ -199,7 +202,6 @@ def analysis(elementNumberPerMeasure, bookDirectory):
     print("Analysis Done!")
 
 
-
 # 2. Rendering ###########################################################################################
 @dataclass
 class Chapter:
@@ -309,15 +311,6 @@ def readPagePiklFiles(pageDirectory, pageNumber):
     return pagePiklFiles
 
 
-def checkAndFixTheLengthOfPklFiles(pklFiles, numberOfMeasuresPerPage):
-    if not pklFiles:
-        pklFiles = None
-    elif len(pklFiles) != 0:
-        while len(pklFiles) < numberOfMeasuresPerPage:
-            pklFiles.extend(pklFiles[:-1])
-    return pklFiles
-
-
 def findTemplateMSCXname(templateNumber):
     if len(str(templateNumber)) == 1:
         templateMSCXname = "00" + str(templateNumber) + ".mscx"
@@ -336,6 +329,61 @@ def findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow):
     return layoutBreak
 
 
+def findNumberOfMeasureNotesOnCurrentPage(pageNumber, numberOfNotesOnEachMeasure):
+    for number in numberOfNotesOnEachMeasure.keys():
+        if pageNumber in numberOfNotesOnEachMeasure[number]["pages"]:
+            measureNotesOnCurrentPage = copy.copy(number)
+            break
+    return measureNotesOnCurrentPage
+
+
+def checkAndFixTheLengthOfPklFiles(pageNumber, pklFiles, numberOfMeasuresPerPage, numberOfNotesOnEachMeasure):
+    numberOfMeasureNotesOnCurrentPage = findNumberOfMeasureNotesOnCurrentPage(pageNumber, numberOfNotesOnEachMeasure)
+    if len(pklFiles) != 0:
+        while len(pklFiles) < numberOfMeasuresPerPage:
+            pklFiles.append(pklFiles[-1])
+        for pklMeasure in pklFiles:
+            while len(pklMeasure) < numberOfMeasureNotesOnCurrentPage:
+                pklMeasure.append(pklMeasure[-1])
+    return pklFiles
+
+
+def renderPage(env, 
+                pageDirectory, 
+                pageNumber,
+                paragraphPages, 
+                headingPages, 
+                numberOfMeasuresPerPage, 
+                numberOfMeasuresPerRow, 
+                captions,
+                currentChapter,
+                currentUnit,
+                currentPageMeasureTemplates, 
+                headers,
+                numberOfNotesOnEachMeasure):
+    renderedPage = ""
+    pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
+    renderedPage += pageHeader
+    pklFiles = readPagePiklFiles(pageDirectory, pageNumber)
+    pklFilesLengthChecked = checkAndFixTheLengthOfPklFiles(pageNumber, pklFiles, numberOfMeasuresPerPage, numberOfNotesOnEachMeasure)
+    for measure in range(0, numberOfMeasuresPerPage):
+        caption, alignment = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
+        horizontalBox = renderHorizontalBox(env, caption, alignment)
+        pageHeaders = headers[pageNumber][measure]
+        templateNumber = currentPageMeasureTemplates[measure]
+        templateMSCXname = findTemplateMSCXname(templateNumber)
+        layoutBreak = findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow)
+        finalPklFiles = [int(x) for x in pklFilesLengthChecked[measure]]
+        measureWithouBase = env.get_template(templateMSCXname).render(
+            headers = pageHeaders,
+            notes =  finalPklFiles)
+        finalMeasure = env.get_template("measureBase.mscx").render(
+            layoutBreak = layoutBreak,
+            measureContent = measureWithouBase)
+        renderedPage += (horizontalBox + finalMeasure)
+    return renderedPage
+
+
 def exportMCSXFile(pageDirectory, fileToExport, bookDirectory):
     dirPath = os.path.join(r'C:\Users\merse\Desktop\Tablature OCR\musescore_outputs', os.path.basename(bookDirectory))
     if not os.path.exists(dirPath):
@@ -348,54 +396,7 @@ def exportMCSXFile(pageDirectory, fileToExport, bookDirectory):
         f.write(fileToExport)
 
 
-def renderPage(env, 
-                pageDirectory, 
-                pageNumber, 
-                paragraphPages, 
-                headingPages, 
-                numberOfMeasuresPerPage, 
-                numberOfMeasuresPerRow, 
-                captions,
-                currentChapter,
-                currentUnit,
-                currentPageMeasureTemplates, 
-                headers):
-
-    renderedPage = ""
-    pageHeader = renderPageHeader(env, int(pageNumber), paragraphPages, headingPages)
-    renderedPage += pageHeader
-    pklFiles = readPagePiklFiles(pageDirectory, pageNumber)
-    finalPklFiles = checkAndFixTheLengthOfPklFiles(pklFiles, numberOfMeasuresPerPage)
-
-    print("--------------------------------------------------------------")
-    print("pageNumber:", pageNumber)
-    print("--------------------------------------------------------------")
-
-    for measure in range(0, numberOfMeasuresPerPage):
-        caption, alignment = findCaptionForHorizontalBox(pageNumber, measure, captions, numberOfMeasuresPerRow)
-        horizontalBox = renderHorizontalBox(env, caption, alignment)
-    #     header = headers[pageNumber][measure]
-    #     templateNumber = currentPageMeasureTemplates[measure]
-    #     templateMSCXname = findTemplateMSCXname(templateNumber)
-    #     layoutBreak = findLayoutBreak(measure, numberOfMeasuresPerPage, numberOfMeasuresPerRow)
-    #     fretNumber = finalPklFiles[measure]
-
-    #     print("header     :", header)
-    #     print("FRET NUMBER:", fretNumber)
-    #     print("----------------")
-
-    #     measureWithouBase = env.get_template(templateMSCXname).render(
-    #         header = header,
-    #         fretNumber =  fretNumber)
-    #     finalMeasure = env.get_template("measureBase.mscx").render(
-    #         layoutBreak = layoutBreak,
-    #         measureContent = measureWithouBase)
-    #     renderedPage += (horizontalBox + finalMeasure)
-    # return renderedPage
-    return ""
-
-
-def renderUnits(env, bookDirectory, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
+def renderUnits(env, bookDirectory, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, numberOfNotesOnEachMeasure, pageMeasureTemplates, headers):
     chapterCover = ""
     if currentChapter.cover:
         chapterCover = renderChapterCover(env, currentChapter.number)
@@ -405,7 +406,7 @@ def renderUnits(env, bookDirectory, pageDirectory, pages, currentChapter, curren
     # Render All Pages in each unit
     unitContent = ""
     for page in pages:
-        unitContent += renderPage(env, 
+        renderedPage = renderPage(env, 
                                 pageDirectory, 
                                 int(page), 
                                 paragraphPages, 
@@ -416,15 +417,18 @@ def renderUnits(env, bookDirectory, pageDirectory, pages, currentChapter, curren
                                 currentChapter.number,
                                 currentUnit.number,
                                 pageMeasureTemplates[int(page)],
-                                headers)
+                                headers,
+                                numberOfNotesOnEachMeasure)
         
+        unitContent += renderedPage
+
     # Join all, covers and content
     unitWithoutBase = " ".join([chapterCover, unitCover, unitContent])
     finalUnitOutput = renderBookBase(env, unitWithoutBase)
     exportMCSXFile(pageDirectory, finalUnitOutput, bookDirectory)
 
 
-def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers):
+def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, numberOfNotesOnEachMeasure, pageMeasureTemplates, headers):
     currentChapter = Chapter(0)
     currentUnit = Unit(0)
     for root, dirs, files in os.walk(bookDirectory):
@@ -434,7 +438,7 @@ def renderBook(env, bookDirectory, paragraphPages, headingPages, numberOfMeasure
             currentChapter.cover = True
         if os.path.basename(root).startswith("unit"):
             pagesInUnitDirectories = findPagesInUnitDirectories(root)
-            renderUnits(env, bookDirectory, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, pageMeasureTemplates, headers)
+            renderUnits(env, bookDirectory, root, pagesInUnitDirectories, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, numberOfNotesOnEachMeasure, pageMeasureTemplates, headers)
 
 
 
@@ -609,28 +613,83 @@ def rendering(bookDirectory, userInput):
     headingPages = findHeadingPages(userInput)
     pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
     headers = findHeaders(userInput)
-    renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], pageMeasureTemplates, headers)
+    renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], userInput["numberOfNotesOnEachMeasure"], pageMeasureTemplates, headers)
     print("Rendering Done!")
 
 
+def detectTextAndExportEachPage(img, path):
+    img = cv2.imread(os.path.join(path, img))
+    text = pytesseract.image_to_string(img)
+    return text
+
+
+def detectIntroductoryText(bookFolder):
+    bookName = os.path.basename(bookFolder)
+    textBasePath = r"C:\Users\merse\Desktop\Tablature OCR\introductoryText"
+    introductoryTextPath = os.path.join(textBasePath, bookName)
+    text = ""
+    if os.path.exists(introductoryTextPath):
+        for root, dirs, imgs in os.walk(introductoryTextPath):
+            for img in imgs:
+                text += detectTextAndExportEachPage(img, introductoryTextPath)
+    textPath = os.path.join(introductoryTextPath, "introductoryText.txt")
+    with open(f"{textPath}", "w") as f:
+        f.write(text)
+    print("Introductory Text Saved!")
+
+
+def pauseForCorrectionAndFilePreparation():
+    input(" **********************************************************************\n \
+1. Correct musescore files.\n \
+2. Create Introdutory Text's Musescore file named '00' and put it musescore_outputs/book. \n \
+3. Prepare everything. \n \
+4. Press Enter to export the final book.\n \
+**********************************************************************")
+
+
+def extractPDFs(bookFolder):
+    pathForMusescoreFiles = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\musescore_outputs", os.path.basename(bookFolder))
+    pdfPath = r"C:\Users\merse\Desktop\Tablature OCR\pdfs"
+    pdfCurrentBookPath = os.path.join(pdfPath, os.path.basename(bookFolder))
+    if not os.path.exists(pdfCurrentBookPath):
+        os.mkdir(pdfCurrentBookPath)
+    for root, dirs, files in os.walk(pathForMusescoreFiles):
+        for idx, file in enumerate(files):
+            PDFfileName = "0"+ str(idx) + ".pdf" if len(str(idx)) == 1 else str(idx) + ".pdf"
+            mscxFile = os.path.join(pathForMusescoreFiles, file)
+            PDFfile = os.path.join(pdfCurrentBookPath, PDFfileName)
+            command = "MuseScore3.exe -o" + ' "' + PDFfile +  '" "' + mscxFile + '"'
+            os.system(command)
+    print("PDF exctraction Done!")
+
+
+    
+
+def mergePDFs(bookFolder):
+    finalBookPath = r"C:\Users\merse\Desktop\Tablature OCR\final_Books"
+    bookName = os.path.basename(bookFolder)
+    pdfFolderPath = os.path.join(r"C:\Users\merse\Desktop\Tablature OCR\pdfs", bookName)
+    pdfList = os.listdir(pdfFolderPath)
+    pdfList.sort()
+    merger = PdfFileMerger()
+    for pdfFile in pdfList:
+        pdfFileWithPath = os.path.join(pdfFolderPath, pdfFile)
+        merger.append(pdfFileWithPath)
+    finalBookNamePath = os.path.join(finalBookPath, bookName + ".pdf")
+    merger.write(finalBookNamePath)
+    merger.close()
+    print("Merging PDF files Done!")
+
+
 def runApp(bookFolder, userInput):
-
-    #analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
+    analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
     rendering(bookFolder, userInput)
+    detectIntroductoryText(bookFolder)
+    pauseForCorrectionAndFilePreparation()
+    extractPDFs(bookFolder)
+    mergePDFs(bookFolder)
+    print(f"{os.path.basename(bookFolder)} Done!")
 
-
-    # 1 detect text
-    #detectInBetweenChapterInstructions()
-
-    # 2 pause
-    # diorthosh - an ginetai pause
-
-    # 3 autoextract pdf
-    # auto extract pdf apo to musescore
-
-
-    # 5 auto commented
-    # final pdf merge
 
 
 
@@ -652,6 +711,11 @@ if __name__ == '__main__':
     userInput = {
         "numberOfMeasuresPerPage" : 12,
         "numberOfMeasuresPerRow" : 2,
+        "numberOfNotesOnEachMeasure" : {
+            12: {
+                "pages" : [*range(1,100)]
+            }
+        },
         "headers" : {
             1:  ["i", "m", "i"],
             2:  ["m", "i", "m"],
@@ -765,8 +829,5 @@ if __name__ == '__main__':
             }
         }   
     }
-
-
-
 
     runApp(bookFolder, userInput)
