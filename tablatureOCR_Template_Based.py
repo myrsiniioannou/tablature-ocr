@@ -17,6 +17,7 @@ import copy
 from PyPDF2 import PdfFileMerger
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract'
+import time
 
 
 # 1. Analysis ###########################################################################################
@@ -188,7 +189,6 @@ def iterateOverBookPages(root, files, elementNumberPerMeasure, percentagesOfFile
             pageMeasureDFs = dataframeCreationForEachMeasure(boxes, labels, scores)
             finalPageMeasureDFs = DFresultOptimization(pageMeasureDFs, elementNumberPerMeasure)
             finalPageMeasureElementsAsList = measureDFtoList(finalPageMeasureDFs)
-            print(finalPageMeasureElementsAsList)
             exportFileForPageMeasures(finalPageMeasureElementsAsList, imagePath)
         
 
@@ -663,8 +663,6 @@ def extractPDFs(bookFolder):
     print("PDF exctraction Done!")
 
 
-    
-
 def mergePDFs(bookFolder):
     finalBookPath = r"C:\Users\merse\Desktop\Tablature OCR\final_Books"
     bookName = os.path.basename(bookFolder)
@@ -682,20 +680,27 @@ def mergePDFs(bookFolder):
 
 
 def runApp(bookFolder, userInput):
+    start = time.time()
     analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
     rendering(bookFolder, userInput)
+    renderingTime = time.time()
+    analysisAndRenderingTime = renderingTime - start
+    print("Finished Analysis and Rendering in: ", analysisAndRenderingTime)
     detectIntroductoryText(bookFolder)
     pauseForCorrectionAndFilePreparation()
     extractPDFs(bookFolder)
     mergePDFs(bookFolder)
     print(f"{os.path.basename(bookFolder)} Done!")
+    end = time.time()
+    totalTime = end - start
+    print("Finished the whole process in: ", totalTime)
 
 
 
 
 if __name__ == '__main__':
 
-    bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBookTEST'
+    bookFolder = r'C:\Users\merse\Desktop\Tablature OCR\books_to_analyze\firstBook'
 
     ##############################################
     #                 PATTERNS
@@ -713,7 +718,7 @@ if __name__ == '__main__':
         "numberOfMeasuresPerRow" : 2,
         "numberOfNotesOnEachMeasure" : {
             12: {
-                "pages" : [*range(1,100)]
+                "pages" : [*range(1,361)]
             }
         },
         "headers" : {
@@ -723,6 +728,7 @@ if __name__ == '__main__':
             4:  ["a", "m", "a"],
             5:  ["i", "a", "i"],
             6:  ["a", "i", "a"],
+
             7:  ["i", "m", "a"],
             8:  ["i", "a", "m"],
             9:  ["m", "i", "a"],
@@ -732,11 +738,17 @@ if __name__ == '__main__':
         },
         "headerPaterns": {
             "pattern1" : {
-                "pages": [*range(1,20)],
+                "pages": [*range(1,16),*range(31,46),*range(61,76),*range(91,106),*range(121,136),*range(151,166), *range(181, 196), *range(211, 226), *range(241, 256), *range(271, 286), *range(301, 316),*range(331, 346)],
                 "sequenceRepetition" : 5,
-                "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4]],
+                "pageMeasureHeaderSequence" : [[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]],
                 "headerPageRepetition" : "vertical" # horizontal vertical or none
-            } # ,
+            },
+            "pattern2" : {
+                "pages": [*range(16,31),*range(46,61),*range(76,91),*range(106,121),*range(136,151),*range(166,181), *range(196, 211), *range(226,241), *range(256, 271), *range(286, 301),*range(316, 331), *range(346,360)],
+                "sequenceRepetition" : 5,
+                "pageMeasureHeaderSequence" : [[7,7,7,7],[8,8,8,8],[9,9,9,9],[10,10,10,10], [11,11,11,11], [12,12,12,12]],
+                "headerPageRepetition" : "vertical" # horizontal vertical or none
+            }
             # "pattern2" : {
             #     "pages": [*range(10,15)],
             #     "sequenceRepetition" : 5,
@@ -752,15 +764,70 @@ if __name__ == '__main__':
         },
         "templatePatterns": {
             1 : {
-                "pages" : [*range(1,40)],
-                "templates" : [1], # if there is only 1 template for every measure of every page of each unit,
-                #then put the number of the template as many times as the number of pages in the unit
-                # for example [1]*10,
+                "pages" : [*range(1,31)],
+                "templates" : [1,2,3,4,5,6],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            2 : {
+                "pages" : [*range(31,61)],
+                "templates" : [7,8,9,10,11,12], 
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            3 : {
+                "pages" : [*range(61,91)],
+                "templates" : [13,14,15,16,17,18],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            4 : {
+                "pages" : [*range(91,121)],
+                "templates" : [19,20,21,22,23,24],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            5 : {
+                "pages" : [*range(121,151)],
+                "templates" : [25,26,27,28,29,30],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            6 : {
+                "pages" : [*range(151,181)],
+                "templates" : [31,32,33,34,35,36],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            7 : {
+                "pages" : [*range(181,211)],
+                "templates" : [37,38,39,40,41,42],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            8 : {
+                "pages" : [*range(211,241)],
+                "templates" : [43,44,45,46,47,48],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            9 : {
+                "pages" : [*range(241,271)],
+                "templates" : [49,50,51,52,53,54],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            10 : {
+                "pages" : [*range(271,301)],
+                "templates" : [55,56,57,58,59,60],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            11 : {
+                "pages" : [*range(301,331)],
+                "templates" : [61,62,63,64,65,66],
+                "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
+            },
+            12 : {
+                "pages" : [*range(331,361)],
+                "templates" : [67,68,69,70,71,72],
                 "measurePageRepetition" : "horizontal" # horizontal, vertical, page, None
             } # ,
             # 2 : {
             #     "pages" : [*range(4,8)],
-            #     "templates" : [8,9,10,11,12,13],
+            #     "templates" : [8,9,10,11,12,13],  # if there is only 1 template for every measure of every page of each unit,
+                                                    #then put the number of the template as many times as the number of pages in the unit
+                                                    # for example [1]*10,
             #     "measurePageRepetition" : "vertical", # horizontal, vertical, page, None
             # },
             # 3 : {
@@ -779,26 +846,16 @@ if __name__ == '__main__':
             "A" : {
                 "letters" : ["I", "II", "III", "IV", "V"],
                 "pageFrequency" : 3
-            },
-            "B" : {
-                "letters" : ["I", "II", "III", "IV", "V"],
-                "pageFrequency" : 3
             }
         },
         # HEADINGS - TITLES (VARIATION - F)
         "headings" : {
             "VARIATION" : {
-                "pages" : [*range(1,16)], #[*range(0,350)]
+                "pages" : [*range(1,361)], #[*range(0,350)]
                 "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
                 "headingPageRepetition" : 3, # or None # 1 otan theloume na emfanizontai ta noumera mia fora
                 "subheading" : None
-            },
-            "F" : {
-                "pages" : [16,17,18,19],
-                "singleHeading" : False, #1 ή 2 ΣΤΗΛΕΣ
-                "headingPageRepetition" : 1, 
-                "subheading" : "A"
-            }# ,
+            } ,
             # "A" : {
             #     "pages" : [20,21,22,23,24],
             #     "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
@@ -817,16 +874,16 @@ if __name__ == '__main__':
             # IF THERE ARE NO CAPTIONS, DELETE EVERYTHING ABOVE 
             # AND LEAVE THE CAPTIONS DICT EMPTY
             "onlyLeft": {
-                "pages" : [1,2,3,4,5], #or "all"
+                "pages" : [*range(1,361)],
                 "symbol" : "F",
                 "number" : True # peritto alla what ever
-            },
-            "everywhere" : {
-                "pages" : [*range(6,17)],
-                "symbol" : "Z",
-                "number" : True,
-                "sameNumberInRow" : False # peritto alla what ever
-            }
+            }# ,
+            # "everywhere" : {
+            #     "pages" : [*range(6,17)],
+            #     "symbol" : "Z",
+            #     "number" : True,
+            #     "sameNumberInRow" : False # peritto alla what ever
+            # }
         }   
     }
 
