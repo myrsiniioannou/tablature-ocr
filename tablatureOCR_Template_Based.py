@@ -306,6 +306,7 @@ def readPagePiklFiles(pageDirectory, pageNumber):
     for root, dirs, files in os.walk(pageDirectory):
         for file in files:
             if file.endswith(".pkl") and int(pageNumber) == int(file[:-4]):
+                #print(root,file)
                 pagePiklFiles = pd.read_pickle(os.path.join(root, file))
                 break                
     return pagePiklFiles
@@ -356,8 +357,6 @@ def renderPage(env,
                 numberOfMeasuresPerPage, 
                 numberOfMeasuresPerRow, 
                 captions,
-                currentChapter,
-                currentUnit,
                 currentPageMeasureTemplates, 
                 headers,
                 numberOfNotesOnEachMeasure):
@@ -396,13 +395,42 @@ def exportMCSXFile(pageDirectory, fileToExport, bookDirectory):
         f.write(fileToExport)
 
 
+def numberToLatinNumeral(number):
+    if int(number) == 1:
+        latinNumeral = "I"
+    elif int(number) == 2:
+        latinNumeral = "II"
+    elif int(number) == 3:
+        latinNumeral = "III"
+    elif int(number) == 4:
+        latinNumeral = "IV"
+    elif int(number) == 5:
+        latinNumeral = "V"
+    elif int(number) == 6:
+        latinNumeral = "VI"
+    elif int(number) == 7:
+        latinNumeral = "VII"
+    elif int(number) == 8:
+        latinNumeral = "VIII"
+    elif int(number) == 9:
+        latinNumeral = "IX"
+    elif int(number) == 10:
+        latinNumeral = "X"
+    else:
+        latinNumeral = None
+    return latinNumeral
+
+
+
 def renderUnits(env, bookDirectory, pageDirectory, pages, currentChapter, currentUnit, paragraphPages, headingPages, numberOfMeasuresPerPage, numberOfMeasuresPerRow, captions, numberOfNotesOnEachMeasure, pageMeasureTemplates, headers):
     chapterCover = ""
     if currentChapter.cover:
-        chapterCover = renderChapterCover(env, currentChapter.number)
+        chapterLatinNumeral = numberToLatinNumeral(currentChapter.number)
+        chapterCover = renderChapterCover(env, chapterLatinNumeral)
         currentChapter.cover = False
     currentUnit.increment()
-    unitCover = renderUnitCover(env, currentUnit.number)
+    unitLatinNumeral = numberToLatinNumeral(currentUnit.number)
+    unitCover = renderUnitCover(env, unitLatinNumeral)
     # Render All Pages in each unit
     unitContent = ""
     for page in pages:
@@ -414,12 +442,9 @@ def renderUnits(env, bookDirectory, pageDirectory, pages, currentChapter, curren
                                 numberOfMeasuresPerPage, 
                                 numberOfMeasuresPerRow, 
                                 captions,
-                                currentChapter.number,
-                                currentUnit.number,
                                 pageMeasureTemplates[int(page)],
                                 headers,
                                 numberOfNotesOnEachMeasure)
-        
         unitContent += renderedPage
 
     # Join all, covers and content
@@ -478,14 +503,16 @@ def addThePageToHeadingDirectory(heading, headingPageCurrentNumber, singleHeadin
         if headingPageCurrentNumber and singleHeading:
             subHeading1 = str(headingPageCurrentNumber)+ str(subheading)
         elif headingPageCurrentNumber and not singleHeading:
-            subHeading1 = str(headingPageCurrentNumber*2-1)+ str(subheading)
-            subHeading2 = str(headingPageCurrentNumber*2)+ str(subheading)
+            subNum1 = headingPageCurrentNumber*2-1
+            subNum2 = headingPageCurrentNumber*2
+            subHeading1 = numberToLatinNumeral(subNum1)+ str(subheading)
+            subHeading2 = numberToLatinNumeral(subNum2)+ str(subheading)
     else:
         if headingPageCurrentNumber:
             if len(heading1)>3:
-                heading1 +=" " + str(headingPageCurrentNumber)
+                heading1 +=" " + numberToLatinNumeral(headingPageCurrentNumber)
             else:
-                heading1 +="" + str(headingPageCurrentNumber)
+                heading1 +="" + numberToLatinNumeral(headingPageCurrentNumber)
     heading = {
         "heading1": heading1,
         "subHeading1" : subHeading1,
@@ -505,6 +532,7 @@ def findHeadingPages(userInput):
         if headingPageRepetition:
             headingPageCurrentNumber = 1
         for page in userInput["headings"][heading]["pages"]:
+            print("page: ", page)
             if headingPageRepetition and headingPageRepetitionCounter < headingPageRepetition:
                 headingPages[page] = addThePageToHeadingDirectory(heading, headingPageCurrentNumber, singleHeading, subheading)
                 headingPageRepetitionCounter += 1
@@ -514,6 +542,10 @@ def findHeadingPages(userInput):
                 headingPageCurrentNumber += 1
             else:
                 headingPages[page] = addThePageToHeadingDirectory(heading, None, singleHeading, subheading)
+            if headingPageCurrentNumber > userInput["headings"][heading]["sectionNumberLimit"]:
+                headingPageCurrentNumber = 1
+            print(headingPages[page])
+            print("------------------------------------------------")
     return headingPages
 
 
@@ -607,14 +639,17 @@ def findHeaders(userInput ):
 
 
 def rendering(bookDirectory, userInput):
-    environment = templateLoading(bookDirectory)
-    numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
-    paragraphPages = findParagraphPages(userInput, numberOfPagesInBook)
+    # environment = templateLoading(bookDirectory)
+    #numberOfPagesInBook = sum([len(files) for r, d, files in os.walk(bookDirectory)])
+    #paragraphPages = findParagraphPages(userInput, numberOfPagesInBook)
     headingPages = findHeadingPages(userInput)
-    pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
-    headers = findHeaders(userInput)
-    renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], userInput["numberOfNotesOnEachMeasure"], pageMeasureTemplates, headers)
-    print("Rendering Done!")
+
+
+
+    # pageMeasureTemplates = findPageMeasureTemplates(userInput["templatePatterns"], userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"])
+    # headers = findHeaders(userInput)
+    # renderBook(environment, bookDirectory, paragraphPages, headingPages, userInput["numberOfMeasuresPerPage"], userInput["numberOfMeasuresPerRow"], userInput["captions"], userInput["numberOfNotesOnEachMeasure"], pageMeasureTemplates, headers)
+    # print("Rendering Done!")
 
 
 def detectTextAndExportEachPage(img, path):
@@ -680,20 +715,21 @@ def mergePDFs(bookFolder):
 
 
 def runApp(bookFolder, userInput):
-    start = time.time()
-    analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
+    # start = time.time()
+    # analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
     rendering(bookFolder, userInput)
-    renderingTime = time.time()
-    analysisAndRenderingTime = renderingTime - start
-    print("Finished Analysis and Rendering in: ", analysisAndRenderingTime)
-    detectIntroductoryText(bookFolder)
-    pauseForCorrectionAndFilePreparation()
-    extractPDFs(bookFolder)
-    mergePDFs(bookFolder)
-    print(f"{os.path.basename(bookFolder)} Done!")
-    end = time.time()
-    totalTime = end - start
-    print("Finished the whole process in: ", totalTime)
+    # renderingTime = time.time()
+    # analysisAndRenderingTime = (renderingTime - start)/60
+    # print("Finished Analysis and Rendering in: ", analysisAndRenderingTime, "m")
+    # detectIntroductoryText(bookFolder)
+    # pauseForCorrectionAndFilePreparation()
+    
+    # extractPDFs(bookFolder)
+    # mergePDFs(bookFolder)
+    # print(f"{os.path.basename(bookFolder)} Done!")
+    # end = time.time()
+    # totalTime = (end - start)/60
+    # print("Finished the whole process in: ", totalTime, "m")
 
 
 
@@ -744,7 +780,7 @@ if __name__ == '__main__':
                 "headerPageRepetition" : "vertical" # horizontal vertical or none
             },
             "pattern2" : {
-                "pages": [*range(16,31),*range(46,61),*range(76,91),*range(106,121),*range(136,151),*range(166,181), *range(196, 211), *range(226,241), *range(256, 271), *range(286, 301),*range(316, 331), *range(346,360)],
+                "pages": [*range(16,31),*range(46,61),*range(76,91),*range(106,121),*range(136,151),*range(166,181), *range(196, 211), *range(226,241), *range(256, 271), *range(286, 301),*range(316, 331), *range(346,361)],
                 "sequenceRepetition" : 5,
                 "pageMeasureHeaderSequence" : [[7,7,7,7],[8,8,8,8],[9,9,9,9],[10,10,10,10], [11,11,11,11], [12,12,12,12]],
                 "headerPageRepetition" : "vertical" # horizontal vertical or none
@@ -846,13 +882,19 @@ if __name__ == '__main__':
             "A" : {
                 "letters" : ["I", "II", "III", "IV", "V"],
                 "pageFrequency" : 3
-            }
+            },
+            "B" : {
+                "letters" : ["I", "II", "III", "IV", "V"],
+                "pageFrequency" : 3
+            },
+
         },
         # HEADINGS - TITLES (VARIATION - F)
         "headings" : {
             "VARIATION" : {
                 "pages" : [*range(1,361)], #[*range(0,350)]
                 "singleHeading" : True, #1 ή 2 ΣΤΗΛΕΣ
+                "sectionNumberLimit": 5,
                 "headingPageRepetition" : 3, # or None # 1 otan theloume na emfanizontai ta noumera mia fora
                 "subheading" : None
             } ,
