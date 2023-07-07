@@ -505,14 +505,14 @@ def addThePageToHeadingDirectory(heading, headingPageCurrentNumber, singleHeadin
         elif headingPageCurrentNumber and not singleHeading:
             subNum1 = headingPageCurrentNumber*2-1
             subNum2 = headingPageCurrentNumber*2
-            subHeading1 = numberToLatinNumeral(subNum1)+ str(subheading)
-            subHeading2 = numberToLatinNumeral(subNum2)+ str(subheading)
+            subHeading1 = subNum1+ str(subheading)
+            subHeading2 = subNum2+ str(subheading)
     else:
         if headingPageCurrentNumber:
             if len(heading1)>3:
-                heading1 +=" " + numberToLatinNumeral(headingPageCurrentNumber)
+                heading1 +=" " + headingPageCurrentNumber
             else:
-                heading1 +="" + numberToLatinNumeral(headingPageCurrentNumber)
+                heading1 +="" + headingPageCurrentNumber
     heading = {
         "heading1": heading1,
         "subHeading1" : subHeading1,
@@ -715,21 +715,21 @@ def mergePDFs(bookFolder):
 
 
 def runApp(bookFolder, userInput):
-    # start = time.time()
+    start = time.time()
     # analysis(userInput["numberOfMeasuresPerPage"], bookFolder)
-    rendering(bookFolder, userInput)
+    # rendering(bookFolder, userInput)
     # renderingTime = time.time()
     # analysisAndRenderingTime = (renderingTime - start)/60
     # print("Finished Analysis and Rendering in: ", analysisAndRenderingTime, "m")
     # detectIntroductoryText(bookFolder)
     # pauseForCorrectionAndFilePreparation()
     
-    # extractPDFs(bookFolder)
-    # mergePDFs(bookFolder)
+    extractPDFs(bookFolder)
+    mergePDFs(bookFolder)
     # print(f"{os.path.basename(bookFolder)} Done!")
-    # end = time.time()
-    # totalTime = (end - start)/60
-    # print("Finished the whole process in: ", totalTime, "m")
+    end = time.time()
+    totalTime = (end - start)/60
+    print("Finished the whole process in: ", totalTime, "m")
 
 
 
