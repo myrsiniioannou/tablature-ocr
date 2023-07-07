@@ -3,4 +3,10 @@
 __pycache__
 books_to_analyze
 extracted_measures
-modules/old-code
+/modules/old-code
+/modules/book_renderer - 32NOTE.py
+/templates/tests_archetypes
+/templates/.mscbackup
+/templates/book - ORIGINAL - NOT 32 NOTES.mscx
+/templates/chord - ORIGINAL - NOT 32 NOTES.mscx
+/templates/horizontalBox - ORIGINAL - NOT 32 NOTES.mscx
