@@ -1,8 +1,6 @@
 .ipynb_checkpoints
 .vscode
 __pycache__
-books_to_analyze
-extracted_measures
 /modules/old-code
 /modules/book_renderer - 32NOTE.py
 /templates/tests_archetypes
